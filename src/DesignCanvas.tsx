@@ -56,6 +56,7 @@ const DesignCanvas: React.FC = () => {
             });
         });
         setConnections(newConnections);
+        console.log(blocks)
     }, [blocks]);
 
     useEffect(() => {
@@ -97,7 +98,7 @@ const DesignCanvas: React.FC = () => {
                     backgroundSize: '20px 20px',
                 }}
             >
-                {blocks.map((item) => (
+                {blocks.map((item) => ( 
                     <DraggableWrapper
                         key={item.id}
                         id={item.id}

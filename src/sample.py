@@ -1,4 +1,5 @@
 class DataProcessor:
+    print("hello")
     def __init__(self, data):
         self.data = data
         self.processed_data = None
@@ -12,7 +13,7 @@ class DataProcessor:
         """Sort the data in ascending or descending order."""
         self.data.sort(reverse=reverse)
         return self
-
+    print("abc")
     def process(self):
         """Apply all data processing steps."""
         self.processed_data = (
