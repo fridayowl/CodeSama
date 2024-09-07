@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import DraggableWrapper from './DraggableWrapper';
 import { ClassBlock, FunctionBlock } from './Blocks';
+import PythonIDE from './PythonIDE';
 import Connections from './Connections';
 import { generateJsonFromPythonFile, BlockData } from './fileProcessor';
 
@@ -19,10 +20,11 @@ const DesignCanvas: React.FC = () => {
     const [blocks, setBlocks] = useState<BlockData[]>([]);
     const [connections, setConnections] = useState<Connection[]>([]);
     const [fileContent, setFileContent] = useState<string | null>(null);
+    const [fileName, setFileName] = useState<string>('Untitled.py');
     const [idePosition, setIdePosition] = useState({ x: 20, y: 20 });
     const canvasRef = useRef<HTMLDivElement>(null);
 
-    const loadFile = async () => {
+    const loadFile = useCallback(async () => {
         if (fileContent) {
             try {
                 const jsonData = await generateJsonFromPythonFile(fileContent);
@@ -32,11 +34,11 @@ const DesignCanvas: React.FC = () => {
                 // Handle error (e.g., show error message to user)
             }
         }
-    };
+    }, [fileContent]);
 
     useEffect(() => {
         loadFile();
-    }, [fileContent]);
+    }, [loadFile]);
 
     const updateConnections = useCallback(() => {
         const newConnections: Connection[] = [];
@@ -64,12 +66,10 @@ const DesignCanvas: React.FC = () => {
         updateConnections();
     }, [updateConnections]);
 
-    const handlePositionChange = useCallback((id: string | undefined, x: number, y: number) => {
-        if (id === undefined) {
-            // This is the IDE
+    const handlePositionChange = useCallback((id: string, x: number, y: number) => {
+        if (id === 'python-ide') {
             setIdePosition({ x, y });
         } else {
-            // This is a block
             setBlocks(prevBlocks =>
                 prevBlocks.map(block =>
                     block.id === id ? { ...block, x, y } : block
@@ -81,6 +81,7 @@ const DesignCanvas: React.FC = () => {
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
+            setFileName(file.name);
             const reader = new FileReader();
             reader.onload = (e: ProgressEvent<FileReader>) => {
                 const content = e.target?.result;
@@ -92,12 +93,17 @@ const DesignCanvas: React.FC = () => {
         }
     };
 
+    const handleCodeChange = useCallback((newCode: string) => {
+        setFileContent(newCode);
+        loadFile();
+    }, [loadFile]);
+
     return (
         <div className="relative w-full h-screen flex flex-col">
-            <input type="file" onChange={handleFileChange} accept=".py" className="mb-4" />
+            <input type="file" onChange={handleFileChange} accept=".py" className="mb-4 p-2" />
             <div
                 ref={canvasRef}
-                className="flex-grow relative overflow-auto"
+                className="flex-grow relative overflow-auto bg-white"
                 style={{
                     backgroundImage: `
                     linear-gradient(to right, #f0f0f0 1px, transparent 1px),
@@ -108,19 +114,17 @@ const DesignCanvas: React.FC = () => {
             >
                 <div className="absolute inset-0" style={{ minWidth: '200%', minHeight: '200%' }}>
                     <DraggableWrapper
+                        id="python-ide"
                         initialX={idePosition.x}
                         initialY={idePosition.y}
                         onPositionChange={handlePositionChange}
+                        title={fileName}
                     >
-                        <div className="w-96 h-96 bg-gray-100 p-4 rounded-lg shadow-md">
-                            <h3 className="text-lg font-bold mb-2">Python IDE</h3>
-                            <textarea
-                                className="w-full h-80 p-2 font-mono text-sm border rounded"
-                                value={fileContent || ''}
-                                onChange={(e) => setFileContent(e.target.value)}
-                                placeholder="Enter your Python code here..."
-                            />
-                        </div>
+                        <PythonIDE
+                            fileContent={fileContent}
+                            onCodeChange={handleCodeChange}
+                            fileName={fileName}
+                        />
                     </DraggableWrapper>
 
                     {blocks.map((item) => (
@@ -130,6 +134,7 @@ const DesignCanvas: React.FC = () => {
                             initialX={item.x}
                             initialY={item.y}
                             onPositionChange={handlePositionChange}
+                            title={item.name}
                         >
                             {item.type === 'class' ? (
                                 <ClassBlock

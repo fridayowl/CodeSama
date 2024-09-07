@@ -2,33 +2,48 @@ import React, { useState, useEffect } from 'react';
 
 interface PythonIDEProps {
     fileContent: string | null;
+    onCodeChange: (newCode: string) => void;
+    fileName: string;
 }
 
-const PythonIDE: React.FC<PythonIDEProps> = ({ fileContent }) => {
+const PythonIDE: React.FC<PythonIDEProps> = ({ fileContent, onCodeChange, fileName }) => {
     const [lines, setLines] = useState<string[]>([]);
 
     useEffect(() => {
         if (fileContent) {
             setLines(fileContent.split('\n'));
+        } else {
+            setLines([]);
         }
     }, [fileContent]);
 
+    const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const newContent = e.target.value;
+        setLines(newContent.split('\n'));
+        onCodeChange(newContent);
+    };
+
     return (
-        <div className="w-full max-w-4xl mx-auto mt-6 bg-white shadow-md rounded-lg overflow-hidden">
-            <div className="bg-gray-800 text-white py-4 px-6">
-                <h2 className="text-xl font-semibold">Python IDE</h2>
+        <div className="w-[600px] h-full bg-gray-100 rounded-lg shadow-md overflow-hidden flex flex-col">
+            <div className="bg-gray-200 text-gray-700 py-2 px-4 font-semibold flex justify-between items-center">
+                <span>{fileName}</span>
+                <span className="text-sm text-gray-500">Location: Uploaded file</span>
             </div>
-            <div className="p-6">
-                <div className="bg-gray-100 p-4 rounded-md overflow-x-auto">
-                    <pre className="font-mono text-sm">
-                        {lines.map((line, index) => (
-                            <div key={index} className="flex">
-                                <span className="w-12 text-gray-500 select-none">{index + 1}</span>
-                                <span>{line}</span>
-                            </div>
-                        ))}
-                    </pre>
+            <div className="flex flex-grow overflow-hidden">
+                <div className="bg-gray-700 text-gray-300 p-2 text-right select-none overflow-y-hidden" style={{ width: '40px' }}>
+                    {lines.map((_, index) => (
+                        <div key={index} className="leading-6 text-xs">
+                            {index + 1}
+                        </div>
+                    ))}
                 </div>
+                <textarea
+                    className="flex-grow p-2 font-mono text-sm bg-gray-800 text-white border-none resize-none outline-none overflow-y-scroll"
+                    value={lines.join('\n')}
+                    onChange={handleTextareaChange}
+                    placeholder="Enter your Python code here..."
+                    spellCheck="false"
+                />
             </div>
         </div>
     );

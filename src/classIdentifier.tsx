@@ -25,8 +25,8 @@ export function identifyClasses(fileContent: string): BlockData[] {
                 author: 'File author',
                 fileType: 'Python',
                 code: line,
-                x: 100,
-                y: 100 + classes.length * 100,
+                x: 800,
+                y: 200 + classes.length * 100,
                 connections: []
             };
 

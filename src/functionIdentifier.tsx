@@ -25,7 +25,7 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
                 author: 'File author',
                 fileType: 'Python',
                 code: line,
-                x: 300,
+                x: 1200,
                 y: 100 + functions.length * 100,
                 connections: []
             };
