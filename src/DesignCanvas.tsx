@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import DraggableWrapper from './DraggableWrapper';
 import { ClassBlock, FunctionBlock } from './Blocks';
 import Connections from './Connections';
@@ -19,6 +19,8 @@ const DesignCanvas: React.FC = () => {
     const [blocks, setBlocks] = useState<BlockData[]>([]);
     const [connections, setConnections] = useState<Connection[]>([]);
     const [fileContent, setFileContent] = useState<string | null>(null);
+    const [idePosition, setIdePosition] = useState({ x: 20, y: 20 });
+    const canvasRef = useRef<HTMLDivElement>(null);
 
     const loadFile = async () => {
         if (fileContent) {
@@ -56,19 +58,24 @@ const DesignCanvas: React.FC = () => {
             });
         });
         setConnections(newConnections);
-        console.log(blocks)
     }, [blocks]);
 
     useEffect(() => {
         updateConnections();
     }, [updateConnections]);
 
-    const handlePositionChange = useCallback((id: string, x: number, y: number) => {
-        setBlocks(prevBlocks =>
-            prevBlocks.map(block =>
-                block.id === id ? { ...block, x, y } : block
-            )
-        );
+    const handlePositionChange = useCallback((id: string | undefined, x: number, y: number) => {
+        if (id === undefined) {
+            // This is the IDE
+            setIdePosition({ x, y });
+        } else {
+            // This is a block
+            setBlocks(prevBlocks =>
+                prevBlocks.map(block =>
+                    block.id === id ? { ...block, x, y } : block
+                )
+            );
+        }
     }, []);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,9 +94,10 @@ const DesignCanvas: React.FC = () => {
 
     return (
         <div className="relative w-full h-screen">
-            <input type="file" onChange={handleFileChange} accept=".py" />
+            <input type="file" onChange={handleFileChange} accept=".py" className="mb-4" />
             <div
-                className="relative w-full h-full bg-white"
+                ref={canvasRef}
+                className="relative w-full h-full bg-white overflow-hidden"
                 style={{
                     backgroundImage: `
                     linear-gradient(to right, #f0f0f0 1px, transparent 1px),
@@ -98,34 +106,52 @@ const DesignCanvas: React.FC = () => {
                     backgroundSize: '20px 20px',
                 }}
             >
-                {blocks.map((item) => ( 
-                    <DraggableWrapper
-                        key={item.id}
-                        id={item.id}
-                        initialX={item.x}
-                        initialY={item.y}
-                        onPositionChange={handlePositionChange}
-                    >
-                        {item.type === 'class' ? (
-                            <ClassBlock
-                                name={item.name}
-                                location={item.location}
-                                author={item.author}
-                                fileType={item.fileType}
-                                code={item.code}
-                            />
-                        ) : (
-                            <FunctionBlock
-                                name={item.name}
-                                location={item.location}
-                                author={item.author}
-                                fileType={item.fileType}
-                                code={item.code}
-                            />
-                        )}
-                    </DraggableWrapper>
-                ))}
-                <Connections connections={connections} />
+                <DraggableWrapper
+                    initialX={idePosition.x}
+                    initialY={idePosition.y}
+                    onPositionChange={handlePositionChange}
+                >
+                    <div className="w-96 h-96 bg-gray-100 p-4 rounded-lg shadow-md">
+                        <h3 className="text-lg font-bold mb-2">Python IDE</h3>
+                        <textarea
+                            className="w-full h-80 p-2 font-mono text-sm border rounded"
+                            value={fileContent || ''}
+                            onChange={(e) => setFileContent(e.target.value)}
+                            placeholder="Enter your Python code here..."
+                        />
+                    </div>
+                </DraggableWrapper>
+
+                <div className="absolute top-0 right-0 w-2/3 h-full">
+                    {blocks.map((item) => (
+                        <DraggableWrapper
+                            key={item.id}
+                            id={item.id}
+                            initialX={item.x}
+                            initialY={item.y}
+                            onPositionChange={handlePositionChange}
+                        >
+                            {item.type === 'class' ? (
+                                <ClassBlock
+                                    name={item.name}
+                                    location={item.location}
+                                    author={item.author}
+                                    fileType={item.fileType}
+                                    code={item.code}
+                                />
+                            ) : (
+                                <FunctionBlock
+                                    name={item.name}
+                                    location={item.location}
+                                    author={item.author}
+                                    fileType={item.fileType}
+                                    code={item.code}
+                                />
+                            )}
+                        </DraggableWrapper>
+                    ))}
+                    <Connections connections={connections} />
+                </div>
             </div>
         </div>
     );

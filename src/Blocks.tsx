@@ -21,9 +21,6 @@ const Block: React.FC<BlockProps & { type: 'class' | 'function' }> = ({ name, lo
         // Here you would typically save the code to your backend or state management system
     };
 
-    console.log(`Rendering ${type} block: ${name}`); // Add this line for debugging
-    console.log("Code:", code); // Add this line for debugging
-
     return (
         <div className={`w-80 p-4 ${type === 'class' ? 'bg-blue-100' : 'bg-green-100'} rounded-lg shadow-md`}>
             <h3 className="font-bold text-lg">{name}</h3>

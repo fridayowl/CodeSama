@@ -1,4 +1,3 @@
-
 import { identifyClasses } from './classIdentifier';
 import { identifyFunctionsAndConnections } from './functionIdentifier';
 
@@ -8,6 +7,7 @@ export async function generateJsonFromPythonFile(fileContent: string): Promise<B
 
     return [...classes, ...functions];
 }
+
 export interface BlockData {
     id: string;
     type: 'class' | 'function';

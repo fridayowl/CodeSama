@@ -2,11 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Move } from 'lucide-react';
 
 interface DraggableWrapperProps {
-    id: string;
+    id?: string;
     initialX: number;
     initialY: number;
     children: React.ReactNode;
-    onPositionChange: (id: string, x: number, y: number) => void;
+    onPositionChange: (id: string | undefined, x: number, y: number) => void;
 }
 
 const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
@@ -72,7 +72,7 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
         >
             <div className="flex items-center justify-between mb-2 bg-gray-200 p-2 rounded-t cursor-move">
                 <Move size={16} />
-                <span className="text-sm font-semibold">{id}</span>
+                <span className="text-sm font-semibold">{id || 'Draggable Item'}</span>
             </div>
             <div className="bg-white border border-gray-300 rounded-b p-4">
                 {children}
