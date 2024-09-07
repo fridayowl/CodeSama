@@ -93,11 +93,11 @@ const DesignCanvas: React.FC = () => {
     };
 
     return (
-        <div className="relative w-full h-screen">
+        <div className="relative w-full h-screen flex flex-col">
             <input type="file" onChange={handleFileChange} accept=".py" className="mb-4" />
             <div
                 ref={canvasRef}
-                className="relative w-full h-full bg-white overflow-hidden"
+                className="flex-grow relative overflow-auto"
                 style={{
                     backgroundImage: `
                     linear-gradient(to right, #f0f0f0 1px, transparent 1px),
@@ -106,23 +106,23 @@ const DesignCanvas: React.FC = () => {
                     backgroundSize: '20px 20px',
                 }}
             >
-                <DraggableWrapper
-                    initialX={idePosition.x}
-                    initialY={idePosition.y}
-                    onPositionChange={handlePositionChange}
-                >
-                    <div className="w-96 h-96 bg-gray-100 p-4 rounded-lg shadow-md">
-                        <h3 className="text-lg font-bold mb-2">Python IDE</h3>
-                        <textarea
-                            className="w-full h-80 p-2 font-mono text-sm border rounded"
-                            value={fileContent || ''}
-                            onChange={(e) => setFileContent(e.target.value)}
-                            placeholder="Enter your Python code here..."
-                        />
-                    </div>
-                </DraggableWrapper>
+                <div className="absolute inset-0" style={{ minWidth: '200%', minHeight: '200%' }}>
+                    <DraggableWrapper
+                        initialX={idePosition.x}
+                        initialY={idePosition.y}
+                        onPositionChange={handlePositionChange}
+                    >
+                        <div className="w-96 h-96 bg-gray-100 p-4 rounded-lg shadow-md">
+                            <h3 className="text-lg font-bold mb-2">Python IDE</h3>
+                            <textarea
+                                className="w-full h-80 p-2 font-mono text-sm border rounded"
+                                value={fileContent || ''}
+                                onChange={(e) => setFileContent(e.target.value)}
+                                placeholder="Enter your Python code here..."
+                            />
+                        </div>
+                    </DraggableWrapper>
 
-                <div className="absolute top-0 right-0 w-2/3 h-full">
                     {blocks.map((item) => (
                         <DraggableWrapper
                             key={item.id}
