@@ -1,8 +1,8 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import DraggableWrapper from './DraggableWrapper';
 import { ClassBlock, FunctionBlock } from './Blocks';
-import PythonIDE from './PythonIDE';
 import Connections from './Connections';
+import PythonIDE from './PythonIDE';
 import { generateJsonFromPythonFile, BlockData } from './fileProcessor';
 
 interface Connection {
@@ -20,11 +20,11 @@ const DesignCanvas: React.FC = () => {
     const [blocks, setBlocks] = useState<BlockData[]>([]);
     const [connections, setConnections] = useState<Connection[]>([]);
     const [fileContent, setFileContent] = useState<string | null>(null);
-    const [fileName, setFileName] = useState<string>('Untitled.py');
-    const [idePosition, setIdePosition] = useState({ x: 20, y: 20 });
-    const canvasRef = useRef<HTMLDivElement>(null);
+    const [fileName, setFileName] = useState<string>('');
+    const [isFlowVisible, setIsFlowVisible] = useState(true);
+    const [classVisibility, setClassVisibility] = useState<Record<string, boolean>>({});
 
-    const loadFile = useCallback(async () => {
+    const loadFile = async () => {
         if (fileContent) {
             try {
                 const jsonData = await generateJsonFromPythonFile(fileContent);
@@ -34,11 +34,11 @@ const DesignCanvas: React.FC = () => {
                 // Handle error (e.g., show error message to user)
             }
         }
-    }, [fileContent]);
+    };
 
     useEffect(() => {
         loadFile();
-    }, [loadFile]);
+    }, [fileContent]);
 
     const updateConnections = useCallback(() => {
         const newConnections: Connection[] = [];
@@ -67,15 +67,11 @@ const DesignCanvas: React.FC = () => {
     }, [updateConnections]);
 
     const handlePositionChange = useCallback((id: string, x: number, y: number) => {
-        if (id === 'python-ide') {
-            setIdePosition({ x, y });
-        } else {
-            setBlocks(prevBlocks =>
-                prevBlocks.map(block =>
-                    block.id === id ? { ...block, x, y } : block
-                )
-            );
-        }
+        setBlocks(prevBlocks =>
+            prevBlocks.map(block =>
+                block.id === id ? { ...block, x, y } : block
+            )
+        );
     }, []);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,17 +89,42 @@ const DesignCanvas: React.FC = () => {
         }
     };
 
-    const handleCodeChange = useCallback((newCode: string) => {
+    const handleCodeChange = (newCode: string) => {
         setFileContent(newCode);
-        loadFile();
-    }, [loadFile]);
+    };
+
+    const handleFlowVisibilityChange = (isVisible: boolean) => {
+        setIsFlowVisible(isVisible);
+    };
+
+    const handleClassVisibilityChange = (classId: string, isVisible: boolean) => {
+        setClassVisibility(prev => ({ ...prev, [classId]: isVisible }));
+    };
+
+    const getVisibleBlocks = () => {
+        return blocks.filter(block => {
+            if (block.type === 'class') return true;
+            const parentClass = blocks.find(b => b.type === 'class' && b.connections.some(conn => conn.to === block.id));
+            return parentClass ? classVisibility[parentClass.id] !== false : true;
+        });
+    };
+
+    const getVisibleConnections = () => {
+        return connections.filter(conn => {
+            const startBlock = blocks.find(b => b.id === conn.start);
+            const endBlock = blocks.find(b => b.id === conn.end);
+            if (startBlock?.type === 'class' && endBlock?.type === 'function') {
+                return classVisibility[startBlock.id] !== false;
+            }
+            return true;
+        });
+    };
 
     return (
-        <div className="relative w-full h-screen flex flex-col">
-            <input type="file" onChange={handleFileChange} accept=".py" className="mb-4 p-2" />
+        <div className="w-full h-screen p-4">
+            <input type="file" onChange={handleFileChange} accept=".py" className="mb-4" />
             <div
-                ref={canvasRef}
-                className="flex-grow relative overflow-auto bg-white"
+                className="relative w-full h-[calc(100%-2rem)] bg-white"
                 style={{
                     backgroundImage: `
                     linear-gradient(to right, #f0f0f0 1px, transparent 1px),
@@ -112,51 +133,52 @@ const DesignCanvas: React.FC = () => {
                     backgroundSize: '20px 20px',
                 }}
             >
-                <div className="absolute inset-0" style={{ minWidth: '200%', minHeight: '200%' }}>
-                    <DraggableWrapper
-                        id="python-ide"
-                        initialX={idePosition.x}
-                        initialY={idePosition.y}
-                        onPositionChange={handlePositionChange}
-                        title={fileName}
-                    >
-                        <PythonIDE
-                            fileContent={fileContent}
-                            onCodeChange={handleCodeChange}
-                            fileName={fileName}
-                        />
-                    </DraggableWrapper>
+                <DraggableWrapper
+                    id="python-ide"
+                    initialX={20}
+                    initialY={20}
+                    onPositionChange={() => { }}
+                >
+                    <PythonIDE
+                        fileContent={fileContent}
+                        onCodeChange={handleCodeChange}
+                        fileName={fileName}
+                        onFlowVisibilityChange={handleFlowVisibilityChange}
+                    />
+                </DraggableWrapper>
 
-                    {blocks.map((item) => (
-                        <DraggableWrapper
-                            key={item.id}
-                            id={item.id}
-                            initialX={item.x}
-                            initialY={item.y}
-                            onPositionChange={handlePositionChange}
-                            title={item.name}
-                        >
-                            {item.type === 'class' ? (
-                                <ClassBlock
-                                    name={item.name}
-                                    location={item.location}
-                                    author={item.author}
-                                    fileType={item.fileType}
-                                    code={item.code}
-                                />
-                            ) : (
-                                <FunctionBlock
-                                    name={item.name}
-                                    location={item.location}
-                                    author={item.author}
-                                    fileType={item.fileType}
-                                    code={item.code}
-                                />
-                            )}
-                        </DraggableWrapper>
-                    ))}
-                    <Connections connections={connections} />
-                </div>
+                {isFlowVisible && getVisibleBlocks().map((item) => (
+                    <DraggableWrapper
+                        key={item.id}
+                        id={item.id}
+                        initialX={item.x}
+                        initialY={item.y}
+                        onPositionChange={handlePositionChange}
+                    >
+                        {item.type === 'class' ? (
+                            <ClassBlock
+                                id={item.id}
+                                name={item.name}
+                                location={item.location}
+                                author={item.author}
+                                fileType={item.fileType}
+                                code={item.code}
+                                onVisibilityChange={handleClassVisibilityChange}
+                            />
+                        ) : (
+                            <FunctionBlock
+                                id={item.id}
+                                name={item.name}
+                                location={item.location}
+                                author={item.author}
+                                fileType={item.fileType}
+                                code={item.code}
+                                onVisibilityChange={() => { }}
+                            />
+                        )}
+                    </DraggableWrapper>
+                ))}
+                {isFlowVisible && <Connections connections={getVisibleConnections()} />}
             </div>
         </div>
     );

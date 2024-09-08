@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface PythonIDEProps {
     fileContent: string | null;
     onCodeChange: (newCode: string) => void;
     fileName: string;
+    onFlowVisibilityChange: (isVisible: boolean) => void;
 }
 
-const PythonIDE: React.FC<PythonIDEProps> = ({ fileContent, onCodeChange, fileName }) => {
+const PythonIDE: React.FC<PythonIDEProps> = ({ fileContent, onCodeChange, fileName, onFlowVisibilityChange }) => {
     const [lines, setLines] = useState<string[]>([]);
+    const [isFlowVisible, setIsFlowVisible] = useState(true);
 
     useEffect(() => {
         if (fileContent) {
@@ -23,11 +26,27 @@ const PythonIDE: React.FC<PythonIDEProps> = ({ fileContent, onCodeChange, fileNa
         onCodeChange(newContent);
     };
 
+    const toggleFlowVisibility = () => {
+        const newVisibility = !isFlowVisible;
+        setIsFlowVisible(newVisibility);
+        onFlowVisibilityChange(newVisibility);
+    };
+
     return (
         <div className="w-[600px] h-full bg-gray-100 rounded-lg shadow-md overflow-hidden flex flex-col">
             <div className="bg-gray-200 text-gray-700 py-2 px-4 font-semibold flex justify-between items-center">
                 <span>{fileName}</span>
-                <span className="text-sm text-gray-500">Location: Uploaded file</span>
+                <div className="flex items-center">
+                    <span className="text-sm text-gray-500 mr-2">Location: Uploaded file</span>
+                    <button
+                        onClick={toggleFlowVisibility}
+                        className="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 flex items-center"
+                        title={isFlowVisible ? "Hide flow" : "Show flow"}
+                    >
+                        {isFlowVisible ? <Eye size={16} className="mr-1" /> : <EyeOff size={16} className="mr-1" />}
+                        <span className="text-xs">{isFlowVisible ? "Hide" : "Show"}</span>
+                    </button>
+                </div>
             </div>
             <div className="flex flex-grow overflow-hidden">
                 <div className="bg-gray-700 text-gray-300 p-2 text-right select-none overflow-y-hidden" style={{ width: '40px' }}>
