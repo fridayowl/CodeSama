@@ -16,49 +16,71 @@ interface Connection {
     toConnector: string;
 }
 
+interface ExtendedBlockData extends BlockData {
+    parentClass?: string;
+}
+
 const DesignCanvas: React.FC = () => {
-    const [blocks, setBlocks] = useState<BlockData[]>([]);
+    const [blocks, setBlocks] = useState<ExtendedBlockData[]>([]);
     const [connections, setConnections] = useState<Connection[]>([]);
     const [fileContent, setFileContent] = useState<string | null>(null);
     const [fileName, setFileName] = useState<string>('');
     const [isFlowVisible, setIsFlowVisible] = useState(true);
     const [classVisibility, setClassVisibility] = useState<Record<string, boolean>>({});
 
-    const loadFile = async () => {
-        if (fileContent) {
-            try {
-                const jsonData = await generateJsonFromPythonFile(fileContent);
-                setBlocks(jsonData);
-            } catch (error) {
-                console.error('Error processing file:', error);
-                // Handle error (e.g., show error message to user)
-            }
+    const loadFile = useCallback(async (content: string) => {
+        try {
+            const jsonData = await generateJsonFromPythonFile(content);
+            
+            // Modify the block IDs to include the class name for methods
+            const modifiedBlocks = jsonData.map(block => {
+                if (block.type === 'function') {
+                    const parentClass = jsonData.find(b => b.type === 'class' && b.code.includes(`def ${block.name}(`));
+                    if (parentClass) {
+                        return {
+                            ...block,
+                            id: `${parentClass.name}_${block.id}`,
+                            parentClass: parentClass.name
+                        } as ExtendedBlockData;
+                    }
+                }
+                return block as ExtendedBlockData;
+            });
+
+            setBlocks(modifiedBlocks);
+        } catch (error) {
+            console.error('Error processing file:', error);
         }
-    };
+    }, []);
 
     useEffect(() => {
-        loadFile();
-    }, [fileContent]);
+        if (fileContent) {
+            loadFile(fileContent);
+        }
+    }, [fileContent, loadFile]);
 
     const updateConnections = useCallback(() => {
         const newConnections: Connection[] = [];
-        blocks.forEach(block => {
-            block.connections.forEach(conn => {
-                const endBlock = blocks.find(b => b.id === conn.to);
-                if (endBlock) {
+        const classBlocks = blocks.filter(block => block.type === 'class');
+        const functionBlocks = blocks.filter(block => block.type === 'function');
+
+        classBlocks.forEach(classBlock => {
+            functionBlocks.forEach(functionBlock => {
+                if (functionBlock.id.startsWith(`${classBlock.name}_`)) {
                     newConnections.push({
-                        id: `${block.id}-${endBlock.id}`,
-                        start: block.id,
-                        end: endBlock.id,
-                        startPoint: { x: block.x, y: block.y },
-                        endPoint: { x: endBlock.x, y: endBlock.y },
-                        type: conn.type,
-                        fromConnector: conn.fromConnector,
-                        toConnector: conn.toConnector
+                        id: `${classBlock.id}-${functionBlock.id}`,
+                        start: classBlock.id,
+                        end: functionBlock.id,
+                        startPoint: { x: classBlock.x, y: classBlock.y },
+                        endPoint: { x: functionBlock.x, y: functionBlock.y },
+                        type: 'contains',
+                        fromConnector: 'method',
+                        toConnector: 'input'
                     });
                 }
             });
         });
+
         setConnections(newConnections);
     }, [blocks]);
 
@@ -104,7 +126,7 @@ const DesignCanvas: React.FC = () => {
     const getVisibleBlocks = () => {
         return blocks.filter(block => {
             if (block.type === 'class') return true;
-            const parentClass = blocks.find(b => b.type === 'class' && b.connections.some(conn => conn.to === block.id));
+            const parentClass = blocks.find(b => b.type === 'class' && block.id.startsWith(`${b.name}_`));
             return parentClass ? classVisibility[parentClass.id] !== false : true;
         });
     };
@@ -168,8 +190,8 @@ const DesignCanvas: React.FC = () => {
                         ) : (
                             <FunctionBlock
                                 id={item.id}
-                                name={item.name}
-                                location={item.location}
+                                name={item.name.split('_').pop() || item.name}
+                                location={`${item.location} (${item.parentClass})`}
                                 author={item.author}
                                 fileType={item.fileType}
                                 code={item.code}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, RefreshCw } from 'lucide-react';
 
 interface PythonIDEProps {
     fileContent: string | null;
@@ -11,6 +11,7 @@ interface PythonIDEProps {
 const PythonIDE: React.FC<PythonIDEProps> = ({ fileContent, onCodeChange, fileName, onFlowVisibilityChange }) => {
     const [lines, setLines] = useState<string[]>([]);
     const [isFlowVisible, setIsFlowVisible] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     useEffect(() => {
         if (fileContent) {
@@ -32,12 +33,30 @@ const PythonIDE: React.FC<PythonIDEProps> = ({ fileContent, onCodeChange, fileNa
         onFlowVisibilityChange(newVisibility);
     };
 
+    const handleRefresh = () => {
+        setIsRefreshing(true);
+        onFlowVisibilityChange(false);
+        setTimeout(() => {
+            onFlowVisibilityChange(true);
+            setIsRefreshing(false);
+        }, 500); // Adjust this delay as needed
+    };
+
     return (
         <div className="w-[600px] h-full bg-gray-100 rounded-lg shadow-md overflow-hidden flex flex-col">
             <div className="bg-gray-200 text-gray-700 py-2 px-4 font-semibold flex justify-between items-center">
                 <span>{fileName}</span>
                 <div className="flex items-center">
                     <span className="text-sm text-gray-500 mr-2">Location: Uploaded file</span>
+                    <button
+                        onClick={handleRefresh}
+                        className="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 flex items-center mr-2"
+                        title="Refresh flow"
+                        disabled={isRefreshing}
+                    >
+                        <RefreshCw size={16} className={`mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+                        <span className="text-xs">Refresh</span>
+                    </button>
                     <button
                         onClick={toggleFlowVisibility}
                         className="px-2 py-1 bg-gray-300 rounded hover:bg-gray-400 flex items-center"
