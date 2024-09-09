@@ -190,7 +190,7 @@ const DesignCanvas: React.FC = () => {
                         ) : (
                             <FunctionBlock
                                 id={item.id}
-                                name={item.name.split('_').pop() || item.name}
+                                name={item.name}
                                 location={`${item.location} (${item.parentClass})`}
                                 author={item.author}
                                 fileType={item.fileType}

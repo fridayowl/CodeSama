@@ -60,7 +60,6 @@ const PythonBlock: React.FC<BlockProps & { type: 'class' | 'function' }> = ({
     const [isVisible, setIsVisible] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [currentCode, setCurrentCode] = useState(code);
-
     const handleCodeChange = (newCode: string) => {
         setCurrentCode(newCode);
     };

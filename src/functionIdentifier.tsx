@@ -15,8 +15,9 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
                 functions.push(currentFunction);
             }
 
-            const name = trimmedLine.split(' ')[1].split('(')[0];
-
+            // Fix: Use a regular expression to capture the full function name
+            const functionNameMatch = trimmedLine.match(/def\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/);
+            const name = functionNameMatch ? functionNameMatch[1] : 'Unknown';
             currentFunction = {
                 id: `${name}Function`,
                 type: 'function',

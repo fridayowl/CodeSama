@@ -1,6 +1,9 @@
 
 
 
+
+Version 0.1 : Focus on  solving developers problems of coding or code traversal and making changes 
+
 Version 1 Sepreating functions and class and creating connections:  
         - single file -> class and function flow 
 
@@ -22,14 +25,43 @@ Version 2.2 Dynamic flow generation-
             refresh button
         blocks 
             -make the blocks ide friendly
+            -fix if function name contains underscore it is not considering that
 
 
 
-upcoming
 
-Version 2.3 Connecting ide with flows-
+
+working on :
+
+Version 2.3 Connecting ide with flow blocks-
         single file 
         -connecting ide with classes 
         -connecting ide with functions outside the scope of the class 
+        Canvas
+            - adding zoom in and zoom out and dragable functionality to the canvas
+        Bugs : 
+            
+
+
+
+
+
+
+
+
+
+Upcoming Versions : 
+Version 3 : Focus on Functions that helps Testing much easier and bug fixing 
+
+Version 5 : Focus on code generation and code analysis 
+
+Version 8 :Focus on multiple files and  multiple import visualisation
+
+Version 10: Adding React Support
+
+
+Version 12 :Git Tracking fro each blocks
+
+Version 14 :Multiple author for editing and working IDE  
 
 
