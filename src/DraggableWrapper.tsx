@@ -25,15 +25,27 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
 
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
-            if (isDragging) {
+            if (isDragging && ref.current) {
+                const canvasRect = ref.current.parentElement?.getBoundingClientRect() || { width: 0, height: 0 };
+                const elementRect = ref.current.getBoundingClientRect();
+
+                // Calculate new position
                 const dx = e.clientX - initialMousePosition.current.x;
                 const dy = e.clientY - initialMousePosition.current.y;
-                const newPosition = {
-                    x: position.x + dx,
-                    y: position.y + dy
-                };
-                setPosition(newPosition);
-                onPositionChange(id, newPosition.x, newPosition.y);
+                const newX = position.x + dx;
+                const newY = position.y + dy;
+
+                // Boundary checks
+                const maxX = canvasRect.width - elementRect.width;
+                const maxY = canvasRect.height - elementRect.height;
+                const boundedX = Math.max(0, Math.min(newX, maxX));
+                const boundedY = Math.max(0, Math.min(newY, maxY));
+
+                // Update position
+                setPosition({ x: boundedX, y: boundedY });
+                onPositionChange(id, boundedX, boundedY);
+
+                // Update initial mouse position
                 initialMousePosition.current = { x: e.clientX, y: e.clientY };
             }
         };

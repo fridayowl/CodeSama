@@ -24,8 +24,9 @@ Version 2.2 Dynamic flow generation-
         python ide 
             refresh button
         blocks 
-            -make the blocks ide friendly
-            -fix if function name contains underscore it is not considering that
+            -make the blocks ide friendly           
+        bugs fixed :
+            -function name contains underscore it is not considering that
 
 
 
@@ -37,8 +38,12 @@ Version 2.3 Connecting ide with flow blocks-
         single file 
         -connecting ide with classes 
         -connecting ide with functions outside the scope of the class 
-        Canvas
-            - adding zoom in and zoom out and dragable functionality to the canvas
+        Canvas 
+            - adding zoom in and zoom out and dragable functionality to the canvas 
+            - when block are at the edges make zoom out automatically or find a way to make it better  
+            
+            working on above 
+
         Bugs : 
             
 

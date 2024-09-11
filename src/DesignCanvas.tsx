@@ -4,8 +4,9 @@ import { ClassBlock, FunctionBlock } from './Blocks';
 import Connections from './Connections';
 import PythonIDE from './PythonIDE';
 import { generateJsonFromPythonFile, BlockData } from './fileProcessor';
-
-interface Connection {
+import CanvasGrid from './CanvasGrid'; 
+// Interface declarations
+export interface Connection {
     id: string;
     start: string;
     end: string;
@@ -16,7 +17,7 @@ interface Connection {
     toConnector: string;
 }
 
-interface ExtendedBlockData extends BlockData {
+export interface ExtendedBlockData extends BlockData {
     parentClass?: string;
 }
 
@@ -31,8 +32,7 @@ const DesignCanvas: React.FC = () => {
     const loadFile = useCallback(async (content: string) => {
         try {
             const jsonData = await generateJsonFromPythonFile(content);
-            
-            // Modify the block IDs to include the class name for methods
+
             const modifiedBlocks = jsonData.map(block => {
                 if (block.type === 'function') {
                     const parentClass = jsonData.find(b => b.type === 'class' && b.code.includes(`def ${block.name}(`));
@@ -145,63 +145,24 @@ const DesignCanvas: React.FC = () => {
     return (
         <div className="w-full h-screen p-4">
             <input type="file" onChange={handleFileChange} accept=".py" className="mb-4" />
-            <div
-                className="relative w-full h-[calc(100%-2rem)] bg-white"
-                style={{
-                    backgroundImage: `
-                    linear-gradient(to right, #f0f0f0 1px, transparent 1px),
-                    linear-gradient(to bottom, #f0f0f0 1px, transparent 1px)
-                    `,
-                    backgroundSize: '20px 20px',
-                }}
-            >
-                <DraggableWrapper
-                    id="python-ide"
-                    initialX={20}
-                    initialY={20}
-                    onPositionChange={() => { }}
-                >
-                    <PythonIDE
-                        fileContent={fileContent}
-                        onCodeChange={handleCodeChange}
-                        fileName={fileName}
-                        onFlowVisibilityChange={handleFlowVisibilityChange}
-                    />
-                </DraggableWrapper>
+            
 
-                {isFlowVisible && getVisibleBlocks().map((item) => (
-                    <DraggableWrapper
-                        key={item.id}
-                        id={item.id}
-                        initialX={item.x}
-                        initialY={item.y}
-                        onPositionChange={handlePositionChange}
-                    >
-                        {item.type === 'class' ? (
-                            <ClassBlock
-                                id={item.id}
-                                name={item.name}
-                                location={item.location}
-                                author={item.author}
-                                fileType={item.fileType}
-                                code={item.code}
-                                onVisibilityChange={handleClassVisibilityChange}
-                            />
-                        ) : (
-                            <FunctionBlock
-                                id={item.id}
-                                name={item.name}
-                                location={`${item.location} (${item.parentClass})`}
-                                author={item.author}
-                                fileType={item.fileType}
-                                code={item.code}
-                                onVisibilityChange={() => { }}
-                            />
-                        )}
-                    </DraggableWrapper>
-                ))}
-                {isFlowVisible && <Connections connections={getVisibleConnections()} />}
-            </div>
+            <CanvasGrid
+                blocks={blocks}
+                connections={connections}
+                isFlowVisible={isFlowVisible}
+                onPositionChange={handlePositionChange}
+                onVisibilityChange={handleClassVisibilityChange}
+                getVisibleBlocks={getVisibleBlocks}
+                getVisibleConnections={getVisibleConnections}
+                fileContent={fileContent}
+                fileName={fileName}
+                onCodeChange={handleCodeChange}
+                onFlowVisibilityChange={handleFlowVisibilityChange}
+            >
+                 
+            </CanvasGrid>
+
         </div>
     );
 };
