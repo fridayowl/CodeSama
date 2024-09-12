@@ -8,6 +8,7 @@ interface DraggableWrapperProps {
     onPositionChange: (id: string, x: number, y: number) => void;
     children: React.ReactNode;
     title?: string;
+    zoomLevel: number;
 }
 
 const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
@@ -16,7 +17,8 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
     initialY,
     onPositionChange,
     children,
-    title = "Draggable Item"
+    title = "Draggable Item",
+    zoomLevel
 }) => {
     const [position, setPosition] = useState({ x: initialX, y: initialY });
     const [isDragging, setIsDragging] = useState(false);
@@ -30,14 +32,14 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
                 const elementRect = ref.current.getBoundingClientRect();
 
                 // Calculate new position
-                const dx = e.clientX - initialMousePosition.current.x;
-                const dy = e.clientY - initialMousePosition.current.y;
+                const dx = (e.clientX - initialMousePosition.current.x) / zoomLevel;
+                const dy = (e.clientY - initialMousePosition.current.y) / zoomLevel;
                 const newX = position.x + dx;
                 const newY = position.y + dy;
 
                 // Boundary checks
-                const maxX = canvasRect.width - elementRect.width;
-                const maxY = canvasRect.height - elementRect.height;
+                const maxX = canvasRect.width / zoomLevel - elementRect.width / zoomLevel;
+                const maxY = canvasRect.height / zoomLevel - elementRect.height / zoomLevel;
                 const boundedX = Math.max(0, Math.min(newX, maxX));
                 const boundedY = Math.max(0, Math.min(newY, maxY));
 
@@ -63,7 +65,7 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('mouseup', handleMouseUp);
         };
-    }, [isDragging, id, onPositionChange, position.x, position.y]);
+    }, [isDragging, id, onPositionChange, position.x, position.y, zoomLevel]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
         if (e.target === ref.current?.firstChild) {
@@ -77,10 +79,12 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
             ref={ref}
             style={{
                 position: 'absolute',
-                left: `${position.x}px`,
-                top: `${position.y}px`,
+                left: `${position.x * zoomLevel}px`,
+                top: `${position.y * zoomLevel}px`,
                 cursor: isDragging ? 'grabbing' : 'grab',
                 userSelect: 'none',
+                transform: `scale(${zoomLevel})`,
+                transformOrigin: 'top left',
             }}
             onMouseDown={handleMouseDown}
         >

@@ -17,6 +17,7 @@ interface CanvasGridProps {
     fileName: string;
     onCodeChange: (newCode: string) => void;
     onFlowVisibilityChange: (isVisible: boolean) => void;
+    zoomLevel: number;
     children?: ReactNode;
 }
 
@@ -32,30 +33,37 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
     fileName,
     onCodeChange,
     onFlowVisibilityChange,
+    zoomLevel,
     children,
 }) => {
     const canvasRef = useRef<HTMLDivElement>(null);
 
+    const handlePositionChange = (id: string, x: number, y: number) => {
+        // Adjust position based on zoom level
+        onPositionChange(id, x / zoomLevel, y / zoomLevel);
+    };
+
     return (
         <div
             ref={canvasRef}
-            className="relative w-full h-[calc(100%-2rem)] bg-white overflow-hidden"
+            className="relative w-full h-full"
             style={{
                 backgroundImage: `
                     linear-gradient(to right, #f0f0f0 1px, transparent 1px),
                     linear-gradient(to bottom, #f0f0f0 1px, transparent 1px)
-                    `,
-                backgroundSize: '20px 20px',
+                `,
+                backgroundSize: `${20 * zoomLevel}px ${20 * zoomLevel}px`,
             }}
         >
             {isFlowVisible && getVisibleBlocks().map((item) => (
                 <DraggableWrapper
                     key={item.id}
                     id={item.id}
-                    initialX={item.x}
-                    initialY={item.y}
-                    onPositionChange={onPositionChange}
+                    initialX={item.x * zoomLevel}
+                    initialY={item.y * zoomLevel}
+                    onPositionChange={handlePositionChange}
                     title={item.name}
+                    zoomLevel={zoomLevel}
                 >
                     {item.type === 'class' ? (
                         <ClassBlock
@@ -81,8 +89,14 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                 </DraggableWrapper>
             ))}
 
-            {/* Draggable PythonIDE Block */}
-            <DraggableWrapper id="python-ide" initialX={20} initialY={20} onPositionChange={onPositionChange} title="Python IDE">
+            <DraggableWrapper
+                id="python-ide"
+                initialX={20 * zoomLevel}
+                initialY={20 * zoomLevel}
+                onPositionChange={handlePositionChange}
+                title="Python IDE"
+                zoomLevel={zoomLevel}
+            >
                 <PythonIDE
                     fileContent={fileContent}
                     onCodeChange={onCodeChange}
@@ -91,7 +105,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                 />
             </DraggableWrapper>
 
-            {isFlowVisible && <Connections connections={getVisibleConnections()} />}
+            {isFlowVisible && <Connections connections={getVisibleConnections()} zoomLevel={zoomLevel} />}
 
             {children}
         </div>

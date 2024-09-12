@@ -19,9 +19,10 @@ interface Connection {
 
 interface ConnectionsProps {
     connections: Connection[];
+    zoomLevel: number;
 }
 
-const Connections: React.FC<ConnectionsProps> = ({ connections }) => {
+const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel }) => {
     const getBezierPath = (start: Point, end: Point): string => {
         const midX = (start.x + end.x) / 2;
         const midY = (start.y + end.y) / 2;
@@ -73,11 +74,19 @@ const Connections: React.FC<ConnectionsProps> = ({ connections }) => {
                 </filter>
             </defs>
             {connections.map((connection) => {
-                const path = getBezierPath(connection.startPoint, connection.endPoint);
+                const startPoint = {
+                    x: connection.startPoint.x * zoomLevel,
+                    y: connection.startPoint.y * zoomLevel
+                };
+                const endPoint = {
+                    x: connection.endPoint.x * zoomLevel,
+                    y: connection.endPoint.y * zoomLevel
+                };
+                const path = getBezierPath(startPoint, endPoint);
                 const color = getConnectionColor(connection.type);
                 const midPoint = {
-                    x: (connection.startPoint.x + connection.endPoint.x) / 2,
-                    y: (connection.startPoint.y + connection.endPoint.y) / 2
+                    x: (startPoint.x + endPoint.x) / 2,
+                    y: (startPoint.y + endPoint.y) / 2
                 };
 
                 return (
@@ -86,26 +95,26 @@ const Connections: React.FC<ConnectionsProps> = ({ connections }) => {
                             d={path}
                             fill="none"
                             stroke={color}
-                            strokeWidth="3"
+                            strokeWidth={3 * zoomLevel}
                             strokeLinecap="round"
                             filter="url(#glow)"
                         />
-                        <circle cx={connection.startPoint.x} cy={connection.startPoint.y} r="4" fill={color} />
-                        <circle cx={connection.endPoint.x} cy={connection.endPoint.y} r="4" fill={color} />
+                        <circle cx={startPoint.x} cy={startPoint.y} r={4 * zoomLevel} fill={color} />
+                        <circle cx={endPoint.x} cy={endPoint.y} r={4 * zoomLevel} fill={color} />
                         <foreignObject
-                            x={midPoint.x - 8}
-                            y={midPoint.y - 8}
-                            width="16"
-                            height="16"
+                            x={midPoint.x - 8 * zoomLevel}
+                            y={midPoint.y - 8 * zoomLevel}
+                            width={16 * zoomLevel}
+                            height={16 * zoomLevel}
                         >
-                            <div className="flex items-center justify-center w-full h-full bg-white rounded-full shadow-md">
+                            <div className="flex items-center justify-center w-full h-full bg-white rounded-full shadow-md" style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'center' }}>
                                 {getConnectionIcon(connection.type)}
                             </div>
                         </foreignObject>
                         <text
-                            x={midPoint.x + 16}
+                            x={midPoint.x + 16 * zoomLevel}
                             y={midPoint.y}
-                            fontSize="10"
+                            fontSize={10 * zoomLevel}
                             fill={color}
                             filter="url(#glow)"
                         >
