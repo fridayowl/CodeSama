@@ -20,9 +20,10 @@ interface Connection {
 interface ConnectionsProps {
     connections: Connection[];
     zoomLevel: number;
+    getBlockPosition: (id: string) => { x: number; y: number; width: number; height: number };
 }
 
-const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel }) => {
+const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBlockPosition }) => {
     const getBezierPath = (start: Point, end: Point): string => {
         const midX = (start.x + end.x) / 2;
         const midY = (start.y + end.y) / 2;
@@ -62,6 +63,14 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel }) => 
         }
     };
 
+    const getAdjustedPoint = (blockId: string, isStart: boolean): Point => {
+        const { x, y, width, height } = getBlockPosition(blockId);
+        return {
+            x: x + (isStart ? 0 : width),
+            y: y + height / 2
+        };
+    };
+
     return (
         <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
             <defs>
@@ -74,14 +83,8 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel }) => 
                 </filter>
             </defs>
             {connections.map((connection) => {
-                const startPoint = {
-                    x: connection.startPoint.x * zoomLevel,
-                    y: connection.startPoint.y * zoomLevel
-                };
-                const endPoint = {
-                    x: connection.endPoint.x * zoomLevel,
-                    y: connection.endPoint.y * zoomLevel
-                };
+                const startPoint = getAdjustedPoint(connection.start, true);
+                const endPoint = getAdjustedPoint(connection.end, false);
                 const path = getBezierPath(startPoint, endPoint);
                 const color = getConnectionColor(connection.type);
                 const midPoint = {
@@ -95,26 +98,26 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel }) => 
                             d={path}
                             fill="none"
                             stroke={color}
-                            strokeWidth={3 * zoomLevel}
+                            strokeWidth={2}
                             strokeLinecap="round"
                             filter="url(#glow)"
                         />
-                        <circle cx={startPoint.x} cy={startPoint.y} r={4 * zoomLevel} fill={color} />
-                        <circle cx={endPoint.x} cy={endPoint.y} r={4 * zoomLevel} fill={color} />
+                        <circle cx={startPoint.x} cy={startPoint.y} r={4} fill={color} />
+                        <circle cx={endPoint.x} cy={endPoint.y} r={4} fill={color} />
                         <foreignObject
-                            x={midPoint.x - 8 * zoomLevel}
-                            y={midPoint.y - 8 * zoomLevel}
-                            width={16 * zoomLevel}
-                            height={16 * zoomLevel}
+                            x={midPoint.x - 8}
+                            y={midPoint.y - 8}
+                            width={16}
+                            height={16}
                         >
-                            <div className="flex items-center justify-center w-full h-full bg-white rounded-full shadow-md" style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'center' }}>
+                            <div className="flex items-center justify-center w-full h-full bg-white rounded-full shadow-md">
                                 {getConnectionIcon(connection.type)}
                             </div>
                         </foreignObject>
                         <text
-                            x={midPoint.x + 16 * zoomLevel}
+                            x={midPoint.x + 16}
                             y={midPoint.y}
-                            fontSize={10 * zoomLevel}
+                            fontSize={10}
                             fill={color}
                             filter="url(#glow)"
                         >

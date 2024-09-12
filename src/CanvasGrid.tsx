@@ -1,4 +1,4 @@
-import React, { useRef, ReactNode } from 'react';
+import React, { useRef, ReactNode, useMemo } from 'react';
 import DraggableWrapper from './DraggableWrapper';
 import Connections from './Connections';
 import { ClassBlock, FunctionBlock } from './Blocks';
@@ -39,9 +39,19 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
     const canvasRef = useRef<HTMLDivElement>(null);
 
     const handlePositionChange = (id: string, x: number, y: number) => {
-        // Adjust position based on zoom level
-        onPositionChange(id, x / zoomLevel, y / zoomLevel);
+        onPositionChange(id, x, y);
     };
+
+    const getBlockPosition = useMemo(() => (id: string) => {
+        const block = blocks.find(b => b.id === id);
+        if (!block) return { x: 0, y: 0, width: 0, height: 0 };
+        return {
+            x: block.x * zoomLevel,
+            y: block.y * zoomLevel,
+            width: 200 * zoomLevel, // Adjust based on your actual block width
+            height: 100 * zoomLevel // Adjust based on your actual block height
+        };
+    }, [blocks, zoomLevel]);
 
     return (
         <div
@@ -59,8 +69,8 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                 <DraggableWrapper
                     key={item.id}
                     id={item.id}
-                    initialX={item.x * zoomLevel}
-                    initialY={item.y * zoomLevel}
+                    initialX={item.x}
+                    initialY={item.y}
                     onPositionChange={handlePositionChange}
                     title={item.name}
                     zoomLevel={zoomLevel}
@@ -91,8 +101,8 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
 
             <DraggableWrapper
                 id="python-ide"
-                initialX={20 * zoomLevel}
-                initialY={20 * zoomLevel}
+                initialX={20}
+                initialY={20}
                 onPositionChange={handlePositionChange}
                 title="Python IDE"
                 zoomLevel={zoomLevel}
@@ -105,7 +115,13 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                 />
             </DraggableWrapper>
 
-            {isFlowVisible && <Connections connections={getVisibleConnections()} zoomLevel={zoomLevel} />}
+            {isFlowVisible && (
+                <Connections
+                    connections={getVisibleConnections()}
+                    zoomLevel={zoomLevel}
+                    getBlockPosition={getBlockPosition}
+                />
+            )}
 
             {children}
         </div>
