@@ -26,20 +26,31 @@ interface ConnectionsProps {
 const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBlockPosition }) => {
     const getBezierPath = (start: Point, end: Point): string => {
         const midX = (start.x + end.x) / 2;
-        const midY = (start.y + end.y) / 2;
         const dx = end.x - start.x;
         const dy = end.y - start.y;
         const curvature = 0.5;
 
-        const controlPoint1 = {
-            x: start.x + dx * curvature,
-            y: start.y
-        };
+        let controlPoint1, controlPoint2;
 
-        const controlPoint2 = {
-            x: end.x - dx * curvature,
-            y: end.y
-        };
+        if (dx < 0) { // If connection is right-to-left
+            controlPoint1 = {
+                x: start.x - Math.abs(dx) * curvature,
+                y: start.y
+            };
+            controlPoint2 = {
+                x: end.x + Math.abs(dx) * curvature,
+                y: end.y
+            };
+        } else {
+            controlPoint1 = {
+                x: start.x + dx * curvature,
+                y: start.y
+            };
+            controlPoint2 = {
+                x: end.x - dx * curvature,
+                y: end.y
+            };
+        }
 
         return `M ${start.x},${start.y} C ${controlPoint1.x},${controlPoint1.y} ${controlPoint2.x},${controlPoint2.y} ${end.x},${end.y}`;
     };
@@ -63,14 +74,6 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
         }
     };
 
-    const getAdjustedPoint = (blockId: string, isStart: boolean): Point => {
-        const { x, y, width, height } = getBlockPosition(blockId);
-        return {
-            x: x + (isStart ? 0 : width),
-            y: y + height / 2
-        };
-    };
-
     return (
         <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
             <defs>
@@ -83,13 +86,11 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
                 </filter>
             </defs>
             {connections.map((connection) => {
-                const startPoint = getAdjustedPoint(connection.start, true);
-                const endPoint = getAdjustedPoint(connection.end, false);
-                const path = getBezierPath(startPoint, endPoint);
+                const path = getBezierPath(connection.startPoint, connection.endPoint);
                 const color = getConnectionColor(connection.type);
                 const midPoint = {
-                    x: (startPoint.x + endPoint.x) / 2,
-                    y: (startPoint.y + endPoint.y) / 2
+                    x: (connection.startPoint.x + connection.endPoint.x) / 2,
+                    y: (connection.startPoint.y + connection.endPoint.y) / 2
                 };
 
                 return (
@@ -102,8 +103,8 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
                             strokeLinecap="round"
                             filter="url(#glow)"
                         />
-                        <circle cx={startPoint.x} cy={startPoint.y} r={4} fill={color} />
-                        <circle cx={endPoint.x} cy={endPoint.y} r={4} fill={color} />
+                        <circle cx={connection.startPoint.x} cy={connection.startPoint.y} r={4} fill={color} />
+                        <circle cx={connection.endPoint.x} cy={connection.endPoint.y} r={4} fill={color} />
                         <foreignObject
                             x={midPoint.x - 8}
                             y={midPoint.y - 8}

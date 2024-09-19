@@ -40,7 +40,7 @@ Version 2.3 Connecting ide with flow blocks-
         -connecting ide with functions outside the scope of the class 
         Canvas 
             - adding zoom in and zoom out and dragable functionality to the canvas  @done
-            - when block are at the edges make zoom out automatically or find a way to make it better  @done
+            - when block are at the edges make zoom out automatically or find a way to make it better @later  
             
         Bugs : 
             

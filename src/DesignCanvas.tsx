@@ -1,13 +1,33 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import DraggableWrapper from './DraggableWrapper';
-import { ClassBlock, FunctionBlock } from './Blocks';
-import Connections from './Connections';
-import PythonIDE from './PythonIDE';
-import { generateJsonFromPythonFile, BlockData } from './fileProcessor';
-import CanvasGrid from './CanvasGrid';
 import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import CanvasGrid from './CanvasGrid';
+import { generateJsonFromPythonFile } from './fileProcessor';
 
-// Interface declarations
+// Type definitions
+export interface BlockData {
+    id: string;
+    type: 'class' | 'function';
+    name: string;
+    location: string;
+    author: string;
+    fileType: string;
+    code: string;
+    x: number;
+    y: number;
+    connections: ConnectionData[];
+}
+
+export interface ConnectionData {
+    to: string;
+    type: 'inherits' | 'composes' | 'uses' | 'contains';
+    fromConnector: string;
+    toConnector: string;
+}
+
+export interface ExtendedBlockData extends BlockData {
+    parentClass?: string;
+}
+
 export interface Connection {
     id: string;
     start: string;
@@ -19,10 +39,6 @@ export interface Connection {
     toConnector: string;
 }
 
-export interface ExtendedBlockData extends BlockData {
-    parentClass?: string;
-}
-
 const DesignCanvas: React.FC = () => {
     const [blocks, setBlocks] = useState<ExtendedBlockData[]>([]);
     const [connections, setConnections] = useState<Connection[]>([]);
@@ -31,9 +47,8 @@ const DesignCanvas: React.FC = () => {
     const [isFlowVisible, setIsFlowVisible] = useState(true);
     const [classVisibility, setClassVisibility] = useState<Record<string, boolean>>({});
     const [zoomLevel, setZoomLevel] = useState(1);
-    const [canvasSize, setCanvasSize] = useState({ width: 3000, height: 2000 }); // Default size
-
-
+    const [canvasSize, setCanvasSize] = useState({ width: 3000, height: 2000 });
+    const [idePosition, setIdePosition] = useState({ x: 20, y: 20 });
 
     const loadFile = useCallback(async (content: string) => {
         try {
@@ -85,21 +100,36 @@ const DesignCanvas: React.FC = () => {
                     });
                 }
             });
+
+            newConnections.push({
+                id: `IDE-${classBlock.id}`,
+                start: 'python-ide',
+                end: classBlock.id,
+                startPoint: { x: idePosition.x + 600, y: idePosition.y + 30 }, // 600 is the width of the IDE
+                endPoint: { x: classBlock.x, y: classBlock.y },
+                type: 'uses',
+                fromConnector: 'output',
+                toConnector: 'input'
+            });
         });
 
         setConnections(newConnections);
-    }, [blocks]);
+    }, [blocks, idePosition]);
 
     useEffect(() => {
         updateConnections();
     }, [updateConnections]);
 
     const handlePositionChange = useCallback((id: string, x: number, y: number) => {
-        setBlocks(prevBlocks =>
-            prevBlocks.map(block =>
-                block.id === id ? { ...block, x, y } : block
-            )
-        );
+        if (id === 'python-ide') {
+            setIdePosition({ x, y });
+        } else {
+            setBlocks(prevBlocks =>
+                prevBlocks.map(block =>
+                    block.id === id ? { ...block, x, y } : block
+                )
+            );
+        }
     }, []);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,15 +159,15 @@ const DesignCanvas: React.FC = () => {
         setClassVisibility(prev => ({ ...prev, [classId]: isVisible }));
     };
 
-    const getVisibleBlocks = () => {
+    const getVisibleBlocks = useCallback(() => {
         return blocks.filter(block => {
             if (block.type === 'class') return true;
             const parentClass = blocks.find(b => b.type === 'class' && block.id.startsWith(`${b.name}_`));
             return parentClass ? classVisibility[parentClass.id] !== false : true;
         });
-    };
+    }, [blocks, classVisibility]);
 
-    const getVisibleConnections = () => {
+    const getVisibleConnections = useCallback(() => {
         return connections.filter(conn => {
             const startBlock = blocks.find(b => b.id === conn.start);
             const endBlock = blocks.find(b => b.id === conn.end);
@@ -146,7 +176,7 @@ const DesignCanvas: React.FC = () => {
             }
             return true;
         });
-    };
+    }, [connections, blocks, classVisibility]);
 
     const handleZoomIn = () => {
         setZoomLevel(prevZoom => Math.min(prevZoom + 0.1, 2));
@@ -155,7 +185,6 @@ const DesignCanvas: React.FC = () => {
     const handleZoomOut = () => {
         setZoomLevel(prevZoom => {
             const newZoom = Math.max(prevZoom - 0.1, 0.2);
-            // Increase canvas size when zooming out
             if (newZoom < prevZoom) {
                 setCanvasSize(prev => ({
                     width: prev.width * (prevZoom / newZoom),
@@ -168,7 +197,7 @@ const DesignCanvas: React.FC = () => {
 
     const handleZoomReset = () => {
         setZoomLevel(1);
-        setCanvasSize({ width: 3000, height: 2000 }); // Reset to default size
+        setCanvasSize({ width: 3000, height: 2000 });
     };
 
     return (
@@ -190,7 +219,7 @@ const DesignCanvas: React.FC = () => {
 
             <div className="overflow-auto" style={{
                 width: '100%',
-                height: 'calc(100vh - 150px)', // Adjust based on your layout
+                height: 'calc(100vh - 150px)',
             }}>
                 <div style={{
                     transform: `scale(${zoomLevel})`,
@@ -212,6 +241,7 @@ const DesignCanvas: React.FC = () => {
                         onCodeChange={handleCodeChange}
                         onFlowVisibilityChange={handleFlowVisibilityChange}
                         zoomLevel={zoomLevel}
+                        idePosition={idePosition}
                     />
                 </div>
             </div>
