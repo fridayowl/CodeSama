@@ -2,6 +2,7 @@ import React from 'react';
 import DraggableWrapper from './DraggableWrapper';
 import Connections from './Connections';
 import { ClassBlock, FunctionBlock } from './Blocks';
+import CodeBlock from './CodeBlock';
 import PythonIDE from './PythonIDE';
 import { ExtendedBlockData, Connection } from './DesignCanvas';
 
@@ -58,10 +59,8 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
     const getAdjustedPosition = (id: string, isStart: boolean) => {
         const { x, y, width, height } = getBlockPosition(id);
         if (id === 'python-ide' && isStart) {
-            // For IDE start point, use the right side
             return { x: x + width, y: y + height / 2 };
         }
-        // For other blocks or end points, use the left side for start, right side for end
         return { x: isStart ? x : x + width, y: y + height / 2 };
     };
 
@@ -91,7 +90,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                             code={item.code}
                             onVisibilityChange={onVisibilityChange}
                         />
-                    ) : (
+                    ) : item.type === 'function' ? (
                         <FunctionBlock
                             id={item.id}
                             name={item.name}
@@ -100,6 +99,16 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                             fileType={item.fileType}
                             code={item.code}
                             onVisibilityChange={() => { }}
+                        />
+                    ) : (
+                        <CodeBlock
+                            id={item.id}
+                            name={item.name}
+                            location={item.location}
+                            author={item.author}
+                            fileType={item.fileType}
+                            code={item.code}
+                            onVisibilityChange={onVisibilityChange}
                         />
                     )}
                 </DraggableWrapper>

@@ -6,7 +6,7 @@ import { generateJsonFromPythonFile } from './fileProcessor';
 // Type definitions
 export interface BlockData {
     id: string;
-    type: 'class' | 'function';
+    type: 'class' | 'function' | 'code';
     name: string;
     location: string;
     author: string;
@@ -49,6 +49,7 @@ const DesignCanvas: React.FC = () => {
     const [zoomLevel, setZoomLevel] = useState(1);
     const [canvasSize, setCanvasSize] = useState({ width: 3000, height: 2000 });
     const [idePosition, setIdePosition] = useState({ x: 20, y: 20 });
+    const [refreshKey, setRefreshKey] = useState(0);
 
     const loadFile = useCallback(async (content: string) => {
         try {
@@ -69,6 +70,7 @@ const DesignCanvas: React.FC = () => {
             });
 
             setBlocks(modifiedBlocks);
+            setRefreshKey(prevKey => prevKey + 1);
         } catch (error) {
             console.error('Error processing file:', error);
         }
@@ -84,6 +86,7 @@ const DesignCanvas: React.FC = () => {
         const newConnections: Connection[] = [];
         const classBlocks = blocks.filter(block => block.type === 'class');
         const functionBlocks = blocks.filter(block => block.type === 'function');
+        const codeBlocks = blocks.filter(block => block.type === 'code');
 
         classBlocks.forEach(classBlock => {
             functionBlocks.forEach(functionBlock => {
@@ -105,8 +108,21 @@ const DesignCanvas: React.FC = () => {
                 id: `IDE-${classBlock.id}`,
                 start: 'python-ide',
                 end: classBlock.id,
-                startPoint: { x: idePosition.x + 600, y: idePosition.y + 30 }, // 600 is the width of the IDE
+                startPoint: { x: idePosition.x + 600, y: idePosition.y + 30 },
                 endPoint: { x: classBlock.x, y: classBlock.y },
+                type: 'uses',
+                fromConnector: 'output',
+                toConnector: 'input'
+            });
+        });
+
+        codeBlocks.forEach(codeBlock => {
+            newConnections.push({
+                id: `IDE-${codeBlock.id}`,
+                start: 'python-ide',
+                end: codeBlock.id,
+                startPoint: { x: idePosition.x + 600, y: idePosition.y + 30 },
+                endPoint: { x: codeBlock.x, y: codeBlock.y },
                 type: 'uses',
                 fromConnector: 'output',
                 toConnector: 'input'
@@ -149,6 +165,7 @@ const DesignCanvas: React.FC = () => {
 
     const handleCodeChange = (newCode: string) => {
         setFileContent(newCode);
+        loadFile(newCode);
     };
 
     const handleFlowVisibilityChange = (isVisible: boolean) => {
@@ -161,7 +178,7 @@ const DesignCanvas: React.FC = () => {
 
     const getVisibleBlocks = useCallback(() => {
         return blocks.filter(block => {
-            if (block.type === 'class') return true;
+            if (block.type === 'class' || block.type === 'code') return true;
             const parentClass = blocks.find(b => b.type === 'class' && block.id.startsWith(`${b.name}_`));
             return parentClass ? classVisibility[parentClass.id] !== false : true;
         });
@@ -229,6 +246,7 @@ const DesignCanvas: React.FC = () => {
                     height: `${canvasSize.height}px`,
                 }}>
                     <CanvasGrid
+                        key={refreshKey}
                         blocks={blocks}
                         connections={connections}
                         isFlowVisible={isFlowVisible}

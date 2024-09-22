@@ -1,16 +1,10 @@
 import { identifyClasses } from './classIdentifier';
 import { identifyFunctionsAndConnections } from './functionIdentifier';
-
-export async function generateJsonFromPythonFile(fileContent: string): Promise<BlockData[]> {
-    const classes = identifyClasses(fileContent);
-    const functions = identifyFunctionsAndConnections(fileContent, classes);
-
-    return [...classes, ...functions];
-}
+import { identifyCodeBlocks } from './codeBlockIdentifier';
 
 export interface BlockData {
     id: string;
-    type: 'class' | 'function';
+    type: 'class' | 'function' | 'code';
     name: string;
     location: string;
     author: string;
@@ -26,4 +20,12 @@ export interface ConnectionData {
     type: 'inherits' | 'composes' | 'uses' | 'contains';
     fromConnector: string;
     toConnector: string;
+}
+
+export async function generateJsonFromPythonFile(fileContent: string): Promise<BlockData[]> {
+    const classes = identifyClasses(fileContent);
+    const functions = identifyFunctionsAndConnections(fileContent, classes);
+    const codeBlocks = identifyCodeBlocks(fileContent, classes, functions);
+
+    return [...classes, ...functions, ...codeBlocks];
 }
