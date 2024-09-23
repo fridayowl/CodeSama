@@ -28,23 +28,27 @@ Version 2.2 Dynamic flow generation-
         bugs fixed :
             -function name contains underscore it is not considering that
 
-
-
-
-
-working on :
-
 Version 2.3 Connecting ide with flow blocks-
         single file 
-        -connecting ide with classes 
-        -connecting ide with functions outside the scope of the class 
+        -connecting ide with classes  @done
+        -connecting ide with functions outside the scope of the class  @done
         Canvas 
             - adding zoom in and zoom out and dragable functionality to the canvas  @done
             - when block are at the edges make zoom out automatically or find a way to make it better @later  
             
-        Bugs : 
-            
+        Bugs Identified  : 
+            Fixing ide focus out  
 
+Working 
+
+Version 2.4 Smoothing and Customizaton -
+        single file  
+        -Changing code block connection color 
+        -Making the positions more ordered 
+        -Making a json file for the customising each connectors color and functionality  
+        Bugs to fix : 
+            -Ide focus out when the text changes
+        Bugs Identified  :  
 
 
 
