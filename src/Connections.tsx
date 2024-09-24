@@ -1,5 +1,6 @@
 import React from 'react';
-import { GitFork, Package, ArrowUpRight, Layers } from 'lucide-react';
+import { GitFork, Package, ArrowUpRight, Layers, FileCode2, LucideIcon } from 'lucide-react';
+import customizationData from './customization.json';
 
 interface Point {
     x: number;
@@ -12,9 +13,11 @@ interface Connection {
     end: string;
     startPoint: Point;
     endPoint: Point;
-    type: 'inherits' | 'composes' | 'uses' | 'contains';
+    type: 'inherits' | 'composes' | 'uses' | 'contains' | 'codeLink';
     fromConnector: string;
     toConnector: string;
+    startBlockType: 'class' | 'function' | 'code';
+    endBlockType: 'class' | 'function' | 'code';
 }
 
 interface ConnectionsProps {
@@ -56,27 +59,60 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
     };
 
     const getConnectionColor = (type: Connection['type']) => {
+        return customizationData.connections[type].lineColor;
+    };
+
+    const getConnectionIcon = (type: Connection['type']): LucideIcon => {
         switch (type) {
-            case 'inherits': return '#3b82f6'; // blue-500
-            case 'composes': return '#10b981'; // emerald-500
-            case 'uses': return '#8b5cf6'; // violet-500
-            case 'contains': return '#f59e0b'; // amber-500
-            default: return '#6b7280'; // gray-500
+            case 'inherits': return GitFork;
+            case 'composes': return Package;
+            case 'uses': return ArrowUpRight;
+            case 'contains': return Layers;
+            case 'codeLink': return FileCode2;
         }
     };
 
-    const getConnectionIcon = (type: Connection['type']) => {
-        switch (type) {
-            case 'inherits': return <GitFork size={16} />;
-            case 'composes': return <Package size={16} />;
-            case 'uses': return <ArrowUpRight size={16} />;
-            case 'contains': return <Layers size={16} />;
-        }
+    const getConnectionStyle = (type: Connection['type']) => {
+        const style = customizationData.connections[type];
+        return {
+            strokeDasharray: style.lineStyle === 'dashed' ? '5,5' :
+                style.lineStyle === 'dotted' ? '2,2' : 'none',
+        };
     };
 
     return (
         <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
             <defs>
+                <marker
+                    id="arrowhead-triangle"
+                    markerWidth="10"
+                    markerHeight="7"
+                    refX="0"
+                    refY="3.5"
+                    orient="auto"
+                >
+                    <polygon points="0 0, 10 3.5, 0 7" />
+                </marker>
+                <marker
+                    id="arrowhead-diamond"
+                    markerWidth="10"
+                    markerHeight="10"
+                    refX="0"
+                    refY="5"
+                    orient="auto"
+                >
+                    <path d="M0,5 L5,0 L10,5 L5,10 Z" />
+                </marker>
+                <marker
+                    id="arrowhead-circle"
+                    markerWidth="10"
+                    markerHeight="10"
+                    refX="5"
+                    refY="5"
+                    orient="auto"
+                >
+                    <circle cx="5" cy="5" r="3" />
+                </marker>
                 <filter id="glow">
                     <feGaussianBlur stdDeviation="2" result="coloredBlur" />
                     <feMerge>
@@ -88,10 +124,14 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
             {connections.map((connection) => {
                 const path = getBezierPath(connection.startPoint, connection.endPoint);
                 const color = getConnectionColor(connection.type);
+                const style = getConnectionStyle(connection.type);
+                const IconComponent = getConnectionIcon(connection.type);
                 const midPoint = {
                     x: (connection.startPoint.x + connection.endPoint.x) / 2,
                     y: (connection.startPoint.y + connection.endPoint.y) / 2
                 };
+
+                const arrowHead = customizationData.connections[connection.type].arrowHead;
 
                 return (
                     <g key={connection.id}>
@@ -102,6 +142,8 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
                             strokeWidth={2}
                             strokeLinecap="round"
                             filter="url(#glow)"
+                            style={style}
+                            markerEnd={`url(#arrowhead-${arrowHead})`}
                         />
                         <circle cx={connection.startPoint.x} cy={connection.startPoint.y} r={4} fill={color} />
                         <circle cx={connection.endPoint.x} cy={connection.endPoint.y} r={4} fill={color} />
@@ -112,7 +154,7 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
                             height={16}
                         >
                             <div className="flex items-center justify-center w-full h-full bg-white rounded-full shadow-md">
-                                {getConnectionIcon(connection.type)}
+                                <IconComponent size={16} />
                             </div>
                         </foreignObject>
                         <text

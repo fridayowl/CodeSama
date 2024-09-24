@@ -1,0 +1,65 @@
+{
+  "blocks": {
+    "class": {
+      "backgroundColor": "#E3F2FD",
+      "borderColor": "#1E88E5",
+      "textColor": "#0D47A1",
+      "icon": "cube"
+    },
+    "function": {
+      "backgroundColor": "#E8F5E9",
+      "borderColor": "#43A047",
+      "textColor": "#1B5E20",
+      "icon": "function-square"
+    },
+    "code": {
+      "backgroundColor": "#FFF3E0",
+      "borderColor": "#FB8C00",
+      "textColor": "#E65100",
+      "icon": "file-code"
+    }
+  },
+  "connections": {
+    "inherits": {
+      "lineColor": "#3B82F6",
+      "lineStyle": "dashed",
+      "arrowHead": "triangle",
+      "icon": "git-fork"
+    },
+    "composes": {
+      "lineColor": "#10B981",
+      "lineStyle": "solid",
+      "arrowHead": "diamond",
+      "icon": "package"
+    },
+    "uses": {
+      "lineColor": "#8B5CF6",
+      "lineStyle": "dotted",
+      "arrowHead": "arrow",
+      "icon": "arrow-up-right"
+    },
+    "contains": {
+      "lineColor": "#F59E0B",
+      "lineStyle": "solid",
+      "arrowHead": "circle",
+      "icon": "layers"
+    },
+    "codeLink": {
+      "lineColor": "#F97316",
+      "lineStyle": "solid",
+      "arrowHead": "arrow",
+      "icon": "file-code-2"
+    }
+  },
+  "canvas": {
+    "backgroundColor": "#F3F4F6",
+    "gridColor": "#E5E7EB",
+    "gridSpacing": 20
+  },
+  "ide": {
+    "backgroundColor": "#1E293B",
+    "textColor": "#E2E8F0",
+    "lineNumbersColor": "#64748B",
+    "highlightColor": "#2563EB"
+  }
+}

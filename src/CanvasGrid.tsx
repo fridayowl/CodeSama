@@ -103,6 +103,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                     ) : (
                         <CodeBlock
                             id={item.id}
+                            type={item.type}
                             name={item.name}
                             location={item.location}
                             author={item.author}
@@ -135,7 +136,12 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                     connections={getVisibleConnections().map(conn => ({
                         ...conn,
                         startPoint: getAdjustedPosition(conn.start, true),
-                        endPoint: getAdjustedPosition(conn.end, false)
+                        endPoint: getAdjustedPosition(conn.end, false),
+                        startBlockType: blocks.find(b => b.id === conn.start)?.type || 'code',
+                        endBlockType: blocks.find(b => b.id === conn.end)?.type || 'code',
+                        type: (blocks.find(b => b.id === conn.start)?.type === 'code' ||
+                            blocks.find(b => b.id === conn.end)?.type === 'code')
+                            ? 'codeLink' : conn.type
                     }))}
                     zoomLevel={zoomLevel}
                     getBlockPosition={getBlockPosition}

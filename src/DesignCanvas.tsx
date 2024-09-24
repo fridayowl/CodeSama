@@ -55,18 +55,30 @@ const DesignCanvas: React.FC = () => {
         try {
             const jsonData = await generateJsonFromPythonFile(content);
 
-            const modifiedBlocks = jsonData.map(block => {
-                if (block.type === 'function') {
+            const modifiedBlocks = jsonData.map((block, index) => {
+                let x, y;
+                if (block.type === 'class') {
+                    x = 700;
+                    y = 100 + index * 250; // Increased vertical spacing
+                } else if (block.type === 'function') {
                     const parentClass = jsonData.find(b => b.type === 'class' && b.code.includes(`def ${block.name}(`));
                     if (parentClass) {
+                        x = 1500;
+                        y = 100 + index * 150;
                         return {
                             ...block,
                             id: `${parentClass.name}_${block.id}`,
-                            parentClass: parentClass.name
+                            parentClass: parentClass.name,
+                            x,
+                            y
                         } as ExtendedBlockData;
                     }
+                } else if (block.type === 'code') {
+                    x = 1500;
+                    y = 100 + index * 200;
                 }
-                return block as ExtendedBlockData;
+
+                return { ...block, x, y } as ExtendedBlockData;
             });
 
             setBlocks(modifiedBlocks);
@@ -95,8 +107,8 @@ const DesignCanvas: React.FC = () => {
                         id: `${classBlock.id}-${functionBlock.id}`,
                         start: classBlock.id,
                         end: functionBlock.id,
-                        startPoint: { x: classBlock.x, y: classBlock.y },
-                        endPoint: { x: functionBlock.x, y: functionBlock.y },
+                        startPoint: { x: classBlock.x + 200, y: classBlock.y + 50 },
+                        endPoint: { x: functionBlock.x, y: functionBlock.y + 50 },
                         type: 'contains',
                         fromConnector: 'method',
                         toConnector: 'input'
@@ -109,7 +121,7 @@ const DesignCanvas: React.FC = () => {
                 start: 'python-ide',
                 end: classBlock.id,
                 startPoint: { x: idePosition.x + 600, y: idePosition.y + 30 },
-                endPoint: { x: classBlock.x, y: classBlock.y },
+                endPoint: { x: classBlock.x, y: classBlock.y + 50 },
                 type: 'uses',
                 fromConnector: 'output',
                 toConnector: 'input'
@@ -122,7 +134,7 @@ const DesignCanvas: React.FC = () => {
                 start: 'python-ide',
                 end: codeBlock.id,
                 startPoint: { x: idePosition.x + 600, y: idePosition.y + 30 },
-                endPoint: { x: codeBlock.x, y: codeBlock.y },
+                endPoint: { x: codeBlock.x, y: codeBlock.y + 50 },
                 type: 'uses',
                 fromConnector: 'output',
                 toConnector: 'input'
