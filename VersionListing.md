@@ -45,9 +45,11 @@ Version 2.4 Smoothing and Customizaton -
         single file  
         -Changing code block connection color  @done
         -Making the positions more ordered 
+        - Fixing code block inside and out side the class 
         -Making a json file for the customising each connectors color and functionality   @done
         Bugs to fix : 
-            -Ide focus out when the text changes
+            -Ide focus out when the text changes 
+            - customization not working for ide and canvas
             -Zoom in and Zoom out automaticaly when the file loads(or something better @done
         Bugs Identified  :  
 

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw,Upload, Settings as SettingsIcon } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Upload, Settings as SettingsIcon } from 'lucide-react';
 import CanvasGrid from './CanvasGrid';
 import { generateJsonFromPythonFile } from './fileProcessor';
 import SettingsPanel from './Settings';
@@ -52,10 +52,13 @@ const DesignCanvas: React.FC = () => {
     const [idePosition, setIdePosition] = useState({ x: 20, y: 20 });
     const [refreshKey, setRefreshKey] = useState(0);
     const [autoZoom, setAutoZoom] = useState(true);
-    const [customization, setCustomization] = useState(defaultCustomization);
+    const [customization, setCustomization] = useState(() => {
+        const savedCustomization = localStorage.getItem('customization');
+        return savedCustomization ? JSON.parse(savedCustomization) : defaultCustomization;
+    });
     const canvasRef = useRef<HTMLDivElement>(null);
     const [isSettingsPanelOpen, setIsSettingsPanelOpen] = useState(false);
-  
+
     const loadFile = useCallback(async (content: string) => {
         try {
             const jsonData = await generateJsonFromPythonFile(content);
@@ -273,16 +276,16 @@ const DesignCanvas: React.FC = () => {
     const toggleAutoZoom = () => {
         setAutoZoom(!autoZoom);
     };
- 
 
     const handleCustomizationChange = (newCustomization: any) => {
         setCustomization(newCustomization);
+        localStorage.setItem('customization', JSON.stringify(newCustomization));
     };
 
     return (
         <div className="w-full h-screen p-4">
             <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center"> 
+                <div className="flex items-center">
                     <button onClick={handleZoomIn} className="mr-2 p-2 bg-blue-500 text-white rounded hover:bg-blue-600" title="Zoom In">
                         <ZoomIn size={20} />
                     </button>
@@ -300,8 +303,8 @@ const DesignCanvas: React.FC = () => {
                         Auto
                     </button>
                     <span className="ml-4">Zoom: {Math.round(zoomLevel * 100)}%</span>
-            
-                    <div className="relative  ml-1 ">
+
+                    <div className="relative ml-1">
                         <input
                             type="file"
                             onChange={handleFileChange}
