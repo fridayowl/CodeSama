@@ -3,52 +3,34 @@
     "class": {
       "backgroundColor": "#E3F2FD",
       "borderColor": "#1E88E5",
-      "textColor": "#0D47A1",
-      "icon": "cube"
+      "textColor": "#0D47A1"
     },
     "function": {
       "backgroundColor": "#E8F5E9",
       "borderColor": "#43A047",
-      "textColor": "#1B5E20",
-      "icon": "function-square"
+      "textColor": "#1B5E20"
     },
     "code": {
       "backgroundColor": "#FFF3E0",
       "borderColor": "#FB8C00",
-      "textColor": "#E65100",
-      "icon": "file-code"
+      "textColor": "#E65100"
     }
   },
   "connections": {
     "inherits": {
-      "lineColor": "#3B82F6",
-      "lineStyle": "dashed",
-      "arrowHead": "triangle",
-      "icon": "git-fork"
+      "lineColor": "#3B82F6"
     },
     "composes": {
-      "lineColor": "#10B981",
-      "lineStyle": "solid",
-      "arrowHead": "diamond",
-      "icon": "package"
+      "lineColor": "#10B981"
     },
     "uses": {
-      "lineColor": "#8B5CF6",
-      "lineStyle": "dotted",
-      "arrowHead": "arrow",
-      "icon": "arrow-up-right"
+      "lineColor": "#8B5CF6"
     },
     "contains": {
-      "lineColor": "#F59E0B",
-      "lineStyle": "solid",
-      "arrowHead": "circle",
-      "icon": "layers"
+      "lineColor": "#F59E0B"
     },
     "codeLink": {
-      "lineColor": "#F97316",
-      "lineStyle": "solid",
-      "arrowHead": "arrow",
-      "icon": "file-code-2"
+      "lineColor": "#F97316"
     }
   },
   "canvas": {

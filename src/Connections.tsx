@@ -1,6 +1,5 @@
 import React from 'react';
 import { GitFork, Package, ArrowUpRight, Layers, FileCode2, LucideIcon } from 'lucide-react';
-import customizationData from './customization.json';
 
 interface Point {
     x: number;
@@ -24,9 +23,12 @@ interface ConnectionsProps {
     connections: Connection[];
     zoomLevel: number;
     getBlockPosition: (id: string) => { x: number; y: number; width: number; height: number };
+    customization: any;
 }
 
-const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBlockPosition }) => {
+const defaultConnectionColor = "#000000";
+
+const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBlockPosition, customization }) => {
     const getBezierPath = (start: Point, end: Point): string => {
         const midX = (start.x + end.x) / 2;
         const dx = end.x - start.x;
@@ -35,7 +37,7 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
 
         let controlPoint1, controlPoint2;
 
-        if (dx < 0) { // If connection is right-to-left
+        if (dx < 0) {
             controlPoint1 = {
                 x: start.x - Math.abs(dx) * curvature,
                 y: start.y
@@ -58,8 +60,11 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
         return `M ${start.x},${start.y} C ${controlPoint1.x},${controlPoint1.y} ${controlPoint2.x},${controlPoint2.y} ${end.x},${end.y}`;
     };
 
-    const getConnectionColor = (type: Connection['type']) => {
-        return customizationData.connections[type].lineColor;
+    const getConnectionColor = (type: Connection['type']): string => {
+        if (customization && customization[type]) {
+            return customization[type].lineColor || defaultConnectionColor;
+        }
+        return defaultConnectionColor;
     };
 
     const getConnectionIcon = (type: Connection['type']): LucideIcon => {
@@ -73,11 +78,14 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
     };
 
     const getConnectionStyle = (type: Connection['type']) => {
-        const style = customizationData.connections[type];
-        return {
-            strokeDasharray: style.lineStyle === 'dashed' ? '5,5' :
-                style.lineStyle === 'dotted' ? '2,2' : 'none',
-        };
+        if (customization && customization[type]) {
+            const style = customization[type];
+            return {
+                strokeDasharray: style.lineStyle === 'dashed' ? '5,5' :
+                    style.lineStyle === 'dotted' ? '2,2' : 'none',
+            };
+        }
+        return {};
     };
 
     return (
@@ -131,7 +139,7 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
                     y: (connection.startPoint.y + connection.endPoint.y) / 2
                 };
 
-                const arrowHead = customizationData.connections[connection.type].arrowHead;
+                const arrowHead = customization[connection.type]?.arrowHead || 'arrow';
 
                 return (
                     <g key={connection.id}>
@@ -154,7 +162,7 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
                             height={16}
                         >
                             <div className="flex items-center justify-center w-full h-full bg-white rounded-full shadow-md">
-                                <IconComponent size={16} />
+                                <IconComponent size={16} color={color} />
                             </div>
                         </foreignObject>
                         <text

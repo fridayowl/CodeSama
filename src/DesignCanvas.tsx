@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, Upload } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw,Upload, Settings as SettingsIcon } from 'lucide-react';
 import CanvasGrid from './CanvasGrid';
 import { generateJsonFromPythonFile } from './fileProcessor';
+import SettingsPanel from './Settings';
+import defaultCustomization from './customization.json';
 
-// Type definitions
 export interface BlockData {
     id: string;
     type: 'class' | 'function' | 'code';
@@ -51,8 +52,10 @@ const DesignCanvas: React.FC = () => {
     const [idePosition, setIdePosition] = useState({ x: 20, y: 20 });
     const [refreshKey, setRefreshKey] = useState(0);
     const [autoZoom, setAutoZoom] = useState(true);
+    const [customization, setCustomization] = useState(defaultCustomization);
     const canvasRef = useRef<HTMLDivElement>(null);
-
+    const [isSettingsPanelOpen, setIsSettingsPanelOpen] = useState(false);
+  
     const loadFile = useCallback(async (content: string) => {
         try {
             const jsonData = await generateJsonFromPythonFile(content);
@@ -270,43 +273,58 @@ const DesignCanvas: React.FC = () => {
     const toggleAutoZoom = () => {
         setAutoZoom(!autoZoom);
     };
+ 
+
+    const handleCustomizationChange = (newCustomization: any) => {
+        setCustomization(newCustomization);
+    };
 
     return (
         <div className="w-full h-screen p-4">
-            <div className="flex items-center mb-4 space-x-2">
-                <button onClick={handleZoomIn} className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600" title="Zoom In">
-                    <ZoomIn size={20} />
-                </button>
-                <button onClick={handleZoomOut} className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600" title="Zoom Out">
-                    <ZoomOut size={20} />
-                </button>
-                <button onClick={handleZoomReset} className="p-2 bg-green-500 text-white rounded hover:bg-green-600" title="Reset Zoom">
-                    <RotateCcw size={20} />
-                </button>
-                <button
-                    onClick={toggleAutoZoom}
-                    className={`p-2 rounded ${autoZoom ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-gray-300 hover:bg-gray-400'}`}
-                    title={autoZoom ? "Disable Auto-Zoom" : "Enable Auto-Zoom"}
-                >
-                    Auto
-                </button>
-                <span className="ml-2">Zoom: {Math.round(zoomLevel * 100)}%</span>
-                <div className="relative">
-                    <input
-                        type="file"
-                        onChange={handleFileChange}
-                        accept=".py"
-                        className="hidden"
-                        id="file-upload"
-                    />
-                    <label
-                        htmlFor="file-upload"
-                        className="flex items-center px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 cursor-pointer"
+            <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center"> 
+                    <button onClick={handleZoomIn} className="mr-2 p-2 bg-blue-500 text-white rounded hover:bg-blue-600" title="Zoom In">
+                        <ZoomIn size={20} />
+                    </button>
+                    <button onClick={handleZoomOut} className="mr-2 p-2 bg-blue-500 text-white rounded hover:bg-blue-600" title="Zoom Out">
+                        <ZoomOut size={20} />
+                    </button>
+                    <button onClick={handleZoomReset} className="mr-2 p-2 bg-green-500 text-white rounded hover:bg-green-600" title="Reset Zoom">
+                        <RotateCcw size={20} />
+                    </button>
+                    <button
+                        onClick={toggleAutoZoom}
+                        className={`mr-2 p-2 rounded ${autoZoom ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-gray-300 hover:bg-gray-400'}`}
+                        title={autoZoom ? "Disable Auto-Zoom" : "Enable Auto-Zoom"}
                     >
-                        <Upload size={20} className="mr-2" />
-                        {fileName || "Choose file"}
-                    </label>
+                        Auto
+                    </button>
+                    <span className="ml-4">Zoom: {Math.round(zoomLevel * 100)}%</span>
+            
+                    <div className="relative  ml-1 ">
+                        <input
+                            type="file"
+                            onChange={handleFileChange}
+                            accept=".py"
+                            className="hidden"
+                            id="file-upload"
+                        />
+                        <label
+                            htmlFor="file-upload"
+                            className="flex items-center px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 cursor-pointer"
+                        >
+                            <Upload size={20} className="mr-2" />
+                            {fileName || "Choose file"}
+                        </label>
+                    </div>
                 </div>
+                <button
+                    onClick={() => setIsSettingsPanelOpen(true)}
+                    className="p-2 bg-gray-200 rounded hover:bg-gray-300"
+                    title="Open Settings"
+                >
+                    <SettingsIcon size={20} />
+                </button>
             </div>
 
             <div
@@ -315,9 +333,10 @@ const DesignCanvas: React.FC = () => {
                 style={{
                     width: '100%',
                     height: 'calc(100vh - 150px)',
-                    backgroundImage: `linear-gradient(to right, #f0f0f0 1px, transparent 1px),
-                                       linear-gradient(to bottom, #f0f0f0 1px, transparent 1px)`,
-                    backgroundSize: `${20 * zoomLevel}px ${20 * zoomLevel}px`,
+                    backgroundImage: `linear-gradient(to right, ${customization.canvas.gridColor} 1px, transparent 1px),
+                                       linear-gradient(to bottom, ${customization.canvas.gridColor} 1px, transparent 1px)`,
+                    backgroundSize: `${customization.canvas.gridSpacing * zoomLevel}px ${customization.canvas.gridSpacing * zoomLevel}px`,
+                    backgroundColor: customization.canvas.backgroundColor,
                 }}
             >
                 <div style={{
@@ -342,9 +361,17 @@ const DesignCanvas: React.FC = () => {
                         onFlowVisibilityChange={handleFlowVisibilityChange}
                         zoomLevel={zoomLevel}
                         idePosition={idePosition}
+                        customization={customization}
                     />
                 </div>
             </div>
+
+            <SettingsPanel
+                isOpen={isSettingsPanelOpen}
+                onClose={() => setIsSettingsPanelOpen(false)}
+                customization={customization}
+                onCustomizationChange={handleCustomizationChange}
+            />
         </div>
     );
 };

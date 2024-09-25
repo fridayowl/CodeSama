@@ -20,6 +20,7 @@ interface CanvasGridProps {
     onFlowVisibilityChange: (isVisible: boolean) => void;
     zoomLevel: number;
     idePosition: { x: number; y: number };
+    customization: any;
 }
 
 const CanvasGrid: React.FC<CanvasGridProps> = ({
@@ -36,6 +37,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
     onFlowVisibilityChange,
     zoomLevel,
     idePosition,
+    customization
 }) => {
     const getBlockPosition = (id: string) => {
         if (id === 'python-ide') {
@@ -66,9 +68,10 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
 
     return (
         <div className="relative w-full h-full" style={{
-            backgroundImage: `linear-gradient(to right, #f0f0f0 1px, transparent 1px),
-                               linear-gradient(to bottom, #f0f0f0 1px, transparent 1px)`,
-            backgroundSize: `${20 * zoomLevel}px ${20 * zoomLevel}px`,
+            backgroundImage: `linear-gradient(to right, ${customization.canvas.gridColor} 1px, transparent 1px),
+                               linear-gradient(to bottom, ${customization.canvas.gridColor} 1px, transparent 1px)`,
+            backgroundSize: `${customization.canvas.gridSpacing * zoomLevel}px ${customization.canvas.gridSpacing * zoomLevel}px`,
+            backgroundColor: customization.canvas.backgroundColor,
         }}>
             {isFlowVisible && getVisibleBlocks().map((item) => (
                 <DraggableWrapper
@@ -89,6 +92,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                             fileType={item.fileType}
                             code={item.code}
                             onVisibilityChange={onVisibilityChange}
+                            customization={customization}
                         />
                     ) : item.type === 'function' ? (
                         <FunctionBlock
@@ -99,6 +103,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                             fileType={item.fileType}
                             code={item.code}
                             onVisibilityChange={() => { }}
+                            customization={customization}
                         />
                     ) : (
                         <CodeBlock
@@ -110,6 +115,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                             fileType={item.fileType}
                             code={item.code}
                             onVisibilityChange={onVisibilityChange}
+                            customization={customization}
                         />
                     )}
                 </DraggableWrapper>
@@ -128,6 +134,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                     onCodeChange={onCodeChange}
                     fileName={fileName}
                     onFlowVisibilityChange={onFlowVisibilityChange}
+                    customization={customization.ide}
                 />
             </DraggableWrapper>
 
@@ -138,13 +145,11 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                         startPoint: getAdjustedPosition(conn.start, true),
                         endPoint: getAdjustedPosition(conn.end, false),
                         startBlockType: blocks.find(b => b.id === conn.start)?.type || 'code',
-                        endBlockType: blocks.find(b => b.id === conn.end)?.type || 'code',
-                        type: (blocks.find(b => b.id === conn.start)?.type === 'code' ||
-                            blocks.find(b => b.id === conn.end)?.type === 'code')
-                            ? 'codeLink' : conn.type
+                        endBlockType: blocks.find(b => b.id === conn.end)?.type || 'code'
                     }))}
                     zoomLevel={zoomLevel}
                     getBlockPosition={getBlockPosition}
+                    customization={customization.connections}
                 />
             )}
         </div>

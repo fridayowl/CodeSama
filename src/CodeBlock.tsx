@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Edit, Save, LucideIcon } from 'lucide-react';
-import customizationData from './customization.json';
 import * as LucideIcons from 'lucide-react';
 
 interface CodeBlockProps {
     id: string;
-    type: 'class' | 'function' | 'code';  // Added type prop
+    type: 'class' | 'function' | 'code';
     name: string;
     location: string;
     author: string;
@@ -14,13 +13,14 @@ interface CodeBlockProps {
     onVisibilityChange: (id: string, isVisible: boolean) => void;
     onCodeChange?: (id: string, newCode: string) => void;
     isStandalone?: boolean;
+    customization: any;
 }
 
 type IconName = keyof typeof LucideIcons;
 
 const CodeBlock: React.FC<CodeBlockProps> = ({
     id,
-    type,  // Added type to destructuring
+    type,
     name,
     location,
     author,
@@ -28,13 +28,14 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
     code,
     onVisibilityChange,
     onCodeChange,
-    isStandalone = false
+    isStandalone = false,
+    customization
 }) => {
     const [isVisible, setIsVisible] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [currentCode, setCurrentCode] = useState(code);
 
-    const blockStyle = customizationData.blocks[type];  // Use type to get correct style
+    const blockStyle = customization.blocks[type];
     const IconComponent = (LucideIcons[blockStyle.icon as IconName] || LucideIcons.File) as LucideIcon;
 
     const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -100,18 +101,27 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
                             <textarea
                                 value={currentCode}
                                 onChange={handleCodeChange}
-                                className="w-full p-2 border rounded font-mono text-sm bg-white text-gray-800"
+                                className="w-full p-2 border rounded font-mono text-sm"
                                 rows={currentCode.split('\n').length}
+                                style={{
+                                    backgroundColor: customization.ide.backgroundColor,
+                                    color: customization.ide.textColor
+                                }}
                             />
                             <button
                                 onClick={handleSave}
-                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                className="mt-2 px-4 py-2 text-white rounded hover:bg-opacity-80"
+                                style={{ backgroundColor: customization.ide.highlightColor }}
                             >
                                 Save
                             </button>
                         </>
                     ) : (
-                        <pre className="w-full p-2 border rounded bg-white overflow-auto font-mono text-sm text-gray-800">
+                        <pre className="w-full p-2 border rounded overflow-auto font-mono text-sm"
+                            style={{
+                                backgroundColor: customization.ide.backgroundColor,
+                                color: customization.ide.textColor
+                            }}>
                             {currentCode}
                         </pre>
                     )}
