@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { ZoomIn, ZoomOut, RotateCcw, Upload } from 'lucide-react';
 import CanvasGrid from './CanvasGrid';
 import { generateJsonFromPythonFile } from './fileProcessor';
 
@@ -50,6 +50,8 @@ const DesignCanvas: React.FC = () => {
     const [canvasSize, setCanvasSize] = useState({ width: 3000, height: 2000 });
     const [idePosition, setIdePosition] = useState({ x: 20, y: 20 });
     const [refreshKey, setRefreshKey] = useState(0);
+    const [autoZoom, setAutoZoom] = useState(true);
+    const canvasRef = useRef<HTMLDivElement>(null);
 
     const loadFile = useCallback(async (content: string) => {
         try {
@@ -59,7 +61,7 @@ const DesignCanvas: React.FC = () => {
                 let x, y;
                 if (block.type === 'class') {
                     x = 700;
-                    y = 100 + index * 250; // Increased vertical spacing
+                    y = 100 + index * 250;
                 } else if (block.type === 'function') {
                     const parentClass = jsonData.find(b => b.type === 'class' && b.code.includes(`def ${block.name}(`));
                     if (parentClass) {
@@ -212,44 +214,112 @@ const DesignCanvas: React.FC = () => {
     };
 
     const handleZoomOut = () => {
-        setZoomLevel(prevZoom => {
-            const newZoom = Math.max(prevZoom - 0.1, 0.2);
-            if (newZoom < prevZoom) {
-                setCanvasSize(prev => ({
-                    width: prev.width * (prevZoom / newZoom),
-                    height: prev.height * (prevZoom / newZoom)
-                }));
-            }
-            return newZoom;
-        });
+        setZoomLevel(prevZoom => Math.max(prevZoom - 0.1, 0.2));
     };
 
     const handleZoomReset = () => {
         setZoomLevel(1);
-        setCanvasSize({ width: 3000, height: 2000 });
+    };
+
+    const calculateBoundingBox = useCallback(() => {
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        blocks.forEach(block => {
+            minX = Math.min(minX, block.x);
+            minY = Math.min(minY, block.y);
+            maxX = Math.max(maxX, block.x + 200);
+            maxY = Math.max(maxY, block.y + 100);
+        });
+        return { minX, minY, maxX, maxY };
+    }, [blocks]);
+
+    const adjustZoom = useCallback(() => {
+        if (!canvasRef.current) return;
+
+        if (blocks.length === 0) {
+            setZoomLevel(1);
+            const { clientWidth, clientHeight } = canvasRef.current;
+            setCanvasSize({ width: clientWidth, height: clientHeight });
+            return;
+        }
+
+        if (!autoZoom) return;
+
+        const { minX, minY, maxX, maxY } = calculateBoundingBox();
+        const canvasWidth = canvasRef.current.clientWidth;
+        const canvasHeight = canvasRef.current.clientHeight;
+
+        const contentWidth = maxX - minX;
+        const contentHeight = maxY - minY;
+
+        const horizontalScale = canvasWidth / contentWidth;
+        const verticalScale = canvasHeight / contentHeight;
+
+        const newZoom = Math.min(horizontalScale, verticalScale, 1) * 0.9;
+
+        setZoomLevel(newZoom);
+        setCanvasSize({
+            width: Math.max(contentWidth / newZoom, canvasWidth / newZoom),
+            height: Math.max(contentHeight / newZoom, canvasHeight / newZoom)
+        });
+    }, [blocks, autoZoom, calculateBoundingBox]);
+
+    useEffect(() => {
+        adjustZoom();
+    }, [blocks, adjustZoom]);
+
+    const toggleAutoZoom = () => {
+        setAutoZoom(!autoZoom);
     };
 
     return (
         <div className="w-full h-screen p-4">
-            <input type="file" onChange={handleFileChange} accept=".py" className="mb-4" />
-
-            <div className="flex items-center mb-4">
-                <button onClick={handleZoomIn} className="mr-2 p-2 bg-blue-500 text-white rounded hover:bg-blue-600" title="Zoom In">
+            <div className="flex items-center mb-4 space-x-2">
+                <button onClick={handleZoomIn} className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600" title="Zoom In">
                     <ZoomIn size={20} />
                 </button>
-                <button onClick={handleZoomOut} className="mr-2 p-2 bg-blue-500 text-white rounded hover:bg-blue-600" title="Zoom Out">
+                <button onClick={handleZoomOut} className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600" title="Zoom Out">
                     <ZoomOut size={20} />
                 </button>
-                <button onClick={handleZoomReset} className="mr-2 p-2 bg-green-500 text-white rounded hover:bg-green-600" title="Reset Zoom">
+                <button onClick={handleZoomReset} className="p-2 bg-green-500 text-white rounded hover:bg-green-600" title="Reset Zoom">
                     <RotateCcw size={20} />
                 </button>
-                <span className="ml-4">Zoom: {Math.round(zoomLevel * 100)}%</span>
+                <button
+                    onClick={toggleAutoZoom}
+                    className={`p-2 rounded ${autoZoom ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-gray-300 hover:bg-gray-400'}`}
+                    title={autoZoom ? "Disable Auto-Zoom" : "Enable Auto-Zoom"}
+                >
+                    Auto
+                </button>
+                <span className="ml-2">Zoom: {Math.round(zoomLevel * 100)}%</span>
+                <div className="relative">
+                    <input
+                        type="file"
+                        onChange={handleFileChange}
+                        accept=".py"
+                        className="hidden"
+                        id="file-upload"
+                    />
+                    <label
+                        htmlFor="file-upload"
+                        className="flex items-center px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 cursor-pointer"
+                    >
+                        <Upload size={20} className="mr-2" />
+                        {fileName || "Choose file"}
+                    </label>
+                </div>
             </div>
 
-            <div className="overflow-auto" style={{
-                width: '100%',
-                height: 'calc(100vh - 150px)',
-            }}>
+            <div
+                ref={canvasRef}
+                className="overflow-auto"
+                style={{
+                    width: '100%',
+                    height: 'calc(100vh - 150px)',
+                    backgroundImage: `linear-gradient(to right, #f0f0f0 1px, transparent 1px),
+                                       linear-gradient(to bottom, #f0f0f0 1px, transparent 1px)`,
+                    backgroundSize: `${20 * zoomLevel}px ${20 * zoomLevel}px`,
+                }}
+            >
                 <div style={{
                     transform: `scale(${zoomLevel})`,
                     transformOrigin: 'top left',

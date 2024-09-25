@@ -1,11 +1,14 @@
 import React from 'react';
+import NavBarMinimal from './NavBar';
 import DesignCanvas from './DesignCanvas';
 
 function App() {
   return (
-    <div className="App">
-      <h1 className="text-3xl font-bold text-center py-4">CodeSama</h1>
-      <DesignCanvas />
+    <div className="App flex flex-col h-screen">
+      <NavBarMinimal />
+      <main className="flex-grow overflow-hidden">
+        <DesignCanvas />
+      </main>
     </div>
   );
 }
