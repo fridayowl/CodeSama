@@ -1,11 +1,11 @@
 import { BlockData } from './fileProcessor';
 
-export function identifyCodeBlocks(fileContent: string, classes: BlockData[], functions: BlockData[]): BlockData[] {
+export function identifyCodeBlocks(fileContent: string): BlockData[] {
     const lines = fileContent.split('\n');
     const codeBlocks: BlockData[] = [];
     let currentBlock: BlockData | null = null;
-    let insideClassOrFunction = false;
-    let classOrFunctionIndentation: number | null = null;
+    let insideClass = false;
+    let classIndentation: number | null = null;
 
     // Helper function to determine the indentation level of a line
     const getIndentationLevel = (line: string): number => line.match(/^\s*/)?.[0]?.length || 0;
@@ -16,7 +16,14 @@ export function identifyCodeBlocks(fileContent: string, classes: BlockData[], fu
 
         // Skip empty lines and comments
         if (!trimmedLine || trimmedLine.startsWith('#')) {
-            // If we're in the middle of collecting a code block, finish it when we hit a comment or blank line
+            return;
+        }
+
+        // Check if the current line starts a class
+        if (trimmedLine.startsWith('class ')) {
+            insideClass = true;
+            classIndentation = currentIndentation;
+            // Close any existing standalone code block before entering a class
             if (currentBlock) {
                 codeBlocks.push(currentBlock);
                 currentBlock = null;
@@ -24,28 +31,14 @@ export function identifyCodeBlocks(fileContent: string, classes: BlockData[], fu
             return;
         }
 
-        // Check if the current line is starting a class or function
-        if (trimmedLine.startsWith('class ') || trimmedLine.startsWith('def ')) {
-            insideClassOrFunction = true;
-            classOrFunctionIndentation = currentIndentation;
-
-            // Close any existing standalone code block
-            if (currentBlock) {
-                codeBlocks.push(currentBlock);
-                currentBlock = null;
-            }
-
-            return;
+        // Detect leaving a class block based on indentation
+        if (insideClass && currentIndentation <= classIndentation!) {
+            insideClass = false;
+            classIndentation = null;
         }
 
-        // Detect leaving the current class or function block based on indentation
-        if (insideClassOrFunction && currentIndentation <= classOrFunctionIndentation!) {
-            insideClassOrFunction = false;
-            classOrFunctionIndentation = null;
-        }
-
-        // If we're not inside a class or function, this is standalone code
-        if (!insideClassOrFunction) {
+        // Only process standalone code (outside class)
+        if (!insideClass) {
             if (!currentBlock) {
                 // Start a new standalone code block
                 currentBlock = {
@@ -67,7 +60,7 @@ export function identifyCodeBlocks(fileContent: string, classes: BlockData[], fu
         }
     });
 
-    // After the loop, if we still have a current block, push it as the final block
+    // After the loop, push the last block if it exists
     if (currentBlock) {
         codeBlocks.push(currentBlock);
     }

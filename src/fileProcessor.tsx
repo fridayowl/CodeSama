@@ -25,7 +25,7 @@ export interface ConnectionData {
 export async function generateJsonFromPythonFile(fileContent: string): Promise<BlockData[]> {
     const classes = identifyClasses(fileContent);
     const functions = identifyFunctionsAndConnections(fileContent, classes);
-    const codeBlocks = identifyCodeBlocks(fileContent, classes, functions);
+    const codeBlocks = identifyCodeBlocks(fileContent );
 
     return [...classes, ...functions, ...codeBlocks];
 }
