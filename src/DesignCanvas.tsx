@@ -82,8 +82,8 @@ const DesignCanvas: React.FC = () => {
                         } as ExtendedBlockData;
                     }
                 } else if (block.type === 'code') {
-                    x = 1500;
-                    y = 100 + index * 200;
+                    x = 700;
+                    y = 150 + index *150;
                 }
 
                 return { ...block, x, y } as ExtendedBlockData;
@@ -107,7 +107,7 @@ const DesignCanvas: React.FC = () => {
         const classBlocks = blocks.filter(block => block.type === 'class');
         const functionBlocks = blocks.filter(block => block.type === 'function');
         const codeBlocks = blocks.filter(block => block.type === 'code');
-
+        console.log(codeBlocks)
         classBlocks.forEach(classBlock => {
             functionBlocks.forEach(functionBlock => {
                 if (functionBlock.id.startsWith(`${classBlock.name}_`)) {

@@ -49,7 +49,7 @@ export function identifyCodeBlocks(fileContent: string): BlockData[] {
                     author: 'File author',
                     fileType: 'Python',
                     code: line,
-                    x: 400,
+                    x: 900,
                     y: 100 + codeBlocks.length * 100,
                     connections: []
                 };
