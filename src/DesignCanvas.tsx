@@ -282,6 +282,7 @@ const DesignCanvas: React.FC = () => {
         localStorage.setItem('customization', JSON.stringify(newCustomization));
     };
 
+
     return (
         <div className="w-full h-screen p-4">
             <div className="flex justify-between items-center mb-4">

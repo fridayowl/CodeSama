@@ -41,7 +41,7 @@ Version 2.3 Connecting ide with flow blocks-
 
 Working 
 
-Version 2.4 Smoothing and Customizaton -
+Version 2.4 Smoothing IDE  and Connection  and Customizaton -
         single file  
         -Changing code block connection color  @done
         -Making the positions more ordered 
