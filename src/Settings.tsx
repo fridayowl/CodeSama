@@ -30,7 +30,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
             <span>{label}</span>
             <input
                 type="color"
-                value={customization?.[category]?.[type]?.[property] || '#ffffff'}  // Provide a default value if undefined
+                value={customization?.[category]?.[type]?.[property] || '#ffffff'}
                 onChange={(e) => handleColorChange(category, type, property, e.target.value)}
                 className="w-8 h-8 rounded cursor-pointer"
             />
@@ -48,7 +48,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
                 </div>
 
                 <h3 className="font-semibold mb-2">Blocks</h3>
-                {['class', 'function', 'code'].map(type => (
+                {['class', 'function', 'code', 'sample'].map(type => (
                     <div key={type} className="mb-4">
                         <h4 className="font-medium capitalize mb-2">{type}</h4>
                         {renderColorPicker('blocks', type, 'backgroundColor', 'Background')}
@@ -68,7 +68,25 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
                 <h3 className="font-semibold mb-2 mt-4">Canvas</h3>
                 {renderColorPicker('canvas', 'canvas', 'backgroundColor', 'Background')}
                 {renderColorPicker('canvas', 'canvas', 'gridColor', 'Grid Color')}
-                {/* Skip non-color properties like gridSpacing */}
+
+                <div className="flex items-center justify-between mb-2">
+                    <span>Grid Spacing</span>
+                    <input
+                        type="number"
+                        value={customization.canvas.gridSpacing}
+                        onChange={(e) => {
+                            const newCustomization = {
+                                ...customization,
+                                canvas: {
+                                    ...customization.canvas,
+                                    gridSpacing: parseInt(e.target.value, 10)
+                                }
+                            };
+                            onCustomizationChange(newCustomization);
+                        }}
+                        className="w-16 p-1 border rounded"
+                    />
+                </div>
 
                 <h3 className="font-semibold mb-2 mt-4">IDE</h3>
                 {renderColorPicker('ide', 'ide', 'backgroundColor', 'Background')}

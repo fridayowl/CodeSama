@@ -1,22 +1,10 @@
 import React from 'react';
 import { GitFork, Package, ArrowUpRight, Layers, FileCode2, LucideIcon } from 'lucide-react';
+import { Connection } from './DesignCanvas';
 
 interface Point {
     x: number;
     y: number;
-}
-
-interface Connection {
-    id: string;
-    start: string;
-    end: string;
-    startPoint: Point;
-    endPoint: Point;
-    type: 'inherits' | 'composes' | 'uses' | 'contains' | 'codeLink';
-    fromConnector: string;
-    toConnector: string;
-    startBlockType: 'class' | 'function' | 'code';
-    endBlockType: 'class' | 'function' | 'code';
 }
 
 interface ConnectionsProps {

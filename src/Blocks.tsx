@@ -28,11 +28,13 @@ const PythonCodeEditor: React.FC<{ code: string; onChange: (code: string) => voi
         onChange(newCode);
     };
 
+    const ideStyle = customization?.ide || {};
+
     return (
-        <div className="relative font-mono text-sm border rounded overflow-hidden" style={{ backgroundColor: customization.ide.backgroundColor }}>
-            <div className="absolute left-0 top-0 bottom-0 p-2 pr-4 text-right select-none" style={{ backgroundColor: customization.ide.lineNumbersColor }}>
+        <div className="relative font-mono text-sm border rounded overflow-hidden" style={{ backgroundColor: ideStyle.backgroundColor || '#f0f0f0' }}>
+            <div className="absolute left-0 top-0 bottom-0 p-2 pr-4 text-right select-none" style={{ backgroundColor: ideStyle.lineNumbersColor || '#e0e0e0' }}>
                 {lines.map((_, i) => (
-                    <div key={i} style={{ color: customization.ide.textColor }}>
+                    <div key={i} style={{ color: ideStyle.textColor || '#000000' }}>
                         {i + 1}
                     </div>
                 ))}
@@ -48,7 +50,7 @@ const PythonCodeEditor: React.FC<{ code: string; onChange: (code: string) => voi
                     minHeight: '3em',
                     overflowX: 'auto',
                     whiteSpace: 'pre',
-                    color: customization.ide.textColor,
+                    color: ideStyle.textColor || '#000000',
                 }}
                 spellCheck={false}
             />
@@ -56,7 +58,7 @@ const PythonCodeEditor: React.FC<{ code: string; onChange: (code: string) => voi
     );
 };
 
-const PythonBlock: React.FC<BlockProps & { type: 'class' | 'function' }> = ({
+const PythonBlock: React.FC<BlockProps & { type: 'class' | 'function' | 'sample' }> = ({
     id, name, location, author, fileType, code, onVisibilityChange, type, customization
 }) => {
     const [isVisible, setIsVisible] = useState(true);
@@ -77,10 +79,12 @@ const PythonBlock: React.FC<BlockProps & { type: 'class' | 'function' }> = ({
         onVisibilityChange(id, newVisibility);
     };
 
-    const blockStyle = customization.blocks[type];
+    // Safely access customization properties
+    const blockStyle = customization?.blocks?.[type] || {};
+    const ideStyle = customization?.ide || {};
 
     return (
-        <div className="w-full max-w-3xl p-4 rounded-lg shadow-md" style={{ backgroundColor: blockStyle.backgroundColor, color: blockStyle.textColor }}>
+        <div className="w-full max-w-3xl p-4 rounded-lg shadow-md" style={{ backgroundColor: blockStyle.backgroundColor || '#ffffff', color: blockStyle.textColor || '#000000' }}>
             <div className="flex justify-between items-center mb-2">
                 <h3 className="font-bold text-lg">{name}</h3>
                 <div>
@@ -125,8 +129,8 @@ const PythonBlock: React.FC<BlockProps & { type: 'class' | 'function' }> = ({
                                 height: `${currentCode.split('\n').length * 1.5}em`,
                                 minHeight: '3em',
                                 whiteSpace: 'pre',
-                                backgroundColor: customization.ide.backgroundColor,
-                                color: customization.ide.textColor,
+                                backgroundColor: ideStyle.backgroundColor || '#f0f0f0',
+                                color: ideStyle.textColor || '#000000',
                             }}
                         >
                             {currentCode}
@@ -140,3 +144,10 @@ const PythonBlock: React.FC<BlockProps & { type: 'class' | 'function' }> = ({
 
 export const ClassBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="class" />;
 export const FunctionBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="function" />;
+export const SampleBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="sample" />;
+
+export default {
+    ClassBlock,
+    FunctionBlock,
+    SampleBlock,
+};

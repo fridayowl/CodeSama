@@ -1,7 +1,7 @@
 import React from 'react';
 import DraggableWrapper from './DraggableWrapper';
 import Connections from './Connections';
-import { ClassBlock, FunctionBlock } from './Blocks';
+import { ClassBlock, FunctionBlock, SampleBlock } from './Blocks';
 import CodeBlock from './CodeBlock';
 import PythonIDE from './PythonIDE';
 import { ExtendedBlockData, Connection } from './DesignCanvas';
@@ -66,6 +66,32 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
         return { x: isStart ? x : x + width, y: y + height / 2 };
     };
 
+    // Find the first class block to use as the source for the sample block connection
+    const sourceClassBlock = blocks.find(block => block.type === 'class');
+
+    // Update connections for the sample block
+    const updatedConnections: Connection[] = getVisibleConnections().map(conn => {
+        if (conn.start === 'python-ide' && blocks.find(b => b.id === conn.end)?.type === 'sample') {
+            return {
+                ...conn,
+                start: sourceClassBlock ? sourceClassBlock.id : 'python-ide',
+                startPoint: sourceClassBlock
+                    ? getAdjustedPosition(sourceClassBlock.id, true)
+                    : getAdjustedPosition('python-ide', true),
+                type: 'uses',
+                startBlockType: sourceClassBlock ? 'class' : 'code',
+                endBlockType: 'sample'
+            };
+        }
+        return {
+            ...conn,
+            startPoint: getAdjustedPosition(conn.start, true),
+            endPoint: getAdjustedPosition(conn.end, false),
+            startBlockType: (blocks.find(b => b.id === conn.start)?.type || 'code') as Connection['startBlockType'],
+            endBlockType: (blocks.find(b => b.id === conn.end)?.type || 'code') as Connection['endBlockType']
+        };
+    });
+
     return (
         <div className="relative w-full h-full" style={{
             backgroundImage: `linear-gradient(to right, ${customization.canvas.gridColor} 1px, transparent 1px),
@@ -105,6 +131,17 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                             onVisibilityChange={() => { }}
                             customization={customization}
                         />
+                    ) : item.type === 'sample' ? (
+                        <SampleBlock
+                            id={item.id}
+                            name={item.name}
+                            location={item.location}
+                            author={item.author}
+                            fileType={item.fileType}
+                            code={item.code}
+                            onVisibilityChange={onVisibilityChange}
+                            customization={customization}
+                        />
                     ) : (
                         <CodeBlock
                             id={item.id}
@@ -140,13 +177,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
 
             {isFlowVisible && (
                 <Connections
-                    connections={getVisibleConnections().map(conn => ({
-                        ...conn,
-                        startPoint: getAdjustedPosition(conn.start, true),
-                        endPoint: getAdjustedPosition(conn.end, false),
-                        startBlockType: blocks.find(b => b.id === conn.start)?.type || 'code',
-                        endBlockType: blocks.find(b => b.id === conn.end)?.type || 'code'
-                    }))}
+                    connections={updatedConnections}
                     zoomLevel={zoomLevel}
                     getBlockPosition={getBlockPosition}
                     customization={customization.connections}

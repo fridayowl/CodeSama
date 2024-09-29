@@ -7,7 +7,7 @@ import defaultCustomization from './customization.json';
 
 export interface BlockData {
     id: string;
-    type: 'class' | 'function' | 'code';
+    type: 'class' | 'function' | 'code' | 'sample';
     name: string;
     location: string;
     author: string;
@@ -35,9 +35,11 @@ export interface Connection {
     end: string;
     startPoint: { x: number; y: number };
     endPoint: { x: number; y: number };
-    type: 'inherits' | 'composes' | 'uses' | 'contains';
+    type: 'inherits' | 'composes' | 'uses' | 'contains' | 'codeLink';
     fromConnector: string;
     toConnector: string;
+    startBlockType: 'class' | 'function' | 'code' | 'sample';
+    endBlockType: 'class' | 'function' | 'code' | 'sample';
 }
 
 const DesignCanvas: React.FC = () => {
@@ -83,13 +85,27 @@ const DesignCanvas: React.FC = () => {
                     }
                 } else if (block.type === 'code') {
                     x = 700;
-                    y = 150 + index *150;
+                    y = 150 + index * 150;
                 }
 
                 return { ...block, x, y } as ExtendedBlockData;
             });
 
-            setBlocks(modifiedBlocks);
+            // Add a sample block with dummy values
+            const sampleBlock: ExtendedBlockData = {
+                id: 'sampleBlock1',
+                type: 'sample',
+                name: 'Sample Block',
+                location: 'Sample Location',
+                author: 'Sample Author',
+                fileType: 'Python',
+                code: 'def sample_function():\n    print("This is a sample function")\n\nsample_function()',
+                x: 300,
+                y: 300,
+                connections: []
+            };
+
+            setBlocks([...modifiedBlocks, sampleBlock]);
             setRefreshKey(prevKey => prevKey + 1);
         } catch (error) {
             console.error('Error processing file:', error);
@@ -107,7 +123,8 @@ const DesignCanvas: React.FC = () => {
         const classBlocks = blocks.filter(block => block.type === 'class');
         const functionBlocks = blocks.filter(block => block.type === 'function');
         const codeBlocks = blocks.filter(block => block.type === 'code');
-        console.log(codeBlocks)
+        const sampleBlocks = blocks.filter(block => block.type === 'sample');
+
         classBlocks.forEach(classBlock => {
             functionBlocks.forEach(functionBlock => {
                 if (functionBlock.id.startsWith(`${classBlock.name}_`)) {
@@ -119,7 +136,9 @@ const DesignCanvas: React.FC = () => {
                         endPoint: { x: functionBlock.x, y: functionBlock.y + 50 },
                         type: 'contains',
                         fromConnector: 'method',
-                        toConnector: 'input'
+                        toConnector: 'input',
+                        startBlockType: 'class',
+                        endBlockType: 'function'
                     });
                 }
             });
@@ -132,7 +151,9 @@ const DesignCanvas: React.FC = () => {
                 endPoint: { x: classBlock.x, y: classBlock.y + 50 },
                 type: 'uses',
                 fromConnector: 'output',
-                toConnector: 'input'
+                toConnector: 'input',
+                startBlockType: 'code',
+                endBlockType: 'class'
             });
         });
 
@@ -145,7 +166,28 @@ const DesignCanvas: React.FC = () => {
                 endPoint: { x: codeBlock.x, y: codeBlock.y + 50 },
                 type: 'uses',
                 fromConnector: 'output',
-                toConnector: 'input'
+                toConnector: 'input',
+                startBlockType: 'code',
+                endBlockType: 'code'
+            });
+        });
+
+        // Connect sample block to the first class block if it exists, otherwise to Python IDE
+        const firstClassBlock = classBlocks[0];
+        sampleBlocks.forEach(sampleBlock => {
+            newConnections.push({
+                id: `${firstClassBlock ? firstClassBlock.id : 'IDE'}-${sampleBlock.id}`,
+                start: firstClassBlock ? firstClassBlock.id : 'python-ide',
+                end: sampleBlock.id,
+                startPoint: firstClassBlock
+                    ? { x: firstClassBlock.x + 200, y: firstClassBlock.y + 50 }
+                    : { x: idePosition.x + 600, y: idePosition.y + 30 },
+                endPoint: { x: sampleBlock.x, y: sampleBlock.y + 50 },
+                type: 'uses',
+                fromConnector: 'output',
+                toConnector: 'input',
+                startBlockType: firstClassBlock ? 'class' : 'code',
+                endBlockType: 'sample'
             });
         });
 
@@ -198,7 +240,7 @@ const DesignCanvas: React.FC = () => {
 
     const getVisibleBlocks = useCallback(() => {
         return blocks.filter(block => {
-            if (block.type === 'class' || block.type === 'code') return true;
+            if (block.type === 'class' || block.type === 'code' || block.type === 'sample') return true;
             const parentClass = blocks.find(b => b.type === 'class' && block.id.startsWith(`${b.name}_`));
             return parentClass ? classVisibility[parentClass.id] !== false : true;
         });
@@ -281,7 +323,6 @@ const DesignCanvas: React.FC = () => {
         setCustomization(newCustomization);
         localStorage.setItem('customization', JSON.stringify(newCustomization));
     };
-
 
     return (
         <div className="w-full h-screen p-4">

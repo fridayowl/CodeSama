@@ -44,12 +44,13 @@ Working
 Version 2.4 Smoothing IDE  and Connection  and Customizaton -
         single file  
         -Changing code block connection color  @done
-        -Making the positions more ordered 
-        - Fixing code block inside and out side the class 
+        -Making the positions more ordered  @done
+        - Fixing code block out side the class  @done
         -Making a json file for the customising each connectors color and functionality   @done
         Bugs to fix : 
             -Ide focus out when the text changes 
-            - customization not working for ide and canvas
+            - customization not working for ide @done 
+            - customization not workign for canvas 
             -Zoom in and Zoom out automaticaly when the file loads(or something better @done
         Bugs Identified  :  
 
