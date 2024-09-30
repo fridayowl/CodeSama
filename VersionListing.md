@@ -39,7 +39,7 @@ Version 2.3 Connecting ide with flow blocks-
         Bugs Identified  : 
             Fixing ide focus out  
 
-Working 
+
 
 Version 2.4 Smoothing IDE  and Connection  and Customizaton -
         single file  
@@ -50,12 +50,18 @@ Version 2.4 Smoothing IDE  and Connection  and Customizaton -
         Bugs to fix : 
             -Ide focus out when the text changes 
             - customization not working for ide @done 
-            - customization not workign for canvas 
             -Zoom in and Zoom out automaticaly when the file loads(or something better @done
         Bugs Identified  :  
+            -customization not workign for canvas @moved to next verion
 
 
-
+working 2.5 : Improvment on the blocks creation and program strucuturing 
+        Single file  
+        - Identifing standalone codes inside  the class 
+        - Imporove setting pannel UI 
+        Bugs to fix : 
+            -Fix standalone functions not connecting with ide 
+            - Fix customization not working for the canvas 
 
 
 
