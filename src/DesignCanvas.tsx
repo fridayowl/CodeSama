@@ -99,8 +99,8 @@ const DesignCanvas: React.FC = () => {
                 author: 'Sample Author',
                 fileType: 'Python',
                 code: 'class SampleClass:\n    def sample_method(self):\n        print("This is a sample method")\n\nsample = SampleClass()\nsample.sample_method()',
-                x: 300,
-                y: 300,
+                x: 1500,
+                y: modifiedBlocks.length * 150,
                 connections: []
             };
 
