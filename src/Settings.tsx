@@ -48,9 +48,12 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
                 </div>
 
                 <h3 className="font-semibold mb-2">Blocks</h3>
-                {['class', 'function', 'code', 'sample'].map(type => (
+                {['class', 'class_function', 'code', 'class_standalone'].map(type => (
                     <div key={type} className="mb-4">
-                        <h4 className="font-medium capitalize mb-2">{type}</h4>
+                        <h4 className="font-medium capitalize mb-2">
+                            {type === 'class_function' ? 'Function' :
+                                type === 'class_standalone' ? 'Standalone Class' : type}
+                        </h4>
                         {renderColorPicker('blocks', type, 'backgroundColor', 'Background')}
                         {renderColorPicker('blocks', type, 'borderColor', 'Border')}
                         {renderColorPicker('blocks', type, 'textColor', 'Text')}

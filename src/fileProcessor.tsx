@@ -4,7 +4,7 @@ import { identifyCodeBlocks } from './codeBlockIdentifier';
 
 export interface BlockData {
     id: string;
-    type: 'class' | 'function' | 'code';
+    type: 'class' | 'class_function' | 'code' | 'class_standalone';
     name: string;
     location: string;
     author: string;
@@ -25,7 +25,7 @@ export interface ConnectionData {
 export async function generateJsonFromPythonFile(fileContent: string): Promise<BlockData[]> {
     const classes = identifyClasses(fileContent);
     const functions = identifyFunctionsAndConnections(fileContent, classes);
-    const codeBlocks = identifyCodeBlocks(fileContent );
+    const codeBlocks = identifyCodeBlocks(fileContent);
 
     return [...classes, ...functions, ...codeBlocks];
 }

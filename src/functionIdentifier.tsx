@@ -15,12 +15,11 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
                 functions.push(currentFunction);
             }
 
-            // Fix: Use a regular expression to capture the full function name
             const functionNameMatch = trimmedLine.match(/def\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/);
             const name = functionNameMatch ? functionNameMatch[1] : 'Unknown';
             currentFunction = {
                 id: `${name}Function`,
-                type: 'function',
+                type: 'class_function',
                 name,
                 location: 'Uploaded file',
                 author: 'File author',

@@ -5,7 +5,7 @@
       "borderColor": "#1E88E5",
       "textColor": "#0D47A1"
     },
-    "function": {
+    "class_function": {
       "backgroundColor": "#E8F5E9",
       "borderColor": "#43A047",
       "textColor": "#1B5E20"
@@ -14,23 +14,33 @@
       "backgroundColor": "#FFF3E0",
       "borderColor": "#FB8C00",
       "textColor": "#E65100"
+    },
+    "class_standalone": {
+      "backgroundColor": "#F3E5F5",
+      "borderColor": "#8E24AA",
+      "textColor": "#4A148C"
     }
   },
   "connections": {
     "inherits": {
-      "lineColor": "#3B82F6"
+      "lineColor": "#3B82F6",
+      "arrowHead": "triangle"
     },
     "composes": {
-      "lineColor": "#10B981"
+      "lineColor": "#10B981",
+      "arrowHead": "diamond"
     },
     "uses": {
-      "lineColor": "#8B5CF6"
+      "lineColor": "#8B5CF6",
+      "arrowHead": "arrow"
     },
     "contains": {
-      "lineColor": "#F59E0B"
+      "lineColor": "#F59E0B",
+      "arrowHead": "circle"
     },
     "codeLink": {
-      "lineColor": "#F97316"
+      "lineColor": "#F97316",
+      "arrowHead": "arrow"
     }
   },
   "canvas": {

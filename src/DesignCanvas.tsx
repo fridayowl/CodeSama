@@ -7,7 +7,7 @@ import defaultCustomization from './customization.json';
 
 export interface BlockData {
     id: string;
-    type: 'class' | 'function' | 'code' | 'sample';
+    type: 'class' | 'class_function' | 'code' | 'class_standalone';
     name: string;
     location: string;
     author: string;
@@ -38,8 +38,8 @@ export interface Connection {
     type: 'inherits' | 'composes' | 'uses' | 'contains' | 'codeLink';
     fromConnector: string;
     toConnector: string;
-    startBlockType: 'class' | 'function' | 'code' | 'sample';
-    endBlockType: 'class' | 'function' | 'code' | 'sample';
+    startBlockType: 'class' | 'class_function' | 'code' | 'class_standalone';
+    endBlockType: 'class' | 'class_function' | 'code' | 'class_standalone';
 }
 
 const DesignCanvas: React.FC = () => {
@@ -70,7 +70,7 @@ const DesignCanvas: React.FC = () => {
                 if (block.type === 'class') {
                     x = 700;
                     y = 100 + index * 250;
-                } else if (block.type === 'function') {
+                } else if (block.type === 'class_function') {
                     const parentClass = jsonData.find(b => b.type === 'class' && b.code.includes(`def ${block.name}(`));
                     if (parentClass) {
                         x = 1500;
@@ -91,21 +91,20 @@ const DesignCanvas: React.FC = () => {
                 return { ...block, x, y } as ExtendedBlockData;
             });
 
-            // Add a sample block with dummy values
-            const sampleBlock: ExtendedBlockData = {
-                id: 'sampleBlock1',
-                type: 'sample',
-                name: 'Sample Block',
+            const classStandaloneBlock: ExtendedBlockData = {
+                id: 'classStandaloneBlock1',
+                type: 'class_standalone',
+                name: 'Class Standalone Block',
                 location: 'Sample Location',
                 author: 'Sample Author',
                 fileType: 'Python',
-                code: 'def sample_function():\n    print("This is a sample function")\n\nsample_function()',
+                code: 'class SampleClass:\n    def sample_method(self):\n        print("This is a sample method")\n\nsample = SampleClass()\nsample.sample_method()',
                 x: 300,
                 y: 300,
                 connections: []
             };
 
-            setBlocks([...modifiedBlocks, sampleBlock]);
+            setBlocks([...modifiedBlocks, classStandaloneBlock]);
             setRefreshKey(prevKey => prevKey + 1);
         } catch (error) {
             console.error('Error processing file:', error);
@@ -121,9 +120,9 @@ const DesignCanvas: React.FC = () => {
     const updateConnections = useCallback(() => {
         const newConnections: Connection[] = [];
         const classBlocks = blocks.filter(block => block.type === 'class');
-        const functionBlocks = blocks.filter(block => block.type === 'function');
+        const functionBlocks = blocks.filter(block => block.type === 'class_function');
         const codeBlocks = blocks.filter(block => block.type === 'code');
-        const sampleBlocks = blocks.filter(block => block.type === 'sample');
+        const classStandaloneBlocks = blocks.filter(block => block.type === 'class_standalone');
 
         classBlocks.forEach(classBlock => {
             functionBlocks.forEach(functionBlock => {
@@ -138,7 +137,7 @@ const DesignCanvas: React.FC = () => {
                         fromConnector: 'method',
                         toConnector: 'input',
                         startBlockType: 'class',
-                        endBlockType: 'function'
+                        endBlockType: 'class_function'
                     });
                 }
             });
@@ -172,22 +171,21 @@ const DesignCanvas: React.FC = () => {
             });
         });
 
-        // Connect sample block to the first class block if it exists, otherwise to Python IDE
         const firstClassBlock = classBlocks[0];
-        sampleBlocks.forEach(sampleBlock => {
+        classStandaloneBlocks.forEach(classStandaloneBlock => {
             newConnections.push({
-                id: `${firstClassBlock ? firstClassBlock.id : 'IDE'}-${sampleBlock.id}`,
+                id: `${firstClassBlock ? firstClassBlock.id : 'IDE'}-${classStandaloneBlock.id}`,
                 start: firstClassBlock ? firstClassBlock.id : 'python-ide',
-                end: sampleBlock.id,
+                end: classStandaloneBlock.id,
                 startPoint: firstClassBlock
                     ? { x: firstClassBlock.x + 200, y: firstClassBlock.y + 50 }
                     : { x: idePosition.x + 600, y: idePosition.y + 30 },
-                endPoint: { x: sampleBlock.x, y: sampleBlock.y + 50 },
+                endPoint: { x: classStandaloneBlock.x, y: classStandaloneBlock.y + 50 },
                 type: 'uses',
                 fromConnector: 'output',
                 toConnector: 'input',
                 startBlockType: firstClassBlock ? 'class' : 'code',
-                endBlockType: 'sample'
+                endBlockType: 'class_standalone'
             });
         });
 
@@ -240,7 +238,7 @@ const DesignCanvas: React.FC = () => {
 
     const getVisibleBlocks = useCallback(() => {
         return blocks.filter(block => {
-            if (block.type === 'class' || block.type === 'code' || block.type === 'sample') return true;
+            if (block.type === 'class' || block.type === 'code' || block.type === 'class_standalone') return true;
             const parentClass = blocks.find(b => b.type === 'class' && block.id.startsWith(`${b.name}_`));
             return parentClass ? classVisibility[parentClass.id] !== false : true;
         });
@@ -250,7 +248,7 @@ const DesignCanvas: React.FC = () => {
         return connections.filter(conn => {
             const startBlock = blocks.find(b => b.id === conn.start);
             const endBlock = blocks.find(b => b.id === conn.end);
-            if (startBlock?.type === 'class' && endBlock?.type === 'function') {
+            if (startBlock?.type === 'class' && endBlock?.type === 'class_function') {
                 return classVisibility[startBlock.id] !== false;
             }
             return true;

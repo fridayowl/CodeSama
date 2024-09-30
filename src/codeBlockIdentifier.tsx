@@ -65,12 +65,5 @@ export function identifyCodeBlocks(fileContent: string): BlockData[] {
         codeBlocks.push(currentBlock);
     }
 
-    // Log the results
-    if (codeBlocks.length > 0) {
-        console.log("Standalone code blocks found:", codeBlocks);
-    } else {
-        console.log("No standalone code blocks found");
-    }
-
     return codeBlocks;
 }

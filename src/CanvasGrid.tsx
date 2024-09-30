@@ -1,8 +1,7 @@
 import React from 'react';
 import DraggableWrapper from './DraggableWrapper';
 import Connections from './Connections';
-import { ClassBlock, FunctionBlock, SampleBlock } from './Blocks';
-import CodeBlock from './CodeBlock';
+import { ClassBlock, FunctionBlock, ClassStandaloneBlock, CodeBlock } from './Blocks';
 import PythonIDE from './PythonIDE';
 import { ExtendedBlockData, Connection } from './DesignCanvas';
 
@@ -66,12 +65,10 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
         return { x: isStart ? x : x + width, y: y + height / 2 };
     };
 
-    // Find the first class block to use as the source for the sample block connection
     const sourceClassBlock = blocks.find(block => block.type === 'class');
 
-    // Update connections for the sample block
     const updatedConnections: Connection[] = getVisibleConnections().map(conn => {
-        if (conn.start === 'python-ide' && blocks.find(b => b.id === conn.end)?.type === 'sample') {
+        if (conn.start === 'python-ide' && blocks.find(b => b.id === conn.end)?.type === 'class_standalone') {
             return {
                 ...conn,
                 start: sourceClassBlock ? sourceClassBlock.id : 'python-ide',
@@ -80,7 +77,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                     : getAdjustedPosition('python-ide', true),
                 type: 'uses',
                 startBlockType: sourceClassBlock ? 'class' : 'code',
-                endBlockType: 'sample'
+                endBlockType: 'class_standalone'
             };
         }
         return {
@@ -109,7 +106,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                     title={item.name}
                     zoomLevel={zoomLevel}
                 >
-                    {item.type === 'class' ? (
+                    {item.type === 'class' && (
                         <ClassBlock
                             id={item.id}
                             name={item.name}
@@ -120,7 +117,8 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                             onVisibilityChange={onVisibilityChange}
                             customization={customization}
                         />
-                    ) : item.type === 'function' ? (
+                    )}
+                    {item.type === 'class_function' && (
                         <FunctionBlock
                             id={item.id}
                             name={item.name}
@@ -131,8 +129,9 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                             onVisibilityChange={() => { }}
                             customization={customization}
                         />
-                    ) : item.type === 'sample' ? (
-                        <SampleBlock
+                    )}
+                    {item.type === 'class_standalone' && (
+                        <ClassStandaloneBlock
                             id={item.id}
                             name={item.name}
                             location={item.location}
@@ -142,10 +141,10 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                             onVisibilityChange={onVisibilityChange}
                             customization={customization}
                         />
-                    ) : (
+                    )}
+                    {item.type === 'code' && (
                         <CodeBlock
                             id={item.id}
-                            type={item.type}
                             name={item.name}
                             location={item.location}
                             author={item.author}

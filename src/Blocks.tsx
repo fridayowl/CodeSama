@@ -58,12 +58,13 @@ const PythonCodeEditor: React.FC<{ code: string; onChange: (code: string) => voi
     );
 };
 
-const PythonBlock: React.FC<BlockProps & { type: 'class' | 'function' | 'sample' }> = ({
+const PythonBlock: React.FC<BlockProps & { type: 'class' | 'class_function' | 'code' | 'class_standalone' }> = ({
     id, name, location, author, fileType, code, onVisibilityChange, type, customization
 }) => {
     const [isVisible, setIsVisible] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [currentCode, setCurrentCode] = useState(code);
+
     const handleCodeChange = (newCode: string) => {
         setCurrentCode(newCode);
     };
@@ -79,12 +80,18 @@ const PythonBlock: React.FC<BlockProps & { type: 'class' | 'function' | 'sample'
         onVisibilityChange(id, newVisibility);
     };
 
-    // Safely access customization properties
     const blockStyle = customization?.blocks?.[type] || {};
     const ideStyle = customization?.ide || {};
 
     return (
-        <div className="w-full max-w-3xl p-4 rounded-lg shadow-md" style={{ backgroundColor: blockStyle.backgroundColor || '#ffffff', color: blockStyle.textColor || '#000000' }}>
+        <div className="w-full max-w-3xl p-4 rounded-lg shadow-md"
+            style={{
+                backgroundColor: blockStyle.backgroundColor || '#ffffff',
+                color: blockStyle.textColor || '#000000',
+                borderColor: blockStyle.borderColor || '#000000',
+                borderWidth: '2px',
+                borderStyle: 'solid'
+            }}>
             <div className="flex justify-between items-center mb-2">
                 <h3 className="font-bold text-lg">{name}</h3>
                 <div>
@@ -104,7 +111,7 @@ const PythonBlock: React.FC<BlockProps & { type: 'class' | 'function' | 'sample'
                     </button>
                 </div>
             </div>
-            <p className="text-sm">Type: {type.charAt(0).toUpperCase() + type.slice(1)}</p>
+            <p className="text-sm">Type: {type}</p>
             <p className="text-sm">File: {fileType}</p>
             <p className="text-sm">Location: {location}</p>
             <p className="text-sm">Author: {author}</p>
@@ -143,11 +150,13 @@ const PythonBlock: React.FC<BlockProps & { type: 'class' | 'function' | 'sample'
 };
 
 export const ClassBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="class" />;
-export const FunctionBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="function" />;
-export const SampleBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="sample" />;
+export const FunctionBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="class_function" />;
+export const ClassStandaloneBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="class_standalone" />;
+export const CodeBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="code" />;
 
 export default {
     ClassBlock,
     FunctionBlock,
-    SampleBlock,
+    ClassStandaloneBlock,
+    CodeBlock,
 };
