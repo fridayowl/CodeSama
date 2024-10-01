@@ -1,6 +1,6 @@
-import { identifyClasses } from './classIdentifier';
-import { identifyFunctionsAndConnections } from './functionIdentifier';
-import { identifyCodeBlocks } from './codeBlockIdentifier';
+import { identifyClasses } from './class_Identifier';
+import { identifyFunctionsAndConnections } from './class_functions_Identifier';
+import { identifyCodeBlocks } from './standalone_codeBlockIdentifier';
 
 export interface BlockData {
     id: string;

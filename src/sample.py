@@ -22,6 +22,7 @@ class DataProcessor:
             .data
         )
         return self.processed_data
+    print("adbc")
 
 print("test")
 print("test1")

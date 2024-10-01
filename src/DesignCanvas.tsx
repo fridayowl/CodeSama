@@ -4,6 +4,7 @@ import CanvasGrid from './CanvasGrid';
 import { generateJsonFromPythonFile } from './fileProcessor';
 import SettingsPanel from './Settings';
 import defaultCustomization from './customization.json';
+import { identifyStandaloneClasses } from './class_standalone_Identifier';
 
 export interface BlockData {
     id: string;
@@ -64,6 +65,7 @@ const DesignCanvas: React.FC = () => {
     const loadFile = useCallback(async (content: string) => {
         try {
             const jsonData = await generateJsonFromPythonFile(content);
+            const standaloneClasses = identifyStandaloneClasses(content);
 
             const modifiedBlocks = jsonData.map((block, index) => {
                 let x, y;
@@ -91,20 +93,7 @@ const DesignCanvas: React.FC = () => {
                 return { ...block, x, y } as ExtendedBlockData;
             });
 
-            const classStandaloneBlock: ExtendedBlockData = {
-                id: 'classStandaloneBlock1',
-                type: 'class_standalone',
-                name: 'Class Standalone Block',
-                location: 'Sample Location',
-                author: 'Sample Author',
-                fileType: 'Python',
-                code: 'class SampleClass:\n    def sample_method(self):\n        print("This is a sample method")\n\nsample = SampleClass()\nsample.sample_method()',
-                x: 1500,
-                y: modifiedBlocks.length * 150,
-                connections: []
-            };
-
-            setBlocks([...modifiedBlocks, classStandaloneBlock]);
+            setBlocks([...modifiedBlocks, ...standaloneClasses]);
             setRefreshKey(prevKey => prevKey + 1);
         } catch (error) {
             console.error('Error processing file:', error);
@@ -117,6 +106,13 @@ const DesignCanvas: React.FC = () => {
         }
     }, [fileContent, loadFile]);
 
+    const getConnectionPoints = useCallback((startBlock: ExtendedBlockData, endBlock: ExtendedBlockData) => {
+        return {
+            startPoint: { x: startBlock.x + 200, y: startBlock.y + 50 },
+            endPoint: { x: endBlock.x, y: endBlock.y + 50 }
+        };
+    }, []);
+
     const updateConnections = useCallback(() => {
         const newConnections: Connection[] = [];
         const classBlocks = blocks.filter(block => block.type === 'class');
@@ -127,12 +123,13 @@ const DesignCanvas: React.FC = () => {
         classBlocks.forEach(classBlock => {
             functionBlocks.forEach(functionBlock => {
                 if (functionBlock.id.startsWith(`${classBlock.name}_`)) {
+                    const { startPoint, endPoint } = getConnectionPoints(classBlock, functionBlock);
                     newConnections.push({
                         id: `${classBlock.id}-${functionBlock.id}`,
                         start: classBlock.id,
                         end: functionBlock.id,
-                        startPoint: { x: classBlock.x + 200, y: classBlock.y + 50 },
-                        endPoint: { x: functionBlock.x, y: functionBlock.y + 50 },
+                        startPoint,
+                        endPoint,
                         type: 'contains',
                         fromConnector: 'method',
                         toConnector: 'input',
@@ -142,12 +139,14 @@ const DesignCanvas: React.FC = () => {
                 }
             });
 
+            const ideBlock = { x: idePosition.x, y: idePosition.y, id: 'python-ide' } as ExtendedBlockData;
+            const { startPoint, endPoint } = getConnectionPoints(ideBlock, classBlock);
             newConnections.push({
                 id: `IDE-${classBlock.id}`,
                 start: 'python-ide',
                 end: classBlock.id,
-                startPoint: { x: idePosition.x + 600, y: idePosition.y + 30 },
-                endPoint: { x: classBlock.x, y: classBlock.y + 50 },
+                startPoint: { x: startPoint.x + 600, y: startPoint.y + 30 },
+                endPoint,
                 type: 'uses',
                 fromConnector: 'output',
                 toConnector: 'input',
@@ -157,12 +156,14 @@ const DesignCanvas: React.FC = () => {
         });
 
         codeBlocks.forEach(codeBlock => {
+            const ideBlock = { x: idePosition.x, y: idePosition.y, id: 'python-ide' } as ExtendedBlockData;
+            const { startPoint, endPoint } = getConnectionPoints(ideBlock, codeBlock);
             newConnections.push({
                 id: `IDE-${codeBlock.id}`,
                 start: 'python-ide',
                 end: codeBlock.id,
-                startPoint: { x: idePosition.x + 600, y: idePosition.y + 30 },
-                endPoint: { x: codeBlock.x, y: codeBlock.y + 50 },
+                startPoint: { x: startPoint.x + 600, y: startPoint.y + 30 },
+                endPoint,
                 type: 'uses',
                 fromConnector: 'output',
                 toConnector: 'input',
@@ -171,26 +172,48 @@ const DesignCanvas: React.FC = () => {
             });
         });
 
-        const firstClassBlock = classBlocks[0];
         classStandaloneBlocks.forEach(classStandaloneBlock => {
-            newConnections.push({
-                id: `${firstClassBlock ? firstClassBlock.id : 'IDE'}-${classStandaloneBlock.id}`,
-                start: firstClassBlock ? firstClassBlock.id : 'python-ide',
-                end: classStandaloneBlock.id,
-                startPoint: firstClassBlock
-                    ? { x: firstClassBlock.x + 200, y: firstClassBlock.y + 50 }
-                    : { x: idePosition.x + 600, y: idePosition.y + 30 },
-                endPoint: { x: classStandaloneBlock.x, y: classStandaloneBlock.y + 50 },
-                type: 'uses',
-                fromConnector: 'output',
-                toConnector: 'input',
-                startBlockType: firstClassBlock ? 'class' : 'code',
-                endBlockType: 'class_standalone'
+            const usageBlocks = blocks.filter(block =>
+                block.code.includes(classStandaloneBlock.name) &&
+                block.type !== 'class_standalone'
+            );
+
+            usageBlocks.forEach(usageBlock => {
+                const { startPoint, endPoint } = getConnectionPoints(usageBlock, classStandaloneBlock);
+                newConnections.push({
+                    id: `${usageBlock.id}-${classStandaloneBlock.id}`,
+                    start: usageBlock.id,
+                    end: classStandaloneBlock.id,
+                    startPoint,
+                    endPoint,
+                    type: 'uses',
+                    fromConnector: 'output',
+                    toConnector: 'input',
+                    startBlockType: usageBlock.type,
+                    endBlockType: 'class_standalone'
+                });
             });
+
+            if (usageBlocks.length === 0) {
+                const ideBlock = { x: idePosition.x, y: idePosition.y, id: 'python-ide' } as ExtendedBlockData;
+                const { startPoint, endPoint } = getConnectionPoints(ideBlock, classStandaloneBlock);
+                newConnections.push({
+                    id: `IDE-${classStandaloneBlock.id}`,
+                    start: 'python-ide',
+                    end: classStandaloneBlock.id,
+                    startPoint: { x: startPoint.x + 600, y: startPoint.y + 30 },
+                    endPoint,
+                    type: 'uses',
+                    fromConnector: 'output',
+                    toConnector: 'input',
+                    startBlockType: 'code',
+                    endBlockType: 'class_standalone'
+                });
+            }
         });
 
         setConnections(newConnections);
-    }, [blocks, idePosition]);
+    }, [blocks, idePosition, getConnectionPoints]);
 
     useEffect(() => {
         updateConnections();
@@ -206,7 +229,8 @@ const DesignCanvas: React.FC = () => {
                 )
             );
         }
-    }, []);
+        updateConnections();
+    }, [updateConnections]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
