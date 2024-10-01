@@ -4,23 +4,59 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
     const lines = fileContent.split('\n');
     const functions: BlockData[] = [];
     let currentFunction: BlockData | null = null;
+    let currentClass: BlockData | null = null;
+    let classIndentationLevel = 0;
     let indentationLevel = 0;
 
     const processLine = (line: string, index: number) => {
         const trimmedLine = line.trimLeft();
         const currentIndentation = line.length - trimmedLine.length;
 
-        if (trimmedLine.startsWith('def ')) {
+        // Detect if we're inside a class
+        if (trimmedLine.startsWith('class ')) {
+            // If there's a class already, save its methods before starting a new class
+            if (currentClass) {
+                if (currentFunction) {
+                    functions.push(currentFunction);
+                    currentFunction = null;
+                }
+                currentClass = null;
+                classIndentationLevel = 0;
+            }
+
+            // Match class name
+            const classNameMatch = trimmedLine.match(/class\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*:/);
+            const className = classNameMatch ? classNameMatch[1] : 'UnknownClass';
+
+            currentClass = {
+                id: `${className}Class`,
+                type: 'class',
+                name: className,
+                location: 'Uploaded file',
+                author: 'File author',
+                fileType: 'Python',
+                code: line,
+                x: 1200,
+                y: 100 + functions.length * 100,
+                connections: []
+            };
+
+            classIndentationLevel = currentIndentation;
+        }
+
+        // Detect method definition inside the current class
+        if (currentClass && trimmedLine.startsWith('def ') && currentIndentation > classIndentationLevel) {
             if (currentFunction) {
                 functions.push(currentFunction);
             }
 
             const functionNameMatch = trimmedLine.match(/def\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/);
-            const name = functionNameMatch ? functionNameMatch[1] : 'Unknown';
+            const functionName = functionNameMatch ? functionNameMatch[1] : 'Unknown';
+
             currentFunction = {
-                id: `${name}Function`,
+                id: `${functionName}Function`,
                 type: 'class_function',
-                name,
+                name: functionName,
                 location: 'Uploaded file',
                 author: 'File author',
                 fileType: 'Python',
@@ -32,8 +68,8 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
 
             indentationLevel = currentIndentation;
         } else if (currentFunction) {
+            // Continuation of the function definition
             if (currentIndentation > indentationLevel || trimmedLine === '') {
-                // This line is part of the current function
                 currentFunction.code += '\n' + line;
             } else {
                 // Function has ended
@@ -46,6 +82,7 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
 
     lines.forEach(processLine);
 
+    // If a function is still open, close it
     if (currentFunction) {
         functions.push(currentFunction);
     }

@@ -59,6 +59,8 @@ working 2.5 : Improvment on the blocks creation and program strucuturing
         Single file  
         - Identifing standalone codes inside  the class 
         - Imporove setting pannel UI 
+        -type: 'class' | 'class_function' | 'code' | 'class_standalone' | 'standalone_function'; change code to stand_alone_code
+        add's
         Bugs to fix : 
             -Fix standalone functions not connecting with ide 
             - Fix customization not working for the canvas 

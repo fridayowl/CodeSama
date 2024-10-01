@@ -25,3 +25,11 @@ class DataProcessor:
 
 print("test")
 print("test1")
+def process1(self):
+        """Apply all data processing steps."""
+        self.processed_data = (
+            self.clean_data()
+            .sort_data()
+            .data
+        )
+        return self.processed_data
