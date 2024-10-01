@@ -4,7 +4,7 @@ import CanvasGrid from './CanvasGrid';
 import { generateJsonFromPythonFile } from './fileProcessor';
 import SettingsPanel from './Settings';
 import defaultCustomization from './customization.json';
-import { identifyStandaloneClasses } from './class_standalone_Identifier';
+import { identifyClassStandaloneCode } from './class_standalone_Identifier';
 
 export interface BlockData {
     id: string;
@@ -65,18 +65,24 @@ const DesignCanvas: React.FC = () => {
     const loadFile = useCallback(async (content: string) => {
         try {
             const jsonData = await generateJsonFromPythonFile(content);
-            const standaloneClasses = identifyStandaloneClasses(content);
+            const standaloneClasses = identifyClassStandaloneCode(content);
 
-            const modifiedBlocks = jsonData.map((block, index) => {
+            let classY = 100;
+            let functionY = 100;
+            let codeY = 100;
+
+            const modifiedBlocks = jsonData.map((block) => {
                 let x, y;
                 if (block.type === 'class') {
                     x = 700;
-                    y = 100 + index * 250;
+                    y = classY;
+                    classY += 250; // Increase the Y position for the next class
                 } else if (block.type === 'class_function') {
                     const parentClass = jsonData.find(b => b.type === 'class' && b.code.includes(`def ${block.name}(`));
                     if (parentClass) {
                         x = 1500;
-                        y = 100 + index * 150;
+                        y = functionY;
+                        functionY += 150; // Increase the Y position for the next function
                         return {
                             ...block,
                             id: `${parentClass.name}_${block.id}`,
@@ -87,10 +93,17 @@ const DesignCanvas: React.FC = () => {
                     }
                 } else if (block.type === 'code') {
                     x = 700;
-                    y = 150 + index * 150;
+                    y = Math.max(classY, functionY, codeY); // Place code blocks below classes and functions
+                    codeY = y + 150; // Increase the Y position for the next code block
                 }
 
                 return { ...block, x, y } as ExtendedBlockData;
+            });
+
+            // Adjust standalone classes position
+            standaloneClasses.forEach((block, index) => {
+                block.x = 2200; // Place standalone classes to the right
+                block.y = 100 + index * 250; // Stack them vertically
             });
 
             setBlocks([...modifiedBlocks, ...standaloneClasses]);

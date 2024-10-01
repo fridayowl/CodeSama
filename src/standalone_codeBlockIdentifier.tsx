@@ -42,7 +42,7 @@ export function identifyCodeBlocks(fileContent: string): BlockData[] {
             if (!currentBlock) {
                 // Start a new standalone code block
                 currentBlock = {
-                    id: `CodeBlock_${codeBlocks.length + 1}`,
+                    id: `Standalone_${codeBlocks.length + 1}`,
                     type: 'code',
                     name: `Standalone Code ${codeBlocks.length + 1}`,
                     location: 'Uploaded file',

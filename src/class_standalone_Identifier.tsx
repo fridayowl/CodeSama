@@ -1,14 +1,14 @@
 import { BlockData } from './fileProcessor';
 
-export function identifyStandaloneClasses(fileContent: string): BlockData[] {
+export function identifyClassStandaloneCode(fileContent: string): BlockData[] {
     // This is a dummy implementation
     // In a real implementation, you would parse the fileContent and identify standalone classes
 
     // Dummy standalone class block
     const dummyStandaloneClass: BlockData = {
-        id: 'StandaloneClass1',
+        id: 'standalonecode',
         type: 'class_standalone',
-        name: 'SampleStandaloneClass',
+        name: 'class_standalone_code',
         location: 'Uploaded file',
         author: 'File author',
         fileType: 'Python',
