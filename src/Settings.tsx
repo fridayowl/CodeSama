@@ -99,7 +99,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
                 {renderConnectionSettings('inherits', 'Inherits')}
                 {renderConnectionSettings('composes', 'Composes')}
                 {renderConnectionSettings('uses', 'Uses')}
-                {renderConnectionSettings('class_contains_functions', 'Contains')}
+                {renderConnectionSettings('contains', 'Contains')}
                 {renderConnectionSettings('codeLink', 'Code Link')}
                 {renderConnectionSettings('class_to_standalone', 'Class to Standalone')}
 
