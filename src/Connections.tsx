@@ -1,5 +1,5 @@
 import React from 'react';
-import { GitFork, Package, ArrowUpRight, Layers, FileCode2, LucideIcon } from 'lucide-react';
+import { GitFork, Package, ArrowUpRight, Layers, FileCode2, LucideIcon, Cog } from 'lucide-react';
 import { Connection } from './DesignCanvas';
 
 interface Point {
@@ -60,8 +60,10 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
             case 'inherits': return GitFork;
             case 'composes': return Package;
             case 'uses': return ArrowUpRight;
-            case 'contains': return Layers;
+            case 'class_contains_functions': return Layers;
             case 'codeLink': return FileCode2;
+            case 'class_to_standalone': return Cog;
+            default: return Cog; // Default icon for any unhandled types
         }
     };
 

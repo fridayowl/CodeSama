@@ -34,7 +34,7 @@
       "lineColor": "#8B5CF6",
       "arrowHead": "arrow"
     },
-    "contains": {
+    "class_contains_functions": {
       "lineColor": "#F59E0B",
       "arrowHead": "circle"
     },

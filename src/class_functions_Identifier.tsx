@@ -92,7 +92,7 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
         const classFunctions = functions.filter(fn => fn.code.includes(`def ${fn.name}(self`));
         classBlock.connections = classFunctions.map(fn => ({
             to: fn.id,
-            type: 'contains',
+            type: 'class_contains_functions',
             fromConnector: 'method',
             toConnector: 'input'
         }));

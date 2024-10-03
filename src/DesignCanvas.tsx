@@ -5,26 +5,9 @@ import { generateJsonFromPythonFile } from './fileProcessor';
 import SettingsPanel from './Settings';
 import defaultCustomization from './customization.json';
 import { identifyClassStandaloneCode } from './class_standalone_Identifier';
+import { BlockData, ConnectionData as FileProcessorConnectionData } from './fileProcessor';
 
-export interface BlockData {
-    id: string;
-    type: 'class' | 'class_function' | 'code' | 'class_standalone';
-    name: string;
-    location: string;
-    author: string;
-    fileType: string;
-    code: string;
-    x: number;
-    y: number;
-    connections: ConnectionData[];
-}
-
-export interface ConnectionData {
-    to: string;
-    type: 'inherits' | 'composes' | 'uses' | 'contains';
-    fromConnector: string;
-    toConnector: string;
-}
+export interface ConnectionData extends FileProcessorConnectionData { }
 
 export interface ExtendedBlockData extends BlockData {
     parentClass?: string;
@@ -36,7 +19,7 @@ export interface Connection {
     end: string;
     startPoint: { x: number; y: number };
     endPoint: { x: number; y: number };
-    type: 'inherits' | 'composes' | 'uses' | 'contains' | 'codeLink';
+    type: ConnectionData['type'];
     fromConnector: string;
     toConnector: string;
     startBlockType: 'class' | 'class_function' | 'code' | 'class_standalone';
@@ -71,7 +54,7 @@ const DesignCanvas: React.FC = () => {
             let functionY = 100;
             let codeY = 100;
 
-            const modifiedBlocks = jsonData.map((block) => {
+            const modifiedBlocks: ExtendedBlockData[] = jsonData.map((block) => {
                 let x, y;
                 if (block.type === 'class') {
                     x = 700;
@@ -102,11 +85,11 @@ const DesignCanvas: React.FC = () => {
 
             // Adjust standalone classes position
             standaloneClasses.forEach((block, index) => {
-                block.x = 2200; // Place standalone classes to the right
-                block.y = 100 + index * 250; // Stack them vertically
+                (block as ExtendedBlockData).x = 2200; // Place standalone classes to the right
+                (block as ExtendedBlockData).y = 100 + index * 250; // Stack them vertically
             });
 
-            setBlocks([...modifiedBlocks, ...standaloneClasses]);
+            setBlocks([...modifiedBlocks, ...standaloneClasses as ExtendedBlockData[]]);
             setRefreshKey(prevKey => prevKey + 1);
         } catch (error) {
             console.error('Error processing file:', error);
@@ -143,7 +126,7 @@ const DesignCanvas: React.FC = () => {
                         end: functionBlock.id,
                         startPoint,
                         endPoint,
-                        type: 'contains',
+                        type: 'class_contains_functions',
                         fromConnector: 'method',
                         toConnector: 'input',
                         startBlockType: 'class',
