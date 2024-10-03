@@ -41,6 +41,11 @@
     "codeLink": {
       "lineColor": "#F97316",
       "arrowHead": "arrow"
+    },
+    "class_to_standalone": {
+      "lineColor": "#EC4899",
+      "arrowHead": "diamond",
+      "lineStyle": "dashed"
     }
   },
   "canvas": {

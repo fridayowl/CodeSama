@@ -17,7 +17,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
             [category]: {
                 ...customization[category],
                 [type]: {
-                    ...customization[category][type],
+                    ...customization[category]?.[type],
                     [property]: value
                 }
             }
@@ -36,6 +36,41 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
             />
         </div>
     );
+
+    const renderConnectionSettings = (type: string, label: string) => {
+        const connectionSettings = customization?.connections?.[type] || {};
+        return (
+            <div key={type} className="mb-4">
+                <h4 className="font-medium capitalize mb-2">{label}</h4>
+                {renderColorPicker('connections', type, 'lineColor', 'Line Color')}
+                <div className="flex items-center justify-between mb-2">
+                    <span>Arrow Head</span>
+                    <select
+                        value={connectionSettings.arrowHead || 'arrow'}
+                        onChange={(e) => handleColorChange('connections', type, 'arrowHead', e.target.value)}
+                        className="p-1 border rounded"
+                    >
+                        <option value="arrow">Arrow</option>
+                        <option value="triangle">Triangle</option>
+                        <option value="diamond">Diamond</option>
+                        <option value="circle">Circle</option>
+                    </select>
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                    <span>Line Style</span>
+                    <select
+                        value={connectionSettings.lineStyle || 'solid'}
+                        onChange={(e) => handleColorChange('connections', type, 'lineStyle', e.target.value)}
+                        className="p-1 border rounded"
+                    >
+                        <option value="solid">Solid</option>
+                        <option value="dashed">Dashed</option>
+                        <option value="dotted">Dotted</option>
+                    </select>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-lg z-50 overflow-y-auto">
@@ -61,12 +96,12 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
                 ))}
 
                 <h3 className="font-semibold mb-2 mt-4">Connections</h3>
-                {['inherits', 'composes', 'uses', 'contains', 'codeLink'].map(type => (
-                    <div key={type} className="mb-4">
-                        <h4 className="font-medium capitalize mb-2">{type}</h4>
-                        {renderColorPicker('connections', type, 'lineColor', 'Line Color')}
-                    </div>
-                ))}
+                {renderConnectionSettings('inherits', 'Inherits')}
+                {renderConnectionSettings('composes', 'Composes')}
+                {renderConnectionSettings('uses', 'Uses')}
+                {renderConnectionSettings('class_contains_functions', 'Contains')}
+                {renderConnectionSettings('codeLink', 'Code Link')}
+                {renderConnectionSettings('class_to_standalone', 'Class to Standalone')}
 
                 <h3 className="font-semibold mb-2 mt-4">Canvas</h3>
                 {renderColorPicker('canvas', 'canvas', 'backgroundColor', 'Background')}
@@ -76,7 +111,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
                     <span>Grid Spacing</span>
                     <input
                         type="number"
-                        value={customization.canvas.gridSpacing}
+                        value={customization.canvas?.gridSpacing || 20}
                         onChange={(e) => {
                             const newCustomization = {
                                 ...customization,
