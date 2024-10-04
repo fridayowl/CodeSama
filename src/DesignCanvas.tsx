@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, Upload, Settings as SettingsIcon } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Upload, Settings as SettingsIcon, X } from 'lucide-react';
 import CanvasGrid from './CanvasGrid';
 import { generateJsonFromPythonFile, BlockData, ConnectionData as FileProcessorConnectionData } from './fileProcessor';
 import SettingsPanel from './Settings';
 import defaultCustomization from './customization.json';
 import { identifyClassStandaloneCode } from './class_standalone_Identifier';
+import customTemplates from './customTemplates';
 
 export interface ConnectionData extends FileProcessorConnectionData { }
 
@@ -43,6 +44,7 @@ const DesignCanvas: React.FC = () => {
     });
     const canvasRef = useRef<HTMLDivElement>(null);
     const [isSettingsPanelOpen, setIsSettingsPanelOpen] = useState(false);
+    const [isTemplatesPanelOpen, setIsTemplatesPanelOpen] = useState(false);
 
     const loadFile = useCallback(async (content: string) => {
         try {
@@ -354,6 +356,31 @@ const DesignCanvas: React.FC = () => {
         localStorage.setItem('customization', JSON.stringify(newCustomization));
     };
 
+    const handleTemplateChange = (template: any) => {
+        setCustomization(template);
+        localStorage.setItem('customization', JSON.stringify(template));
+        setIsTemplatesPanelOpen(false);
+    };
+
+    const TemplateCard: React.FC<{ template: any }> = ({ template }) => (
+        <div
+            className="w-48 h-64 bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform hover:scale-105"
+            onClick={() => handleTemplateChange(template)}
+        >
+            <div className="h-1/2 p-2 flex flex-col justify-between" style={{ backgroundColor: template.canvas.backgroundColor }}>
+                <div className="flex justify-between">
+                    <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks.class.backgroundColor }} />
+                    <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks.class_function.backgroundColor }} />
+                </div>
+                <div className="w-full h-1 rounded" style={{ backgroundColor: template.connections.uses.lineColor }} />
+            </div>
+            <div className="h-1/2 p-4 flex flex-col justify-between">
+                <h3 className="font-bold text-lg">{template.name}</h3>
+                <p className="text-sm text-gray-600">Click to apply</p>
+            </div>
+        </div>
+    );
+
     return (
         <div className="w-full h-screen p-4">
             <div className="flex justify-between items-center mb-4">
@@ -393,13 +420,22 @@ const DesignCanvas: React.FC = () => {
                         </label>
                     </div>
                 </div>
-                <button
-                    onClick={() => setIsSettingsPanelOpen(true)}
-                    className="p-2 bg-gray-200 rounded hover:bg-gray-300"
-                    title="Open Settings"
-                >
-                    <SettingsIcon size={20} />
-                </button>
+                <div className="flex items-center space-x-2">
+                    <button
+                        onClick={() => setIsTemplatesPanelOpen(true)}
+                        className="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300 text-sm"
+                        title="Choose Template"
+                    >
+                        Choose Template
+                    </button>
+                    <button
+                        onClick={() => setIsSettingsPanelOpen(true)}
+                        className="p-2 bg-gray-200 rounded hover:bg-gray-300"
+                        title="Open Settings"
+                    >
+                        <SettingsIcon size={20} />
+                    </button>
+                </div>
             </div>
 
             <div
@@ -440,6 +476,24 @@ const DesignCanvas: React.FC = () => {
                     />
                 </div>
             </div>
+
+            {isTemplatesPanelOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-lg max-w-3xl max-h-[80vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-2xl font-bold">Choose a Template</h2>
+                            <button onClick={() => setIsTemplatesPanelOpen(false)} className="p-1 rounded-full hover:bg-gray-200">
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                            {customTemplates.map((template, index) => (
+                                <TemplateCard key={index} template={template} />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <SettingsPanel
                 isOpen={isSettingsPanelOpen}
