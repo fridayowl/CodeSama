@@ -17,11 +17,11 @@ interface ConnectionsProps {
 const defaultConnectionColor = "#000000";
 
 const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBlockPosition, customization }) => {
-    const getBezierPath = (start: Point, end: Point): string => {
+    const getBezierPath = (start: Point, end: Point, type: Connection['type']): string => {
         const midX = (start.x + end.x) / 2;
         const dx = end.x - start.x;
         const dy = end.y - start.y;
-        const curvature = 0.5;
+        const curvature = type === 'class_to_standalone' ? 0.7 : 0.5;
 
         let controlPoint1, controlPoint2;
 
@@ -63,7 +63,7 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
             case 'class_contains_functions': return Layers;
             case 'codeLink': return FileCode2;
             case 'class_to_standalone': return Cog;
-            default: return Cog; // Default icon for any unhandled types
+            default: return Cog;
         }
     };
 
@@ -76,6 +76,13 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
             };
         }
         return {};
+    };
+
+    const getAdjustedPosition = (position: Point): Point => {
+        return {
+            x: position.x * zoomLevel,
+            y: position.y * zoomLevel
+        };
     };
 
     return (
@@ -120,13 +127,15 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
                 </filter>
             </defs>
             {connections.map((connection) => {
-                const path = getBezierPath(connection.startPoint, connection.endPoint);
+                const startPos = getAdjustedPosition(connection.startPoint);
+                const endPos = getAdjustedPosition(connection.endPoint);
+                const path = getBezierPath(startPos, endPos, connection.type);
                 const color = getConnectionColor(connection.type);
                 const style = getConnectionStyle(connection.type);
                 const IconComponent = getConnectionIcon(connection.type);
                 const midPoint = {
-                    x: (connection.startPoint.x + connection.endPoint.x) / 2,
-                    y: (connection.startPoint.y + connection.endPoint.y) / 2
+                    x: (startPos.x + endPos.x) / 2,
+                    y: (startPos.y + endPos.y) / 2
                 };
 
                 const arrowHead = customization[connection.type]?.arrowHead || 'arrow';
@@ -137,28 +146,28 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
                             d={path}
                             fill="none"
                             stroke={color}
-                            strokeWidth={2}
+                            strokeWidth={2 * zoomLevel}
                             strokeLinecap="round"
                             filter="url(#glow)"
                             style={style}
                             markerEnd={`url(#arrowhead-${arrowHead})`}
                         />
-                        <circle cx={connection.startPoint.x} cy={connection.startPoint.y} r={4} fill={color} />
-                        <circle cx={connection.endPoint.x} cy={connection.endPoint.y} r={4} fill={color} />
+                        <circle cx={startPos.x} cy={startPos.y} r={4 * zoomLevel} fill={color} />
+                        <circle cx={endPos.x} cy={endPos.y} r={4 * zoomLevel} fill={color} />
                         <foreignObject
-                            x={midPoint.x - 8}
-                            y={midPoint.y - 8}
-                            width={16}
-                            height={16}
+                            x={midPoint.x - 8 * zoomLevel}
+                            y={midPoint.y - 8 * zoomLevel}
+                            width={16 * zoomLevel}
+                            height={16 * zoomLevel}
                         >
                             <div className="flex items-center justify-center w-full h-full bg-white rounded-full shadow-md">
-                                <IconComponent size={16} color={color} />
+                                <IconComponent size={16 * zoomLevel} color={color} />
                             </div>
                         </foreignObject>
                         <text
-                            x={midPoint.x + 16}
+                            x={midPoint.x + 16 * zoomLevel}
                             y={midPoint.y}
-                            fontSize={10}
+                            fontSize={10 * zoomLevel}
                             fill={color}
                             filter="url(#glow)"
                         >

@@ -1,11 +1,10 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { ZoomIn, ZoomOut, RotateCcw, Upload, Settings as SettingsIcon } from 'lucide-react';
 import CanvasGrid from './CanvasGrid';
-import { generateJsonFromPythonFile } from './fileProcessor';
+import { generateJsonFromPythonFile, BlockData, ConnectionData as FileProcessorConnectionData } from './fileProcessor';
 import SettingsPanel from './Settings';
 import defaultCustomization from './customization.json';
 import { identifyClassStandaloneCode } from './class_standalone_Identifier';
-import { BlockData, ConnectionData as FileProcessorConnectionData } from './fileProcessor';
 
 export interface ConnectionData extends FileProcessorConnectionData { }
 
@@ -53,19 +52,20 @@ const DesignCanvas: React.FC = () => {
             let classY = 100;
             let functionY = 100;
             let codeY = 100;
+            let standaloneY = 100;
 
             const modifiedBlocks: ExtendedBlockData[] = jsonData.map((block) => {
                 let x, y;
                 if (block.type === 'class') {
                     x = 700;
                     y = classY;
-                    classY += 250; // Increase the Y position for the next class
+                    classY += 250;
                 } else if (block.type === 'class_function') {
                     const parentClass = jsonData.find(b => b.type === 'class' && b.code.includes(`def ${block.name}(`));
                     if (parentClass) {
                         x = 1500;
                         y = functionY;
-                        functionY += 150; // Increase the Y position for the next function
+                        functionY += 150;
                         return {
                             ...block,
                             id: `${parentClass.name}_${block.id}`,
@@ -76,17 +76,29 @@ const DesignCanvas: React.FC = () => {
                     }
                 } else if (block.type === 'code') {
                     x = 700;
-                    y = Math.max(classY, functionY, codeY); // Place code blocks below classes and functions
-                    codeY = y + 150; // Increase the Y position for the next code block
+                    y = Math.max(classY, functionY, codeY);
+                    codeY = y + 150;
                 }
-
                 return { ...block, x, y } as ExtendedBlockData;
             });
 
-            // Adjust standalone classes position
             standaloneClasses.forEach((block, index) => {
-                (block as ExtendedBlockData).x = 2200; // Place standalone classes to the right
-                (block as ExtendedBlockData).y = 100 + index * 250; // Stack them vertically
+                (block as ExtendedBlockData).x = 2200;
+                (block as ExtendedBlockData).y = standaloneY;
+                standaloneY += 250;
+
+                const usingClasses = modifiedBlocks.filter(b =>
+                    b.type === 'class' && b.code.includes(block.name)
+                );
+
+                usingClasses.forEach(usingClass => {
+                    (usingClass.connections = usingClass.connections || []).push({
+                        to: block.id,
+                        type: 'class_to_standalone',
+                        fromConnector: 'output',
+                        toConnector: 'input'
+                    });
+                });
             });
 
             setBlocks([...modifiedBlocks, ...standaloneClasses as ExtendedBlockData[]]);
@@ -171,7 +183,7 @@ const DesignCanvas: React.FC = () => {
         classStandaloneBlocks.forEach(classStandaloneBlock => {
             const usageBlocks = blocks.filter(block =>
                 block.code.includes(classStandaloneBlock.name) &&
-                block.type !== 'class_standalone'
+                block.type === 'class'
             );
 
             usageBlocks.forEach(usageBlock => {
@@ -182,10 +194,10 @@ const DesignCanvas: React.FC = () => {
                     end: classStandaloneBlock.id,
                     startPoint,
                     endPoint,
-                    type: 'uses',
+                    type: 'class_to_standalone',
                     fromConnector: 'output',
                     toConnector: 'input',
-                    startBlockType: usageBlock.type,
+                    startBlockType: 'class',
                     endBlockType: 'class_standalone'
                 });
             });
@@ -199,7 +211,7 @@ const DesignCanvas: React.FC = () => {
                     end: classStandaloneBlock.id,
                     startPoint: { x: startPoint.x + 600, y: startPoint.y + 30 },
                     endPoint,
-                    type: 'uses',
+                    type: 'class_to_standalone',
                     fromConnector: 'output',
                     toConnector: 'input',
                     startBlockType: 'code',

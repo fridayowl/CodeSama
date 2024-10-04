@@ -75,7 +75,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                 startPoint: sourceClassBlock
                     ? getAdjustedPosition(sourceClassBlock.id, true)
                     : getAdjustedPosition('python-ide', true),
-                type: 'uses',
+                type: 'class_to_standalone',
                 startBlockType: sourceClassBlock ? 'class' : 'code',
                 endBlockType: 'class_standalone'
             };
