@@ -55,15 +55,23 @@ Version 2.4 Smoothing IDE  and Connection  and Customizaton -
             -customization not workign for canvas @moved to next verion
 
 
-working 2.5 : Improvment on the blocks creation and program strucuturing 
+Version  2.5 : Improvment on the blocks creation and program strucuturing 
         Single file  
-        - Identifing standalone codes inside  the class 
-        - Imporove setting pannel UI 
-        -type: 'class' | 'class_function' | 'code' | 'class_standalone' | 'standalone_function'; change code to stand_alone_code
+        - Imporove setting pannel UI  @done
+        -type: 'class' | 'class_function' | 'code' | 'class_standalone' | 'standalone_function'; change code to stand_alone_code @done
         add's
         Bugs to fix : 
-            -Fix standalone functions not connecting with ide 
-            - Fix customization not working for the canvas 
+            -Fix standalone functions not connecting with ide  
+            - Fix customization not working for the canvas  @moved 
+
+
+working 2.6 - Closing functions for single file 
+        Single file 
+        - Idenfy the standalone code insde a class 
+        - Identify the standalone code and functions seperatly 
+        - Fix the connectors not moving as desired 
+        - Set the zoom level to 70% 
+
 
 
 
