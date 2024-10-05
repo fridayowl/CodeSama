@@ -52,9 +52,9 @@ const DesignCanvas: React.FC = () => {
             const standaloneClasses = identifyClassStandaloneCode(content);
 
             let classY = 100;
-            let functionY = 100;
+            let functionY = 220;
             let codeY = 100;
-            let standaloneY = 100;
+            let standaloneY = 220;
 
             const modifiedBlocks: ExtendedBlockData[] = jsonData.map((block) => {
                 let x, y;

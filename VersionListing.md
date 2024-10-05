@@ -67,7 +67,7 @@ Version  2.5 : Improvment on the blocks creation and program strucuturing
 
 working 2.6 - Closing functions for single file 
         Single file 
-        - Idenfy the standalone code insde a class 
+        - Idenfy the standalone code inside a class 
         - Identify the standalone code and functions seperatly 
         - Fix the connectors not moving as desired 
         - Set the zoom level to 70% 
