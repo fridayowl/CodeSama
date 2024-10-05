@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { GitFork, Package, ArrowUpRight, Layers, FileCode2, LucideIcon, Cog } from 'lucide-react';
 import { Connection } from './DesignCanvas';
 
@@ -17,6 +17,17 @@ interface ConnectionsProps {
 const defaultConnectionColor = "#000000";
 
 const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBlockPosition, customization }) => {
+    const [renderedConnections, setRenderedConnections] = useState<Connection[]>([]);
+
+    useEffect(() => {
+        // Delay the rendering of connections slightly to ensure block positions are updated
+        const timer = setTimeout(() => {
+            setRenderedConnections(connections);
+        }, 100);
+
+        return () => clearTimeout(timer);
+    }, [connections]);
+
     const getBezierPath = (start: Point, end: Point, type: Connection['type']): string => {
         const midX = (start.x + end.x) / 2;
         const dx = end.x - start.x;
@@ -78,13 +89,6 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
         return {};
     };
 
-    const getAdjustedPosition = (position: Point): Point => {
-        return {
-            x: position.x * zoomLevel,
-            y: position.y * zoomLevel
-        };
-    };
-
     return (
         <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
             <defs>
@@ -126,9 +130,17 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
                     </feMerge>
                 </filter>
             </defs>
-            {connections.map((connection) => {
-                const startPos = getAdjustedPosition(connection.startPoint);
-                const endPos = getAdjustedPosition(connection.endPoint);
+            {renderedConnections.map((connection) => {
+                const startBlock = getBlockPosition(connection.start);
+                const endBlock = getBlockPosition(connection.end);
+                const startPos = {
+                    x: startBlock.x + startBlock.width / 2,
+                    y: startBlock.y + startBlock.height / 2
+                };
+                const endPos = {
+                    x: endBlock.x + endBlock.width / 2,
+                    y: endBlock.y + endBlock.height / 2
+                };
                 const path = getBezierPath(startPos, endPos, connection.type);
                 const color = getConnectionColor(connection.type);
                 const style = getConnectionStyle(connection.type);
@@ -146,28 +158,28 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
                             d={path}
                             fill="none"
                             stroke={color}
-                            strokeWidth={2 * zoomLevel}
+                            strokeWidth={2 / zoomLevel}
                             strokeLinecap="round"
                             filter="url(#glow)"
                             style={style}
                             markerEnd={`url(#arrowhead-${arrowHead})`}
                         />
-                        <circle cx={startPos.x} cy={startPos.y} r={4 * zoomLevel} fill={color} />
-                        <circle cx={endPos.x} cy={endPos.y} r={4 * zoomLevel} fill={color} />
+                        <circle cx={startPos.x} cy={startPos.y} r={4 / zoomLevel} fill={color} />
+                        <circle cx={endPos.x} cy={endPos.y} r={4 / zoomLevel} fill={color} />
                         <foreignObject
-                            x={midPoint.x - 8 * zoomLevel}
-                            y={midPoint.y - 8 * zoomLevel}
-                            width={16 * zoomLevel}
-                            height={16 * zoomLevel}
+                            x={midPoint.x - 8 / zoomLevel}
+                            y={midPoint.y - 8 / zoomLevel}
+                            width={16 / zoomLevel}
+                            height={16 / zoomLevel}
                         >
                             <div className="flex items-center justify-center w-full h-full bg-white rounded-full shadow-md">
-                                <IconComponent size={16 * zoomLevel} color={color} />
+                                <IconComponent size={16 / zoomLevel} color={color} />
                             </div>
                         </foreignObject>
                         <text
-                            x={midPoint.x + 16 * zoomLevel}
+                            x={midPoint.x + 16 / zoomLevel}
                             y={midPoint.y}
-                            fontSize={10 * zoomLevel}
+                            fontSize={10 / zoomLevel}
                             fill={color}
                             filter="url(#glow)"
                         >
