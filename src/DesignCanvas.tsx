@@ -4,7 +4,6 @@ import CanvasGrid from './CanvasGrid';
 import { generateJsonFromPythonFile, BlockData, ConnectionData as FileProcessorConnectionData } from './fileProcessor';
 import SettingsPanel from './Settings';
 import defaultCustomization from './customization.json';
-import { identifyClassStandaloneCode } from './class_standalone_Identifier';
 import customTemplates from './customTemplates';
 
 export interface ConnectionData extends FileProcessorConnectionData { }
@@ -49,12 +48,13 @@ const DesignCanvas: React.FC = () => {
     const loadFile = useCallback(async (content: string) => {
         try {
             const jsonData = await generateJsonFromPythonFile(content);
-            const standaloneClasses = identifyClassStandaloneCode(content);
 
             let classY = 100;
             let functionY = 220;
             let codeY = 100;
             let standaloneY = 220;
+
+            const classes = jsonData.filter(block => block.type === 'class');
 
             const modifiedBlocks: ExtendedBlockData[] = jsonData.map((block) => {
                 let x, y;
@@ -80,30 +80,21 @@ const DesignCanvas: React.FC = () => {
                     x = 700;
                     y = Math.max(classY, functionY, codeY);
                     codeY = y + 150;
+                } else if (block.type === 'class_standalone') {
+                    // Only include standalone classes if there are regular classes
+                    if (classes.length > 0) {
+                        x = 2200;
+                        y = standaloneY;
+                        standaloneY += 250;
+                    } else {
+                        // If there are no regular classes, don't include this block
+                        return null;
+                    }
                 }
                 return { ...block, x, y } as ExtendedBlockData;
-            });
+            }).filter(Boolean) as ExtendedBlockData[]; // Remove any null entries
 
-            standaloneClasses.forEach((block, index) => {
-                (block as ExtendedBlockData).x = 2200;
-                (block as ExtendedBlockData).y = standaloneY;
-                standaloneY += 250;
-
-                const usingClasses = modifiedBlocks.filter(b =>
-                    b.type === 'class' && b.code.includes(block.name)
-                );
-
-                usingClasses.forEach(usingClass => {
-                    (usingClass.connections = usingClass.connections || []).push({
-                        to: block.id,
-                        type: 'class_to_standalone',
-                        fromConnector: 'output',
-                        toConnector: 'input'
-                    });
-                });
-            });
-
-            setBlocks([...modifiedBlocks, ...standaloneClasses as ExtendedBlockData[]]);
+            setBlocks(modifiedBlocks);
             setRefreshKey(prevKey => prevKey + 1);
         } catch (error) {
             console.error('Error processing file:', error);

@@ -68,17 +68,21 @@ Version  2.5 : Improvment on the blocks creation and program strucuturing
 working 2.6 - Closing functions for single file 
         Single file 
         - Idenfy the standalone code inside a class 
+            @done
         - Identify the standalone code and functions seperatly 
         - Fix the connectors not moving as desired 
         - Set the zoom level to 70% 
+        -Fix setting unique id for the blocks rather than the function name or code name
 
 
+
+Version 2.7 - Setting Connectors exact line of the ide 
 
 
 
 
 Upcoming Versions : 
-Version 3 : Focus on Functions that helps Testing much easier and bug fixing 
+Version 3 : Focus on Functions that helps Testing much easier and bug fixing  and Documentation (lock in features)
 
 Version 5 : Focus on code generation and code analysis 
 

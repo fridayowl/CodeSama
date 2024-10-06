@@ -1,38 +1,82 @@
-import { BlockData } from './fileProcessor';
+import { BlockData, ConnectionData } from './fileProcessor';
 
-export function identifyClassStandaloneCode(fileContent: string): BlockData[] {
-    // This is a dummy implementation
-    // In a real implementation, you would parse the fileContent and identify standalone classes
+export function identifyClassStandaloneCode(fileContent: string, classes: BlockData[]): BlockData[] {
+    const standaloneBlocks: BlockData[] = [];
+    let blockCount = 0;
 
-    // Dummy standalone class block
-    const dummyStandaloneClass: BlockData = {
-        id: 'standalonecode',
-        type: 'class_standalone',
-        name: 'class_standalone_code',
-        location: 'Uploaded file',
-        author: 'File author',
-        fileType: 'Python',
-        code: `
-class SampleStandaloneClass:
-    def __init__(self, value):
-        self.value = value
+    classes.forEach(classBlock => {
+        const classLines = classBlock.code.split('\n');
+        let currentBlock: string[] = [];
+        let isInsideFunction = false;
+        let classIndentation = -1;
+        let functionIndentation = -1;
 
-    def get_value(self):
-        return self.value
+        const createBlock = (code: string[]): BlockData | null => {
+            if (code.length > 0) {
+                blockCount++;
+                const connection: ConnectionData = {
+                    to: classBlock.id,
+                    type: 'class_to_standalone',
+                    fromConnector: 'output',
+                    toConnector: 'input'
+                };
+                return {
+                    id: `class_standalone_${blockCount}`,
+                    type: 'class_standalone',
+                    name: `${classBlock.name} Standalone Block ${blockCount}`,
+                    location: classBlock.location,
+                    author: classBlock.author,
+                    fileType: classBlock.fileType,
+                    code: code.join('\n'),
+                    x: classBlock.x + 300,
+                    y: classBlock.y + (standaloneBlocks.length % 3) * 150,
+                    connections: [connection]
+                };
+            }
+            return null;
+        };
 
-    def set_value(self, new_value):
-        self.value = new_value
+        const processLine = (line: string, index: number) => {
+            const trimmedLine = line.trim();
+            const indentation = line.length - trimmedLine.length;
 
-# Usage of the standalone class
-sample = SampleStandaloneClass(42)
-print(sample.get_value())  # Output: 42
-sample.set_value(100)
-print(sample.get_value())  # Output: 100
-`,
-        x: 1500,
-        y: 300,
-        connections: []
-    };
+            if (index === 0) {
+                classIndentation = indentation;
+                return;
+            }
 
-    return [dummyStandaloneClass];
+            if (trimmedLine.startsWith('def ') && indentation > classIndentation) {
+                if (currentBlock.length > 0) {
+                    const block = createBlock(currentBlock);
+                    if (block) standaloneBlocks.push(block);
+                    currentBlock = [];
+                }
+                isInsideFunction = true;
+                functionIndentation = indentation;
+            } else if (isInsideFunction && indentation <= functionIndentation) {
+                isInsideFunction = false;
+                functionIndentation = -1;
+                if (trimmedLine !== '' && indentation > classIndentation) {
+                    currentBlock.push(line);
+                }
+            } else if (!isInsideFunction && indentation > classIndentation) {
+                if (trimmedLine !== '') {
+                    currentBlock.push(line);
+                } else if (currentBlock.length > 0) {
+                    const block = createBlock(currentBlock);
+                    if (block) standaloneBlocks.push(block);
+                    currentBlock = [];
+                }
+            }
+        };
+
+        classLines.forEach(processLine);
+
+        if (currentBlock.length > 0) {
+            const finalBlock = createBlock(currentBlock);
+            if (finalBlock) standaloneBlocks.push(finalBlock);
+        }
+    });
+
+    return standaloneBlocks;
 }

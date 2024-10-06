@@ -1,6 +1,7 @@
 import { identifyClasses } from './class_Identifier';
 import { identifyFunctionsAndConnections } from './class_functions_Identifier';
 import { identifyCodeBlocks } from './standalone_codeBlockIdentifier';
+import { identifyClassStandaloneCode } from './class_standalone_Identifier';
 
 export interface BlockData {
     id: string;
@@ -25,7 +26,14 @@ export interface ConnectionData {
 export async function generateJsonFromPythonFile(fileContent: string): Promise<BlockData[]> {
     const classes = identifyClasses(fileContent);
     const functions = identifyFunctionsAndConnections(fileContent, classes);
-    const codeBlocks = identifyCodeBlocks(fileContent);
+    const standaloneCodeBlocks = identifyCodeBlocks(fileContent);
+    const ClassStandaloneCode = identifyClassStandaloneCode(fileContent,classes);
+    console.log(ClassStandaloneCode)
 
-    return [...classes, ...functions, ...codeBlocks];
+    // Only include standalone classes if there are regular classes
+    const finalBlocks = classes.length > 0
+        ? [...classes, ...functions, ...standaloneCodeBlocks, ...ClassStandaloneCode]
+        : [...classes, ...functions, ...standaloneCodeBlocks];
+
+    return finalBlocks;
 }

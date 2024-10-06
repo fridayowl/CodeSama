@@ -3,66 +3,72 @@ import { BlockData } from './fileProcessor';
 export function identifyCodeBlocks(fileContent: string): BlockData[] {
     const lines = fileContent.split('\n');
     const codeBlocks: BlockData[] = [];
-    let currentBlock: BlockData | null = null;
+    let currentBlock: string[] = [];
     let insideClass = false;
+    let insideFunction = false;
     let classIndentation: number | null = null;
+    let functionIndentation: number | null = null;
 
-    // Helper function to determine the indentation level of a line
     const getIndentationLevel = (line: string): number => line.match(/^\s*/)?.[0]?.length || 0;
+
+    const createBlock = (code: string[]): BlockData => ({
+        id: `Standalone_${codeBlocks.length + 1}`,
+        type: 'code',
+        name: `Standalone Code ${codeBlocks.length + 1}`,
+        location: 'Uploaded file',
+        author: 'File author',
+        fileType: 'Python',
+        code: code.join('\n'),
+        x: 900,
+        y: 100 + codeBlocks.length * 100,
+        connections: []
+    });
 
     lines.forEach((line, index) => {
         const trimmedLine = line.trim();
         const currentIndentation = getIndentationLevel(line);
 
-        // Skip empty lines and comments
         if (!trimmedLine || trimmedLine.startsWith('#')) {
             return;
         }
 
-        // Check if the current line starts a class
         if (trimmedLine.startsWith('class ')) {
+            if (currentBlock.length > 0) {
+                codeBlocks.push(createBlock(currentBlock));
+                currentBlock = [];
+            }
             insideClass = true;
             classIndentation = currentIndentation;
-            // Close any existing standalone code block before entering a class
-            if (currentBlock) {
-                codeBlocks.push(currentBlock);
-                currentBlock = null;
-            }
             return;
         }
 
-        // Detect leaving a class block based on indentation
         if (insideClass && currentIndentation <= classIndentation!) {
             insideClass = false;
             classIndentation = null;
         }
 
-        // Only process standalone code (outside class)
-        if (!insideClass) {
-            if (!currentBlock) {
-                // Start a new standalone code block
-                currentBlock = {
-                    id: `Standalone_${codeBlocks.length + 1}`,
-                    type: 'code',
-                    name: `Standalone Code ${codeBlocks.length + 1}`,
-                    location: 'Uploaded file',
-                    author: 'File author',
-                    fileType: 'Python',
-                    code: line,
-                    x: 900,
-                    y: 100 + codeBlocks.length * 100,
-                    connections: []
-                };
-            } else {
-                // Continue adding to the current code block
-                currentBlock.code += '\n' + line;
+        if (trimmedLine.startsWith('def ') && !insideClass) {
+            if (currentBlock.length > 0) {
+                codeBlocks.push(createBlock(currentBlock));
+                currentBlock = [];
             }
+            insideFunction = true;
+            functionIndentation = currentIndentation;
+            return;
+        }
+
+        if (insideFunction && currentIndentation <= functionIndentation!) {
+            insideFunction = false;
+            functionIndentation = null;
+        }
+
+        if (!insideClass && !insideFunction) {
+            currentBlock.push(line);
         }
     });
 
-    // After the loop, push the last block if it exists
-    if (currentBlock) {
-        codeBlocks.push(currentBlock);
+    if (currentBlock.length > 0) {
+        codeBlocks.push(createBlock(currentBlock));
     }
 
     return codeBlocks;
