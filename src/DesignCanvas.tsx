@@ -265,6 +265,7 @@ const DesignCanvas: React.FC = () => {
                 const content = e.target?.result;
                 if (typeof content === 'string') {
                     setFileContent(content);
+                    setZoomLevel(0.7);
                 }
             };
             reader.readAsText(file);
