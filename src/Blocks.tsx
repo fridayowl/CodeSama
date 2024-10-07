@@ -29,6 +29,8 @@ const Block: React.FC<BlockProps> = ({
     const [isVisible, setIsVisible] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [isDetailsVisible, setIsDetailsVisible] = useState(false);
+    const [isDocumentationVisible, setIsDocumentationVisible] = useState(false);
+    const [isTestingVisible, setIsTestingVisible] = useState(false);
     const [currentCode, setCurrentCode] = useState(code);
 
     const blockStyle = customization?.blocks?.[type] || {};
@@ -52,10 +54,22 @@ const Block: React.FC<BlockProps> = ({
 
     const toggleEditing = () => {
         setIsEditing(!isEditing);
+        if (!isVisible) {
+            setIsVisible(true);
+            onVisibilityChange(id, true);
+        }
     };
 
     const toggleDetails = () => {
         setIsDetailsVisible(!isDetailsVisible);
+    };
+
+    const toggleDocumentation = () => {
+        setIsDocumentationVisible(!isDocumentationVisible);
+    };
+
+    const toggleTesting = () => {
+        setIsTestingVisible(!isTestingVisible);
     };
 
     return (
@@ -92,12 +106,14 @@ const Block: React.FC<BlockProps> = ({
                         {isVisible ? <Eye size={16} /> : <EyeOff size={16} />}
                     </button>
                     <button
+                        onClick={toggleDocumentation}
                         className="p-1 bg-gray-200 rounded hover:bg-gray-300"
                         title="Documentation"
                     >
                         <FileText size={16} />
                     </button>
                     <button
+                        onClick={toggleTesting}
                         className="p-1 bg-gray-200 rounded hover:bg-gray-300"
                         title="Testing"
                     >
@@ -144,6 +160,21 @@ const Block: React.FC<BlockProps> = ({
                             {currentCode}
                         </pre>
                     )}
+                </div>
+            )}
+            {isDocumentationVisible && (
+                <div className="p-4 bg-gray-50 border-t">
+                    <h4 className="font-semibold mb-2">Documentation</h4>
+                    <p className="text-sm">This is a sample documentation for the {name} {type}. Replace this with actual documentation.</p>
+                </div>
+            )}
+            {isTestingVisible && (
+                <div className="p-4 bg-gray-50 border-t">
+                    <h4 className="font-semibold mb-2">Testing</h4>
+                    <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                        Run Tests
+                    </button>
+                    <p className="mt-2 text-sm">Click the button above to run tests for this {type}.</p>
                 </div>
             )}
         </div>
