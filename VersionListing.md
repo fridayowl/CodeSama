@@ -76,7 +76,9 @@ working 2.6 - Closing functions for single file
 
 
 
-Version 2.7 - Setting Connectors exact line of the ide  and also make this blocks smaller and compact
+Version 2.7 - Setting Connectors exact line of the ide  and also make this blocks smaller and compact 
+            - add a directory viewer 
+            
 
 Version 2.8 - Import (first phase of multiple pages) and inhertience  block (in heritinece in single file )
 
