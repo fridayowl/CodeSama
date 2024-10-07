@@ -1,6 +1,6 @@
 import { BlockData } from './fileProcessor';
 
-export function identifyStandaloneFunctions(fileContent: string): BlockData[] {
+export function identifyStandaloneFunctions(fileContent: string, fileName: string): BlockData[] {
     const lines = fileContent.split('\n');
     const functionBlocks: BlockData[] = [];
     let currentFunction: string[] = [];
@@ -13,7 +13,7 @@ export function identifyStandaloneFunctions(fileContent: string): BlockData[] {
     const getIndentationLevel = (line: string): number => line.match(/^\s*/)?.[0]?.length || 0;
 
     const createFunctionBlock = (code: string[], name: string): BlockData => ({
-        id: `StandaloneFunction_${functionBlocks.length + 1}`,
+        id: `${fileName}.${name}`,
         type: 'standalone_function',
         name: name,
         location: 'Uploaded file',

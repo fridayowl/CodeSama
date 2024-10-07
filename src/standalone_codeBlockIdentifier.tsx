@@ -1,6 +1,6 @@
 import { BlockData } from './fileProcessor';
 
-export function identifyCodeBlocks(fileContent: string): BlockData[] {
+export function identifyCodeBlocks(fileContent: string, fileName: string): BlockData[] {
     const lines = fileContent.split('\n');
     const codeBlocks: BlockData[] = [];
     let currentBlock: string[] = [];
@@ -11,18 +11,21 @@ export function identifyCodeBlocks(fileContent: string): BlockData[] {
 
     const getIndentationLevel = (line: string): number => line.match(/^\s*/)?.[0]?.length || 0;
 
-    const createBlock = (code: string[]): BlockData => ({
-        id: `Standalone_${codeBlocks.length + 1}`,
-        type: 'code',
-        name: `Standalone Code ${codeBlocks.length + 1}`,
-        location: 'Uploaded file',
-        author: 'File author',
-        fileType: 'Python',
-        code: code.join('\n'),
-        x: 900,
-        y: 100 + codeBlocks.length * 100,
-        connections: []
-    });
+    const createBlock = (code: string[], blockIndex: number): BlockData => {
+        const blockName = `Block_${blockIndex}`;
+        return {
+            id: `${fileName}.${blockName}`,
+            type: 'code',
+            name: blockName,
+            location: 'Uploaded file',
+            author: 'File author',
+            fileType: 'Python',
+            code: code.join('\n'),
+            x: 900,
+            y: 100 + codeBlocks.length * 100,
+            connections: []
+        };
+    };
 
     lines.forEach((line, index) => {
         const trimmedLine = line.trim();
@@ -34,7 +37,7 @@ export function identifyCodeBlocks(fileContent: string): BlockData[] {
 
         if (trimmedLine.startsWith('class ')) {
             if (currentBlock.length > 0) {
-                codeBlocks.push(createBlock(currentBlock));
+                codeBlocks.push(createBlock(currentBlock, codeBlocks.length + 1));
                 currentBlock = [];
             }
             insideClass = true;
@@ -49,7 +52,7 @@ export function identifyCodeBlocks(fileContent: string): BlockData[] {
 
         if (trimmedLine.startsWith('def ') && !insideClass) {
             if (currentBlock.length > 0) {
-                codeBlocks.push(createBlock(currentBlock));
+                codeBlocks.push(createBlock(currentBlock, codeBlocks.length + 1));
                 currentBlock = [];
             }
             insideFunction = true;
@@ -68,7 +71,7 @@ export function identifyCodeBlocks(fileContent: string): BlockData[] {
     });
 
     if (currentBlock.length > 0) {
-        codeBlocks.push(createBlock(currentBlock));
+        codeBlocks.push(createBlock(currentBlock, codeBlocks.length + 1));
     }
 
     return codeBlocks;

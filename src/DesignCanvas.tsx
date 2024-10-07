@@ -45,9 +45,10 @@ const DesignCanvas: React.FC = () => {
     const [isSettingsPanelOpen, setIsSettingsPanelOpen] = useState(false);
     const [isTemplatesPanelOpen, setIsTemplatesPanelOpen] = useState(false);
 
-    const loadFile = useCallback(async (content: string) => {
+    const loadFile = useCallback(async (content: string, name: string) => {
         try {
-            const jsonData = await generateJsonFromPythonFile(content);
+            console.log("filename",name)
+            const jsonData = await generateJsonFromPythonFile(content,name);
 
             let classY = 100;
             let functionY = 220;
@@ -105,10 +106,15 @@ const DesignCanvas: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (fileContent) {
-            loadFile(fileContent);
+        if (fileContent && fileName) {
+            loadFile(fileContent, fileName);
         }
-    }, [fileContent, loadFile]);
+    }, [fileContent, fileName, loadFile]);
+
+    const handleCodeChange = (newCode: string) => {
+        setFileContent(newCode);
+        loadFile(newCode, fileName);
+    };
 
     const getConnectionPoints = useCallback((startBlock: ExtendedBlockData, endBlock: ExtendedBlockData) => {
         return {
@@ -269,11 +275,7 @@ const DesignCanvas: React.FC = () => {
         }
     };
 
-    const handleCodeChange = (newCode: string) => {
-        setFileContent(newCode);
-        loadFile(newCode);
-    };
-
+    
     const handleFlowVisibilityChange = (isVisible: boolean) => {
         setIsFlowVisible(isVisible);
     };
@@ -356,7 +358,7 @@ const DesignCanvas: React.FC = () => {
     }, [blocks, autoZoom, calculateBoundingBox]);
 
     useEffect(() => {
-        adjustZoom();
+        adjustZoom(); 
     }, [blocks, adjustZoom]);
 
     const toggleAutoZoom = () => {

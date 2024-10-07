@@ -70,13 +70,15 @@ working 2.6 - Closing functions for single file
         - Idenfy the standalone code inside a class 
             @done
         - Identify the standalone code and functions seperatly  @done
-        - Fix the connectors not moving as desired 
+        - Fix the connectors not moving as desired  @done
         - Set the zoom level to 70% 
         -Fix setting unique id for the blocks rather than the function name or code name
 
 
 
 Version 2.7 - Setting Connectors exact line of the ide 
+
+Version 2.8 - Import (first phase of multiple pages) and inhertience  block (in heritinece in single file )
 
 
 

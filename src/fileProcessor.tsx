@@ -22,12 +22,12 @@ export interface ConnectionData {
     fromConnector: string;
     toConnector: string;
 }
-export async function generateJsonFromPythonFile(fileContent: string): Promise<BlockData[]> {
+export async function generateJsonFromPythonFile(fileContent: string,name:string): Promise<BlockData[]> {
     const classes = identifyClasses(fileContent);
     const functions = identifyFunctionsAndConnections(fileContent, classes);
-    const standaloneCodeBlocks = identifyCodeBlocks(fileContent);
+    const standaloneCodeBlocks = identifyCodeBlocks(fileContent,name);
     const ClassStandaloneCode = identifyClassStandaloneCode(fileContent,classes);
-    const standaloneFunctions = identifyStandaloneFunctions(fileContent);
+    const standaloneFunctions = identifyStandaloneFunctions(fileContent,name);
     console.log(standaloneFunctions)
 
     // Only include standalone classes if there are regular classes
