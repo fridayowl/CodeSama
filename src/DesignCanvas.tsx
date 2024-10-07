@@ -90,9 +90,9 @@ const DesignCanvas: React.FC = () => {
                         return null;
                     }
                 } else if (block.type === 'standalone_function') {
-                    x = 2200;
-                    y = standaloneFunctionY;
-                    standaloneFunctionY += 150;
+                    x = 700;
+                    y = Math.max(classY, functionY, codeY);
+                    codeY = y + 150;
                 }
                 return { ...block, x, y } as ExtendedBlockData;
             }).filter(Boolean) as ExtendedBlockData[];
