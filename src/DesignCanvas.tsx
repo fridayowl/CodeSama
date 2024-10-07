@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, Upload, Settings as SettingsIcon, X } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Settings as SettingsIcon, X } from 'lucide-react';
 import CanvasGrid from './CanvasGrid';
 import { generateJsonFromPythonFile, BlockData, ConnectionData as FileProcessorConnectionData } from './fileProcessor';
 import SettingsPanel from './Settings';
@@ -25,11 +25,14 @@ export interface Connection {
     endBlockType: 'class' | 'class_function' | 'code' | 'class_standalone' | 'standalone_function';
 }
 
-const DesignCanvas: React.FC = () => {
+interface DesignCanvasProps {
+    selectedFile: string | null;
+    selectedFileName: string | null;
+}
+
+const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileName }) => {
     const [blocks, setBlocks] = useState<ExtendedBlockData[]>([]);
     const [connections, setConnections] = useState<Connection[]>([]);
-    const [fileContent, setFileContent] = useState<string | null>(null);
-    const [fileName, setFileName] = useState<string>('');
     const [isFlowVisible, setIsFlowVisible] = useState(true);
     const [classVisibility, setClassVisibility] = useState<Record<string, boolean>>({});
     const [zoomLevel, setZoomLevel] = useState(1);
@@ -45,10 +48,10 @@ const DesignCanvas: React.FC = () => {
     const [isSettingsPanelOpen, setIsSettingsPanelOpen] = useState(false);
     const [isTemplatesPanelOpen, setIsTemplatesPanelOpen] = useState(false);
 
-    const loadFile = useCallback(async (content: string) => {
+    const processFile = useCallback(async (content: string, fileName: string) => {
         try {
             const jsonData = await generateJsonFromPythonFile(content, fileName);
-            console.log('Loaded JSON data:', jsonData); // Debugging log
+            console.log('Loaded JSON data:', jsonData);
 
             let classY = 100;
             let functionY = 220;
@@ -99,18 +102,18 @@ const DesignCanvas: React.FC = () => {
             }).filter(Boolean) as ExtendedBlockData[];
 
             setBlocks(modifiedBlocks);
-            console.log('Set blocks:', modifiedBlocks); // Debugging log
+            console.log('Set blocks:', modifiedBlocks);
             setRefreshKey(prevKey => prevKey + 1);
         } catch (error) {
             console.error('Error processing file:', error);
         }
-    }, [fileName]);
+    }, []);
 
     useEffect(() => {
-        if (fileContent) {
-            loadFile(fileContent);
+        if (selectedFile && selectedFileName) {
+            processFile(selectedFile, selectedFileName);
         }
-    }, [fileContent, loadFile]);
+    }, [selectedFile, selectedFileName, processFile]);
 
     const getConnectionPoints = useCallback((startBlock: ExtendedBlockData, endBlock: ExtendedBlockData) => {
         return {
@@ -256,25 +259,10 @@ const DesignCanvas: React.FC = () => {
         updateConnections();
     }, [updateConnections]);
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            setFileName(file.name);
-            const reader = new FileReader();
-            reader.onload = (e: ProgressEvent<FileReader>) => {
-                const content = e.target?.result;
-                if (typeof content === 'string') {
-                    setFileContent(content);
-                    setZoomLevel(0.7);
-                }
-            };
-            reader.readAsText(file);
-        }
-    };
-
     const handleCodeChange = (newCode: string) => {
-        setFileContent(newCode);
-        loadFile(newCode);
+        if (selectedFileName) {
+            processFile(newCode, selectedFileName);
+        }
     };
 
     const handleFlowVisibilityChange = (isVisible: boolean) => {
@@ -417,23 +405,6 @@ const DesignCanvas: React.FC = () => {
                         Auto
                     </button>
                     <span className="ml-4">Zoom: {Math.round(zoomLevel * 100)}%</span>
-
-                    <div className="relative ml-1">
-                        <input
-                            type="file"
-                            onChange={handleFileChange}
-                            accept=".py"
-                            className="hidden"
-                            id="file-upload"
-                        />
-                        <label
-                            htmlFor="file-upload"
-                            className="flex items-center px-4 py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 cursor-pointer"
-                        >
-                            <Upload size={20} className="mr-2" />
-                            {fileName || "Choose file"}
-                        </label>
-                    </div>
                 </div>
                 <div className="flex items-center space-x-2">
                     <button
@@ -481,8 +452,8 @@ const DesignCanvas: React.FC = () => {
                         onVisibilityChange={handleClassVisibilityChange}
                         getVisibleBlocks={getVisibleBlocks}
                         getVisibleConnections={getVisibleConnections}
-                        fileContent={fileContent}
-                        fileName={fileName}
+                        fileContent={selectedFile}
+                        fileName={selectedFileName || ''}
                         onCodeChange={handleCodeChange}
                         onFlowVisibilityChange={handleFlowVisibilityChange}
                         zoomLevel={zoomLevel}

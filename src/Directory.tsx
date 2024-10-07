@@ -5,11 +5,13 @@ export interface FileSystemItem {
     name: string;
     type: 'file' | 'folder';
     children?: FileSystemItem[];
+    content?: string;
 }
 
 interface DirectoryProps {
     items: FileSystemItem[];
     onFolderSelect: (folder: FileSystemItem[]) => void;
+    onFileSelect: (fileContent: string, fileName: string) => void;
 }
 
 const commonFileTypes = [
@@ -20,54 +22,79 @@ const commonFileTypes = [
     '.sql', '.json', '.xml', '.yaml', '.md'
 ];
 
-const DirectoryItem: React.FC<{ item: FileSystemItem; depth: number; visibleTypes: string[] }> = ({ item, depth, visibleTypes }) => {
-    const [isOpen, setIsOpen] = useState(false);
-
-    const toggleOpen = () => {
-        if (item.type === 'folder') {
-            setIsOpen(!isOpen);
-        }
-    };
-
-    if (item.type === 'file') {
-        const extension = '.' + item.name.split('.').pop()?.toLowerCase();
-        if (!visibleTypes.includes(extension)) {
-            return null;
-        }
-    }
-
-    return (
-        <div>
-            <div
-                className="flex items-center cursor-pointer hover:bg-gray-100 py-1"
-                style={{ paddingLeft: `${depth * 16}px` }}
-                onClick={toggleOpen}
-            >
-                {item.type === 'folder' && (
-                    isOpen ? <ChevronDown size={16} className="mr-1" /> : <ChevronRight size={16} className="mr-1" />
-                )}
-                {item.type === 'folder' ? (
-                    <Folder size={16} className="mr-2 text-blue-500" />
-                ) : (
-                    <File size={16} className="mr-2 text-gray-500" />
-                )}
-                <span className="text-sm">{item.name}</span>
-            </div>
-            {item.type === 'folder' && isOpen && item.children && (
-                <div>
-                    {item.children.map((child, index) => (
-                        <DirectoryItem key={index} item={child} depth={depth + 1} visibleTypes={visibleTypes} />
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-};
-
-const Directory: React.FC<DirectoryProps> = ({ items, onFolderSelect }) => {
+const Directory: React.FC<DirectoryProps> = ({ items, onFolderSelect, onFileSelect }) => {
     const [isMinimized, setIsMinimized] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [visibleTypes, setVisibleTypes] = useState<string[]>(commonFileTypes);
+
+    const handleFileSelect = useCallback(async (file: FileSystemItem) => {
+        if (file.type === 'file' && file.content) {
+            try {
+                // Check if the content is a Blob URL
+                if (file.content.startsWith('blob:')) {
+                    const response = await fetch(file.content);
+                    const text = await response.text();
+                    onFileSelect(text, file.name);
+                } else {
+                    // If it's not a Blob URL, assume it's the content itself
+                    onFileSelect(file.content, file.name);
+                }
+            } catch (error) {
+                console.error('Error reading file content:', error);
+                // Optionally, you can show an error message to the user here
+            }
+        }
+    }, [onFileSelect]);
+
+    const DirectoryItem: React.FC<{
+        item: FileSystemItem;
+        depth: number;
+        visibleTypes: string[];
+    }> = ({ item, depth, visibleTypes }) => {
+        const [isOpen, setIsOpen] = useState(false);
+
+        const handleClick = () => {
+            if (item.type === 'folder') {
+                setIsOpen(!isOpen);
+            } else if (item.type === 'file') {
+                handleFileSelect(item);
+            }
+        };
+
+        if (item.type === 'file') {
+            const extension = '.' + item.name.split('.').pop()?.toLowerCase();
+            if (!visibleTypes.includes(extension)) {
+                return null;
+            }
+        }
+
+        return (
+            <div>
+                <div
+                    className="flex items-center cursor-pointer hover:bg-gray-100 py-1"
+                    style={{ paddingLeft: `${depth * 16}px` }}
+                    onClick={handleClick}
+                >
+                    {item.type === 'folder' && (
+                        isOpen ? <ChevronDown size={16} className="mr-1" /> : <ChevronRight size={16} className="mr-1" />
+                    )}
+                    {item.type === 'folder' ? (
+                        <Folder size={16} className="mr-2 text-blue-500" />
+                    ) : (
+                        <File size={16} className="mr-2 text-gray-500" />
+                    )}
+                    <span className="text-sm">{item.name}</span>
+                </div>
+                {item.type === 'folder' && isOpen && item.children && (
+                    <div>
+                        {item.children.map((child, index) => (
+                            <DirectoryItem key={index} item={child} depth={depth + 1} visibleTypes={visibleTypes} />
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     const handleFolderSelect = useCallback(() => {
         const input = document.createElement('input');
@@ -86,7 +113,11 @@ const Directory: React.FC<DirectoryProps> = ({ items, onFolderSelect }) => {
 
                     path.forEach((name: string, index: number) => {
                         if (index === path.length - 1) {
-                            currentLevel.push({ name, type: 'file' });
+                            currentLevel.push({
+                                name,
+                                type: 'file',
+                                content: URL.createObjectURL(file)
+                            });
                         } else {
                             let folder = currentLevel.find(item => item.name === name && item.type === 'folder');
                             if (!folder) {
@@ -203,7 +234,12 @@ const Directory: React.FC<DirectoryProps> = ({ items, onFolderSelect }) => {
                     )}
                     <div className="mt-4 max-h-[calc(100vh-300px)] overflow-y-auto">
                         {filteredItems.map((item, index) => (
-                            <DirectoryItem key={index} item={item} depth={0} visibleTypes={visibleTypes} />
+                            <DirectoryItem
+                                key={index}
+                                item={item}
+                                depth={0}
+                                visibleTypes={visibleTypes}
+                            />
                         ))}
                     </div>
                 </div>
