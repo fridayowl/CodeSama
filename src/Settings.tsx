@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Palette, GitBranch, Grid, Terminal, RefreshCw, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Palette, GitBranch, Grid, Terminal, RefreshCw } from 'lucide-react';
 import customTemplates from './customTemplates';
 
 interface SettingsPanelProps {
@@ -10,6 +10,8 @@ interface SettingsPanelProps {
 }
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customization, onCustomizationChange }) => {
+    const [activeTab, setActiveTab] = useState('blocks');
+
     if (!isOpen) return null;
 
     const handleColorChange = (category: string, type: string, property: string, value: string) => {
@@ -43,16 +45,29 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
         </div>
     );
 
-    const renderConnectionSettings = (type: string, label: string) => {
-        const connectionSettings = customization?.connections?.[type] || {};
-        return (
+    const renderBlockSettings = () => {
+        const blockTypes = ['class', 'class_function', 'code', 'class_standalone', 'standalone_function'];
+        return blockTypes.map(type => (
             <div key={type} className="mb-4">
-                <h4 className="font-medium mb-2 text-gray-700">{label}</h4>
+                <h4 className="font-medium mb-2 text-gray-700 capitalize">{type.replace('_', ' ')} Blocks</h4>
+                {renderColorPicker('blocks', type, 'backgroundColor', 'Background')}
+                {renderColorPicker('blocks', type, 'borderColor', 'Border')}
+                {renderColorPicker('blocks', type, 'textColor', 'Text')}
+                {renderColorPicker('blocks', type, 'headerColor', 'Header')}
+            </div>
+        ));
+    };
+
+    const renderConnectionSettings = () => {
+        const connectionTypes = ['inherits', 'composes', 'uses', 'class_contains_functions', 'codeLink', 'class_to_standalone'];
+        return connectionTypes.map(type => (
+            <div key={type} className="mb-4">
+                <h4 className="font-medium mb-2 text-gray-700 capitalize">{type.replace('_', ' ')}</h4>
                 {renderColorPicker('connections', type, 'lineColor', 'Line Color')}
                 <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-600">Arrow Head</span>
                     <select
-                        value={connectionSettings.arrowHead || 'arrow'}
+                        value={customization.connections[type].arrowHead || 'arrow'}
                         onChange={(e) => handleColorChange('connections', type, 'arrowHead', e.target.value)}
                         className="p-1 border rounded text-sm"
                     >
@@ -65,7 +80,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
                 <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-600">Line Style</span>
                     <select
-                        value={connectionSettings.lineStyle || 'solid'}
+                        value={customization.connections[type].lineStyle || 'solid'}
                         onChange={(e) => handleColorChange('connections', type, 'lineStyle', e.target.value)}
                         className="p-1 border rounded text-sm"
                     >
@@ -75,45 +90,60 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
                     </select>
                 </div>
             </div>
-        );
+        ));
     };
 
-    const renderSection = (title: string, icon: React.ReactNode, content: React.ReactNode) => (
-        <div className="mb-6">
-            <div className="flex items-center mb-3">
-                {icon}
-                <h3 className="font-semibold ml-2 text-gray-800">{title}</h3>
+    const renderCanvasSettings = () => (
+        <>
+            {renderColorPicker('canvas', 'canvas', 'backgroundColor', 'Background')}
+            {renderColorPicker('canvas', 'canvas', 'gridColor', 'Grid Color')}
+            <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-600">Grid Spacing</span>
+                <input
+                    type="number"
+                    value={customization.canvas?.gridSpacing || 20}
+                    onChange={(e) => handleColorChange('canvas', 'canvas', 'gridSpacing', e.target.value)}
+                    className="w-16 p-1 border rounded text-sm"
+                />
             </div>
-            <div className="bg-gray-50 p-4 rounded">
-                {content}
-            </div>
-        </div>
+        </>
     );
 
-    const renderTemplateCard = (template: any) => (
-        <div
-            key={template.name}
-            className="border rounded-lg p-4 mb-4 cursor-pointer hover:shadow-md transition-shadow duration-200"
-            onClick={() => onCustomizationChange(template)}
-        >
-            <div className="flex justify-between items-center mb-2">
-                <h4 className="font-medium text-gray-800">{template.name}</h4>
-                {customization.name === template.name && (
-                    <Check size={20} className="text-green-500" />
-                )}
-            </div>
-            <div className="flex space-x-2 mb-2">
-                <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks.class.backgroundColor }} />
-                <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks.class_function.backgroundColor }} />
-                <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks.code.backgroundColor }} />
-            </div>
-            <div className="flex space-x-2">
-                <div className="w-8 h-8 rounded" style={{ backgroundColor: template.canvas.backgroundColor }} />
-                <div className="w-8 h-8 rounded" style={{ backgroundColor: template.ide.backgroundColor }} />
-                <div className="w-8 h-1 self-center rounded" style={{ backgroundColor: template.connections.uses.lineColor }} />
-            </div>
-        </div>
+    const renderIDESettings = () => (
+        <>
+            {renderColorPicker('ide', 'ide', 'backgroundColor', 'Background')}
+            {renderColorPicker('ide', 'ide', 'textColor', 'Text')}
+            {renderColorPicker('ide', 'ide', 'lineNumbersColor', 'Line Numbers')}
+            {renderColorPicker('ide', 'ide', 'highlightColor', 'Highlight')}
+        </>
     );
+
+    const renderTemplates = () => (
+        <>
+            {customTemplates.map((template, index) => (
+                <div
+                    key={index}
+                    className="border rounded-lg p-4 mb-4 cursor-pointer hover:shadow-md transition-shadow duration-200"
+                    onClick={() => onCustomizationChange(template)}
+                >
+                    <h4 className="font-medium text-gray-800 mb-2">{template.name}</h4>
+                    <div className="flex space-x-2">
+                        <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks.class.backgroundColor }} />
+                        <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks.class_function.backgroundColor }} />
+                        <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks.code.backgroundColor }} />
+                    </div>
+                </div>
+            ))}
+        </>
+    );
+
+    const tabs = [
+        { id: 'blocks', label: 'Blocks', icon: <Palette size={20} /> },
+        { id: 'connections', label: 'Connections', icon: <GitBranch size={20} /> },
+        { id: 'canvas', label: 'Canvas', icon: <Grid size={20} /> },
+        { id: 'ide', label: 'IDE', icon: <Terminal size={20} /> },
+        { id: 'templates', label: 'Templates', icon: <RefreshCw size={20} /> },
+    ];
 
     return (
         <div className="fixed right-0 top-0 h-full w-96 bg-white shadow-lg z-50 overflow-y-auto">
@@ -125,86 +155,26 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
                     </button>
                 </div>
 
-                {renderSection("Templates", <Palette size={20} />, (
-                    <div>
-                        <p className="text-sm text-gray-600 mb-2">Choose a preset template:</p>
-                        <div className="max-h-80 overflow-y-auto">
-                            {customTemplates.map(renderTemplateCard)}
-                        </div>
+                <div className="flex mb-6 border-b">
+                    {tabs.map((tab) => (
                         <button
-                            className="mt-4 w-full p-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition duration-200 flex items-center justify-center"
-                            onClick={() => onCustomizationChange(customTemplates[0])}
+                            key={tab.id}
+                            className={`flex items-center px-4 py-2 ${activeTab === tab.id ? 'border-b-2 border-blue-500' : ''}`}
+                            onClick={() => setActiveTab(tab.id)}
                         >
-                            <RefreshCw size={16} className="mr-2" />
-                            Reset to Default
+                            {tab.icon}
+                            <span className="ml-2">{tab.label}</span>
                         </button>
-                    </div>
-                ))}
+                    ))}
+                </div>
 
-                {renderSection("Blocks", <Palette size={20} />, (
-                    <>
-                        <div className="mb-4">
-                            <h4 className="font-medium mb-2 text-gray-700">Class Blocks</h4>
-                            {renderColorPicker('blocks', 'class', 'backgroundColor', 'Background')}
-                            {renderColorPicker('blocks', 'class', 'borderColor', 'Border')}
-                            {renderColorPicker('blocks', 'class', 'textColor', 'Text')}
-                        </div>
-                        <div className="mb-4">
-                            <h4 className="font-medium mb-2 text-gray-700">Class Function Blocks</h4>
-                            {renderColorPicker('blocks', 'class_function', 'backgroundColor', 'Background')}
-                            {renderColorPicker('blocks', 'class_function', 'borderColor', 'Border')}
-                            {renderColorPicker('blocks', 'class_function', 'textColor', 'Text')}
-                        </div>
-                        <div className="mb-4">
-                            <h4 className="font-medium mb-2 text-gray-700">Standalone Code Blocks</h4>
-                            {renderColorPicker('blocks', 'code', 'backgroundColor', 'Background')}
-                            {renderColorPicker('blocks', 'code', 'borderColor', 'Border')}
-                            {renderColorPicker('blocks', 'code', 'textColor', 'Text')}
-                        </div>
-                    </>
-                ))}
-
-                {renderSection("Connections", <GitBranch size={20} />, (
-                    <>
-                        {renderConnectionSettings('uses', 'IDE To Blocks')}
-                        {renderConnectionSettings('class_contains_functions', 'Class To Functions')}
-                        {renderConnectionSettings('class_to_standalone', 'Class To Standalone')}
-                    </>
-                ))}
-
-                {renderSection("Canvas", <Grid size={20} />, (
-                    <>
-                        {renderColorPicker('canvas', 'canvas', 'backgroundColor', 'Background')}
-                        {renderColorPicker('canvas', 'canvas', 'gridColor', 'Grid Color')}
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm text-gray-600">Grid Spacing</span>
-                            <input
-                                type="number"
-                                value={customization.canvas?.gridSpacing || 20}
-                                onChange={(e) => {
-                                    const newCustomization = {
-                                        ...customization,
-                                        canvas: {
-                                            ...customization.canvas,
-                                            gridSpacing: parseInt(e.target.value, 10)
-                                        }
-                                    };
-                                    onCustomizationChange(newCustomization);
-                                }}
-                                className="w-16 p-1 border rounded text-sm"
-                            />
-                        </div>
-                    </>
-                ))}
-
-                {renderSection("IDE", <Terminal size={20} />, (
-                    <>
-                        {renderColorPicker('ide', 'ide', 'backgroundColor', 'Background')}
-                        {renderColorPicker('ide', 'ide', 'textColor', 'Text')}
-                        {renderColorPicker('ide', 'ide', 'lineNumbersColor', 'Line Numbers')}
-                        {renderColorPicker('ide', 'ide', 'highlightColor', 'Highlight')}
-                    </>
-                ))}
+                <div className="bg-gray-50 p-4 rounded">
+                    {activeTab === 'blocks' && renderBlockSettings()}
+                    {activeTab === 'connections' && renderConnectionSettings()}
+                    {activeTab === 'canvas' && renderCanvasSettings()}
+                    {activeTab === 'ide' && renderIDESettings()}
+                    {activeTab === 'templates' && renderTemplates()}
+                </div>
             </div>
         </div>
     );

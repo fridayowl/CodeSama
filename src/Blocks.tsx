@@ -1,78 +1,47 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Eye, EyeOff, Edit, Save } from 'lucide-react';
+import React, { useState } from 'react';
+import { Eye, EyeOff, Edit, Save, Info, FileText, TestTube } from 'lucide-react';
 
 interface BlockProps {
     id: string;
+    type: 'class' | 'class_function' | 'code' | 'class_standalone' | 'standalone_function';
     name: string;
     location: string;
     author: string;
     fileType: string;
     code: string;
     onVisibilityChange: (id: string, isVisible: boolean) => void;
+    onCodeChange?: (id: string, newCode: string) => void;
     customization: any;
 }
 
-const PythonCodeEditor: React.FC<{ code: string; onChange: (code: string) => void; customization: any }> = ({ code, onChange, customization }) => {
-    const [lines, setLines] = useState(code.split('\n'));
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-    useEffect(() => {
-        if (textareaRef.current) {
-            textareaRef.current.style.width = `${Math.max(...lines.map(line => line.length)) * 8}px`;
-        }
-    }, [lines]);
-
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const newCode = e.target.value;
-        setLines(newCode.split('\n'));
-        onChange(newCode);
-    };
-
-    const ideStyle = customization?.ide || {};
-
-    return (
-        <div className="relative font-mono text-sm border rounded overflow-hidden" style={{ backgroundColor: ideStyle.backgroundColor || '#f0f0f0' }}>
-            <div className="absolute left-0 top-0 bottom-0 p-2 pr-4 text-right select-none" style={{ backgroundColor: ideStyle.lineNumbersColor || '#e0e0e0' }}>
-                {lines.map((_, i) => (
-                    <div key={i} style={{ color: ideStyle.textColor || '#000000' }}>
-                        {i + 1}
-                    </div>
-                ))}
-            </div>
-            <textarea
-                ref={textareaRef}
-                value={code}
-                onChange={handleChange}
-                className="w-full p-2 pl-12 bg-transparent resize-none outline-none"
-                style={{
-                    minWidth: '300px',
-                    height: `${lines.length * 1.5}em`,
-                    minHeight: '3em',
-                    overflowX: 'auto',
-                    whiteSpace: 'pre',
-                    color: ideStyle.textColor || '#000000',
-                }}
-                spellCheck={false}
-            />
-        </div>
-    );
-};
-
-const PythonBlock: React.FC<BlockProps & {
-    type: 'class' | 'class_function' | 'code' | 'class_standalone' | 'standalone_function' }> = ({
-    id, name, location, author, fileType, code, onVisibilityChange, type, customization
+const Block: React.FC<BlockProps> = ({
+    id,
+    type,
+    name,
+    location,
+    author,
+    fileType,
+    code,
+    onVisibilityChange,
+    onCodeChange,
+    customization
 }) => {
     const [isVisible, setIsVisible] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
+    const [isDetailsVisible, setIsDetailsVisible] = useState(false);
     const [currentCode, setCurrentCode] = useState(code);
 
-    const handleCodeChange = (newCode: string) => {
-        setCurrentCode(newCode);
+    const blockStyle = customization?.blocks?.[type] || {};
+
+    const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setCurrentCode(e.target.value);
     };
 
     const handleSave = () => {
         setIsEditing(false);
-        // Here you would typically save the code to your backend or state management system
+        if (onCodeChange) {
+            onCodeChange(id, currentCode);
+        }
     };
 
     const toggleVisibility = () => {
@@ -81,24 +50,36 @@ const PythonBlock: React.FC<BlockProps & {
         onVisibilityChange(id, newVisibility);
     };
 
-    const blockStyle = customization?.blocks?.[type] || {};
-    const ideStyle = customization?.ide || {};
+    const toggleEditing = () => {
+        setIsEditing(!isEditing);
+    };
+
+    const toggleDetails = () => {
+        setIsDetailsVisible(!isDetailsVisible);
+    };
 
     return (
-        <div className="w-full max-w-3xl p-4 rounded-lg shadow-md"
+        <div className="w-full max-w-3xl rounded-lg shadow-md overflow-hidden"
             style={{
                 backgroundColor: blockStyle.backgroundColor || '#ffffff',
-                color: blockStyle.textColor || '#000000',
                 borderColor: blockStyle.borderColor || '#000000',
+                color: blockStyle.textColor || '#000000',
                 borderWidth: '2px',
                 borderStyle: 'solid'
             }}>
-            <div className="flex justify-between items-center mb-2">
+            <div className="p-2 flex justify-between items-center" style={{ backgroundColor: blockStyle.headerColor || '#f0f0f0' }}>
                 <h3 className="font-bold text-lg">{name}</h3>
-                <div>
+                <div className="flex space-x-2">
                     <button
-                        onClick={() => setIsEditing(!isEditing)}
-                        className="p-1 bg-gray-200 rounded hover:bg-gray-300 mr-2"
+                        onClick={toggleDetails}
+                        className="p-1 bg-gray-200 rounded hover:bg-gray-300"
+                        title="Details"
+                    >
+                        <Info size={16} />
+                    </button>
+                    <button
+                        onClick={toggleEditing}
+                        className="p-1 bg-gray-200 rounded hover:bg-gray-300"
                         title={isEditing ? "Save" : "Edit"}
                     >
                         {isEditing ? <Save size={16} /> : <Edit size={16} />}
@@ -110,37 +91,56 @@ const PythonBlock: React.FC<BlockProps & {
                     >
                         {isVisible ? <Eye size={16} /> : <EyeOff size={16} />}
                     </button>
+                    <button
+                        className="p-1 bg-gray-200 rounded hover:bg-gray-300"
+                        title="Documentation"
+                    >
+                        <FileText size={16} />
+                    </button>
+                    <button
+                        className="p-1 bg-gray-200 rounded hover:bg-gray-300"
+                        title="Testing"
+                    >
+                        <TestTube size={16} />
+                    </button>
                 </div>
             </div>
-            <p className="text-sm">Type: {type}</p>
-            <p className="text-sm">File: {fileType}</p>
-            <p className="text-sm">Location: {location}</p>
-            <p className="text-sm">Author: {author}</p>
+            {isDetailsVisible && (
+                <div className="px-4 py-2 bg-gray-100">
+                    <p className="text-sm">Type: {type}</p>
+                    <p className="text-sm">File: {fileType}</p>
+                    <p className="text-sm">Location: {location}</p>
+                    <p className="text-sm">Author: {author}</p>
+                </div>
+            )}
             {isVisible && (
-                <div className="mt-2">
+                <div className="p-4">
                     {isEditing ? (
                         <>
-                            <PythonCodeEditor code={currentCode} onChange={handleCodeChange} customization={customization} />
+                            <textarea
+                                value={currentCode}
+                                onChange={handleCodeChange}
+                                className="w-full p-2 border rounded font-mono text-sm"
+                                rows={currentCode.split('\n').length}
+                                style={{
+                                    backgroundColor: customization.ide?.backgroundColor || '#f0f0f0',
+                                    color: customization.ide?.textColor || '#000000'
+                                }}
+                            />
                             <button
                                 onClick={handleSave}
-                                className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                className="mt-2 px-4 py-2 text-white rounded hover:bg-opacity-80"
+                                style={{ backgroundColor: customization.ide?.highlightColor || '#3b82f6' }}
                             >
                                 Save
                             </button>
                         </>
                     ) : (
-                        <pre
-                            onClick={() => setIsEditing(true)}
-                            className="w-full p-2 border rounded cursor-pointer overflow-auto font-mono text-sm"
+                        <pre className="w-full p-2 border rounded overflow-auto font-mono text-sm"
                             style={{
-                                minWidth: '300px',
-                                height: `${currentCode.split('\n').length * 1.5}em`,
-                                minHeight: '3em',
-                                whiteSpace: 'pre',
-                                backgroundColor: ideStyle.backgroundColor || '#f0f0f0',
-                                color: ideStyle.textColor || '#000000',
-                            }}
-                        >
+                                backgroundColor: customization.ide?.backgroundColor || '#f0f0f0',
+                                color: customization.ide?.textColor || '#000000'
+                            }}>
                             {currentCode}
                         </pre>
                     )}
@@ -150,11 +150,11 @@ const PythonBlock: React.FC<BlockProps & {
     );
 };
 
-export const ClassBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="class" />;
-export const FunctionBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="class_function" />;
-export const ClassStandaloneBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="class_standalone" />;
-export const CodeBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="code" />;
-export const StandaloneFunctionBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="standalone_function" />;
+export const ClassBlock: React.FC<BlockProps> = (props) => <Block {...props} />;
+export const FunctionBlock: React.FC<BlockProps> = (props) => <Block {...props} />;
+export const ClassStandaloneBlock: React.FC<BlockProps> = (props) => <Block {...props} />;
+export const CodeBlock: React.FC<BlockProps> = (props) => <Block {...props} />;
+export const StandaloneFunctionBlock: React.FC<BlockProps> = (props) => <Block {...props} />;
 
 export default {
     ClassBlock,

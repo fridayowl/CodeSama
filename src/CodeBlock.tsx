@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Edit, Save, LucideIcon } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { Eye, EyeOff, Edit, Save, Info, FileText, TestTube, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface CodeBlockProps {
     id: string;
@@ -12,11 +11,8 @@ interface CodeBlockProps {
     code: string;
     onVisibilityChange: (id: string, isVisible: boolean) => void;
     onCodeChange?: (id: string, newCode: string) => void;
-    isStandalone?: boolean;
     customization: any;
 }
-
-type IconName = keyof typeof LucideIcons;
 
 const CodeBlock: React.FC<CodeBlockProps> = ({
     id,
@@ -28,15 +24,14 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
     code,
     onVisibilityChange,
     onCodeChange,
-    isStandalone = false,
     customization
 }) => {
     const [isVisible, setIsVisible] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
+    const [isDetailsVisible, setIsDetailsVisible] = useState(false);
     const [currentCode, setCurrentCode] = useState(code);
 
     const blockStyle = customization.blocks[type];
-    const IconComponent = (LucideIcons[blockStyle.icon as IconName] || LucideIcons.File) as LucideIcon;
 
     const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setCurrentCode(e.target.value);
@@ -59,6 +54,10 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
         setIsEditing(!isEditing);
     };
 
+    const toggleDetails = () => {
+        setIsDetailsVisible(!isDetailsVisible);
+    };
+
     return (
         <div className="w-full max-w-3xl rounded-lg shadow-md overflow-hidden"
             style={{
@@ -66,12 +65,16 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
                 borderColor: blockStyle.borderColor,
                 color: blockStyle.textColor
             }}>
-            <div className="p-4 flex justify-between items-center">
-                <div className="flex items-center">
-                    <IconComponent size={24} className="mr-2" />
-                    <h3 className="font-bold text-lg">{name}</h3>
-                </div>
+            <div className="p-2 flex justify-between items-center" style={{ backgroundColor: blockStyle.headerColor }}>
+                <h3 className="font-bold text-lg">{name}</h3>
                 <div className="flex space-x-2">
+                    <button
+                        onClick={toggleDetails}
+                        className="p-1 bg-gray-200 rounded hover:bg-gray-300"
+                        title="Show/Hide Details"
+                    >
+                        <Info size={16} />
+                    </button>
                     <button
                         onClick={toggleEditing}
                         className="p-1 bg-gray-200 rounded hover:bg-gray-300"
@@ -86,14 +89,28 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
                     >
                         {isVisible ? <Eye size={16} /> : <EyeOff size={16} />}
                     </button>
+                    <button
+                        className="p-1 bg-gray-200 rounded hover:bg-gray-300"
+                        title="Documentation"
+                    >
+                        <FileText size={16} />
+                    </button>
+                    <button
+                        className="p-1 bg-gray-200 rounded hover:bg-gray-300"
+                        title="Testing"
+                    >
+                        <TestTube size={16} />
+                    </button>
                 </div>
             </div>
-            <div className="px-4 pb-2">
-                <p className="text-sm">Type: {type}</p>
-                <p className="text-sm">File: {fileType}</p>
-                <p className="text-sm">Location: {location}</p>
-                <p className="text-sm">Author: {author}</p>
-            </div>
+            {isDetailsVisible && (
+                <div className="px-4 py-2 bg-gray-100">
+                    <p className="text-sm">Type: {type}</p>
+                    <p className="text-sm">File: {fileType}</p>
+                    <p className="text-sm">Location: {location}</p>
+                    <p className="text-sm">Author: {author}</p>
+                </div>
+            )}
             {isVisible && (
                 <div className="p-4">
                     {isEditing ? (

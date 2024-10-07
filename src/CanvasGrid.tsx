@@ -11,11 +11,11 @@ interface CanvasGridProps {
     isFlowVisible: boolean;
     onPositionChange: (id: string, x: number, y: number) => void;
     onVisibilityChange: (id: string, isVisible: boolean) => void;
+    onCodeChange: (id: string, newCode: string) => void;
     getVisibleBlocks: () => ExtendedBlockData[];
     getVisibleConnections: () => Connection[];
     fileContent: string | null;
     fileName: string;
-    onCodeChange: (newCode: string) => void;
     onFlowVisibilityChange: (isVisible: boolean) => void;
     zoomLevel: number;
     idePosition: { x: number; y: number };
@@ -28,11 +28,11 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
     isFlowVisible,
     onPositionChange,
     onVisibilityChange,
+    onCodeChange,
     getVisibleBlocks,
     getVisibleConnections,
     fileContent,
     fileName,
-    onCodeChange,
     onFlowVisibilityChange,
     zoomLevel,
     idePosition,
@@ -52,8 +52,8 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
         return {
             x: block.x * zoomLevel,
             y: block.y * zoomLevel,
-            width: 200 * zoomLevel,
-            height: 100 * zoomLevel
+            width: 300 * zoomLevel,  // Increased width to accommodate new features
+            height: 150 * zoomLevel  // Increased height to accommodate new features
         };
     };
 
@@ -65,29 +65,34 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
         return { x: isStart ? x : x + width, y: y + height / 2 };
     };
 
-    const sourceClassBlock = blocks.find(block => block.type === 'class');
-
-    const updatedConnections: Connection[] = getVisibleConnections().map(conn => {
-        if (conn.start === 'python-ide' && blocks.find(b => b.id === conn.end)?.type === 'class_standalone') {
-            return {
-                ...conn,
-                start: sourceClassBlock ? sourceClassBlock.id : 'python-ide',
-                startPoint: sourceClassBlock
-                    ? getAdjustedPosition(sourceClassBlock.id, true)
-                    : getAdjustedPosition('python-ide', true),
-                type: 'class_to_standalone',
-                startBlockType: sourceClassBlock ? 'class' : 'code',
-                endBlockType: 'class_standalone'
-            };
-        }
-        return {
-            ...conn,
-            startPoint: getAdjustedPosition(conn.start, true),
-            endPoint: getAdjustedPosition(conn.end, false),
-            startBlockType: (blocks.find(b => b.id === conn.start)?.type || 'code') as Connection['startBlockType'],
-            endBlockType: (blocks.find(b => b.id === conn.end)?.type || 'code') as Connection['endBlockType']
+    const renderBlock = (item: ExtendedBlockData) => {
+        const commonProps = {
+            id: item.id,
+            name: item.name,
+            location: item.location,
+            author: item.author,
+            fileType: item.fileType,
+            code: item.code,
+            onVisibilityChange: onVisibilityChange,
+            onCodeChange: (newCode: string) => onCodeChange(item.id, newCode),
+            customization: customization
         };
-    });
+
+        switch (item.type) {
+            case 'class':
+                return <ClassBlock {...commonProps} type="class" />;
+            case 'class_function':
+                return <FunctionBlock {...commonProps} type="class_function" />;
+            case 'class_standalone':
+                return <ClassStandaloneBlock {...commonProps} type="class_standalone" />;
+            case 'code':
+                return <CodeBlock {...commonProps} type="code" />;
+            case 'standalone_function':
+                return <StandaloneFunctionBlock {...commonProps} type="standalone_function" />;
+            default:
+                return null;
+        }
+    };
 
     return (
         <div className="relative w-full h-full" style={{
@@ -106,66 +111,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                     title={item.name}
                     zoomLevel={zoomLevel}
                 >
-                    {item.type === 'class' && (
-                        <ClassBlock
-                            id={item.id}
-                            name={item.name}
-                            location={item.location}
-                            author={item.author}
-                            fileType={item.fileType}
-                            code={item.code}
-                            onVisibilityChange={onVisibilityChange}
-                            customization={customization}
-                        />
-                    )}
-                    {item.type === 'class_function' && (
-                        <FunctionBlock
-                            id={item.id}
-                            name={item.name}
-                            location={`${item.location} (${item.parentClass})`}
-                            author={item.author}
-                            fileType={item.fileType}
-                            code={item.code}
-                            onVisibilityChange={() => { }}
-                            customization={customization}
-                        />
-                    )}
-                    {item.type === 'class_standalone' && (
-                        <ClassStandaloneBlock
-                            id={item.id}
-                            name={item.name}
-                            location={item.location}
-                            author={item.author}
-                            fileType={item.fileType}
-                            code={item.code}
-                            onVisibilityChange={onVisibilityChange}
-                            customization={customization}
-                        />
-                    )}
-                    {item.type === 'code' && (
-                        <CodeBlock
-                            id={item.id}
-                            name={item.name}
-                            location={item.location}
-                            author={item.author}
-                            fileType={item.fileType}
-                            code={item.code}
-                            onVisibilityChange={onVisibilityChange}
-                            customization={customization}
-                        />
-                    )}
-                    {item.type === 'standalone_function' && (
-                        <StandaloneFunctionBlock
-                            id={item.id}
-                            name={item.name}
-                            location={item.location}
-                            author={item.author}
-                            fileType={item.fileType}
-                            code={item.code}
-                            onVisibilityChange={onVisibilityChange}
-                            customization={customization}
-                        />
-                    )}
+                    {renderBlock(item)}
                 </DraggableWrapper>
             ))}
 
@@ -179,7 +125,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
             >
                 <PythonIDE
                     fileContent={fileContent}
-                    onCodeChange={onCodeChange}
+                    onCodeChange={(newCode) => onCodeChange('python-ide', newCode)}
                     fileName={fileName}
                     onFlowVisibilityChange={onFlowVisibilityChange}
                     customization={customization.ide}
@@ -188,7 +134,11 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
 
             {isFlowVisible && (
                 <Connections
-                    connections={updatedConnections}
+                    connections={getVisibleConnections().map(conn => ({
+                        ...conn,
+                        startPoint: getAdjustedPosition(conn.start, true),
+                        endPoint: getAdjustedPosition(conn.end, false)
+                    }))}
                     zoomLevel={zoomLevel}
                     getBlockPosition={getBlockPosition}
                     customization={customization.connections}

@@ -3,44 +3,59 @@
     "class": {
       "backgroundColor": "#E3F2FD",
       "borderColor": "#1E88E5",
-      "textColor": "#0D47A1"
+      "textColor": "#0D47A1",
+      "headerColor": "#BBDEFB"
     },
     "class_function": {
       "backgroundColor": "#E8F5E9",
       "borderColor": "#43A047",
-      "textColor": "#1B5E20"
+      "textColor": "#1B5E20",
+      "headerColor": "#C8E6C9"
     },
     "code": {
       "backgroundColor": "#FFF3E0",
       "borderColor": "#FB8C00",
-      "textColor": "#E65100"
+      "textColor": "#E65100",
+      "headerColor": "#FFE0B2"
     },
     "class_standalone": {
       "backgroundColor": "#F3E5F5",
       "borderColor": "#8E24AA",
-      "textColor": "#4A148C"
+      "textColor": "#4A148C",
+      "headerColor": "#E1BEE7"
+    },
+    "standalone_function": {
+      "backgroundColor": "#E1F5FE",
+      "borderColor": "#03A9F4",
+      "textColor": "#01579B",
+      "headerColor": "#B3E5FC"
     }
   },
   "connections": {
     "inherits": {
       "lineColor": "#3B82F6",
-      "arrowHead": "triangle"
+      "arrowHead": "triangle",
+      "lineStyle": "solid"
     },
     "composes": {
       "lineColor": "#10B981",
-      "arrowHead": "diamond"
+      "arrowHead": "diamond",
+      "lineStyle": "dashed"
     },
     "uses": {
       "lineColor": "#8B5CF6",
-      "arrowHead": "arrow"
+      "arrowHead": "arrow",
+      "lineStyle": "solid"
     },
     "class_contains_functions": {
       "lineColor": "#F59E0B",
-      "arrowHead": "circle"
+      "arrowHead": "circle",
+      "lineStyle": "dotted"
     },
     "codeLink": {
       "lineColor": "#F97316",
-      "arrowHead": "arrow"
+      "arrowHead": "arrow",
+      "lineStyle": "solid"
     },
     "class_to_standalone": {
       "lineColor": "#EC4899",
