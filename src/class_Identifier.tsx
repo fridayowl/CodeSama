@@ -1,6 +1,6 @@
 import { BlockData } from './fileProcessor';
 
-export function identifyClasses(fileContent: string): BlockData[] {
+export function identifyClasses(fileContent: string,fileName:string): BlockData[] {
     const lines = fileContent.split('\n');
     const classes: BlockData[] = [];
     let currentClass: BlockData | null = null;
@@ -18,7 +18,7 @@ export function identifyClasses(fileContent: string): BlockData[] {
             const name = trimmedLine.split(' ')[1].split('(')[0];
 
             currentClass = {
-                id: `${name}Class`,
+                id: `${fileName}.${name}`,
                 type: 'class',
                 name,
                 location: 'Uploaded file',

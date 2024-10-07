@@ -23,8 +23,9 @@ export interface ConnectionData {
     toConnector: string;
 }
 export async function generateJsonFromPythonFile(fileContent: string,name:string): Promise<BlockData[]> {
-    const classes = identifyClasses(fileContent);
-    const functions = identifyFunctionsAndConnections(fileContent, classes);
+    const classes = identifyClasses(fileContent,name);
+    const functions = identifyFunctionsAndConnections(fileContent, classes,name);
+    console.log("functions",functions)
     const standaloneCodeBlocks = identifyCodeBlocks(fileContent,name);
     const ClassStandaloneCode = identifyClassStandaloneCode(fileContent,classes);
     const standaloneFunctions = identifyStandaloneFunctions(fileContent,name);

@@ -25,10 +25,9 @@ class DataProcessor:
         return self.processed_data
     print("adbc")
 
-
 print("test")
 print("test1")
-def process1(self):
+def process(self):
         """Apply all data processing steps."""
         self.processed_data = (
             self.clean_data()

@@ -1,6 +1,6 @@
 import { BlockData, ConnectionData } from './fileProcessor';
 
-export function identifyFunctionsAndConnections(fileContent: string, classes: BlockData[]): BlockData[] {
+export function identifyFunctionsAndConnections(fileContent: string, classes: BlockData[],fileName:string): BlockData[] {
     const lines = fileContent.split('\n');
     const functions: BlockData[] = [];
     let currentFunction: BlockData | null = null;
@@ -54,7 +54,7 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
             const functionName = functionNameMatch ? functionNameMatch[1] : 'Unknown';
 
             currentFunction = {
-                id: `${functionName}Function`,
+                id: `${fileName}.${currentClass.name}.${functionName}`,
                 type: 'class_function',
                 name: functionName,
                 location: 'Uploaded file',

@@ -45,10 +45,10 @@ const DesignCanvas: React.FC = () => {
     const [isSettingsPanelOpen, setIsSettingsPanelOpen] = useState(false);
     const [isTemplatesPanelOpen, setIsTemplatesPanelOpen] = useState(false);
 
-    const loadFile = useCallback(async (content: string, name: string) => {
+    const loadFile = useCallback(async (content: string) => {
         try {
-            console.log("filename",name)
-            const jsonData = await generateJsonFromPythonFile(content,name);
+            const jsonData = await generateJsonFromPythonFile(content, fileName);
+            console.log('Loaded JSON data:', jsonData); // Debugging log
 
             let classY = 100;
             let functionY = 220;
@@ -99,22 +99,18 @@ const DesignCanvas: React.FC = () => {
             }).filter(Boolean) as ExtendedBlockData[];
 
             setBlocks(modifiedBlocks);
+            console.log('Set blocks:', modifiedBlocks); // Debugging log
             setRefreshKey(prevKey => prevKey + 1);
         } catch (error) {
             console.error('Error processing file:', error);
         }
-    }, []);
+    }, [fileName]);
 
     useEffect(() => {
-        if (fileContent && fileName) {
-            loadFile(fileContent, fileName);
+        if (fileContent) {
+            loadFile(fileContent);
         }
-    }, [fileContent, fileName, loadFile]);
-
-    const handleCodeChange = (newCode: string) => {
-        setFileContent(newCode);
-        loadFile(newCode, fileName);
-    };
+    }, [fileContent, loadFile]);
 
     const getConnectionPoints = useCallback((startBlock: ExtendedBlockData, endBlock: ExtendedBlockData) => {
         return {
@@ -275,7 +271,11 @@ const DesignCanvas: React.FC = () => {
         }
     };
 
-    
+    const handleCodeChange = (newCode: string) => {
+        setFileContent(newCode);
+        loadFile(newCode);
+    };
+
     const handleFlowVisibilityChange = (isVisible: boolean) => {
         setIsFlowVisible(isVisible);
     };
@@ -358,7 +358,7 @@ const DesignCanvas: React.FC = () => {
     }, [blocks, autoZoom, calculateBoundingBox]);
 
     useEffect(() => {
-        adjustZoom(); 
+        adjustZoom();
     }, [blocks, adjustZoom]);
 
     const toggleAutoZoom = () => {
