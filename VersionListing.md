@@ -69,7 +69,7 @@ working 2.6 - Closing functions for single file
         Single file 
         - Idenfy the standalone code inside a class 
             @done
-        - Identify the standalone code and functions seperatly 
+        - Identify the standalone code and functions seperatly  @done
         - Fix the connectors not moving as desired 
         - Set the zoom level to 70% 
         -Fix setting unique id for the blocks rather than the function name or code name

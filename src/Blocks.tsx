@@ -58,7 +58,8 @@ const PythonCodeEditor: React.FC<{ code: string; onChange: (code: string) => voi
     );
 };
 
-const PythonBlock: React.FC<BlockProps & { type: 'class' | 'class_function' | 'code' | 'class_standalone' }> = ({
+const PythonBlock: React.FC<BlockProps & {
+    type: 'class' | 'class_function' | 'code' | 'class_standalone' | 'standalone_function' }> = ({
     id, name, location, author, fileType, code, onVisibilityChange, type, customization
 }) => {
     const [isVisible, setIsVisible] = useState(true);
@@ -153,10 +154,12 @@ export const ClassBlock: React.FC<BlockProps> = (props) => <PythonBlock {...prop
 export const FunctionBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="class_function" />;
 export const ClassStandaloneBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="class_standalone" />;
 export const CodeBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="code" />;
+export const StandaloneFunctionBlock: React.FC<BlockProps> = (props) => <PythonBlock {...props} type="standalone_function" />;
 
 export default {
     ClassBlock,
     FunctionBlock,
     ClassStandaloneBlock,
     CodeBlock,
+    StandaloneFunctionBlock
 };

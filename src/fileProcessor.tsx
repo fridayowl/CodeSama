@@ -2,10 +2,10 @@ import { identifyClasses } from './class_Identifier';
 import { identifyFunctionsAndConnections } from './class_functions_Identifier';
 import { identifyCodeBlocks } from './standalone_codeBlockIdentifier';
 import { identifyClassStandaloneCode } from './class_standalone_Identifier';
-
+import { identifyStandaloneFunctions } from './standalone_codeFunctionIdentifier';
 export interface BlockData {
     id: string;
-    type: 'class' | 'class_function' | 'code' | 'class_standalone';
+    type: 'class' | 'class_function' | 'code' | 'class_standalone' | 'standalone_function';
     name: string;
     location: string;
     author: string;
@@ -22,18 +22,18 @@ export interface ConnectionData {
     fromConnector: string;
     toConnector: string;
 }
-
 export async function generateJsonFromPythonFile(fileContent: string): Promise<BlockData[]> {
     const classes = identifyClasses(fileContent);
     const functions = identifyFunctionsAndConnections(fileContent, classes);
     const standaloneCodeBlocks = identifyCodeBlocks(fileContent);
     const ClassStandaloneCode = identifyClassStandaloneCode(fileContent,classes);
-    console.log(ClassStandaloneCode)
+    const standaloneFunctions = identifyStandaloneFunctions(fileContent);
+    console.log(standaloneFunctions)
 
     // Only include standalone classes if there are regular classes
     const finalBlocks = classes.length > 0
-        ? [...classes, ...functions, ...standaloneCodeBlocks, ...ClassStandaloneCode]
-        : [...classes, ...functions, ...standaloneCodeBlocks];
+        ? [...classes, ...functions, ...standaloneCodeBlocks, ...ClassStandaloneCode, ...standaloneFunctions]
+        : [...classes, ...functions, ...standaloneCodeBlocks, ...standaloneFunctions];
 
     return finalBlocks;
 }

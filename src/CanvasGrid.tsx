@@ -1,7 +1,7 @@
 import React from 'react';
 import DraggableWrapper from './DraggableWrapper';
 import Connections from './Connections';
-import { ClassBlock, FunctionBlock, ClassStandaloneBlock, CodeBlock } from './Blocks';
+import { ClassBlock, FunctionBlock, ClassStandaloneBlock, CodeBlock, StandaloneFunctionBlock } from './Blocks';
 import PythonIDE from './PythonIDE';
 import { ExtendedBlockData, Connection } from './DesignCanvas';
 
@@ -144,6 +144,18 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                     )}
                     {item.type === 'code' && (
                         <CodeBlock
+                            id={item.id}
+                            name={item.name}
+                            location={item.location}
+                            author={item.author}
+                            fileType={item.fileType}
+                            code={item.code}
+                            onVisibilityChange={onVisibilityChange}
+                            customization={customization}
+                        />
+                    )}
+                    {item.type === 'standalone_function' && (
+                        <StandaloneFunctionBlock
                             id={item.id}
                             name={item.name}
                             location={item.location}

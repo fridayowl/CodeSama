@@ -21,8 +21,8 @@ export interface Connection {
     type: ConnectionData['type'];
     fromConnector: string;
     toConnector: string;
-    startBlockType: 'class' | 'class_function' | 'code' | 'class_standalone';
-    endBlockType: 'class' | 'class_function' | 'code' | 'class_standalone';
+    startBlockType: 'class' | 'class_function' | 'code' | 'class_standalone' | 'standalone_function';
+    endBlockType: 'class' | 'class_function' | 'code' | 'class_standalone' | 'standalone_function';
 }
 
 const DesignCanvas: React.FC = () => {
@@ -53,6 +53,7 @@ const DesignCanvas: React.FC = () => {
             let functionY = 220;
             let codeY = 100;
             let standaloneY = 220;
+            let standaloneFunctionY = 340;
 
             const classes = jsonData.filter(block => block.type === 'class');
 
@@ -81,18 +82,20 @@ const DesignCanvas: React.FC = () => {
                     y = Math.max(classY, functionY, codeY);
                     codeY = y + 150;
                 } else if (block.type === 'class_standalone') {
-                    // Only include standalone classes if there are regular classes
                     if (classes.length > 0) {
                         x = 2200;
                         y = standaloneY;
                         standaloneY += 250;
                     } else {
-                        // If there are no regular classes, don't include this block
                         return null;
                     }
+                } else if (block.type === 'standalone_function') {
+                    x = 2200;
+                    y = standaloneFunctionY;
+                    standaloneFunctionY += 150;
                 }
                 return { ...block, x, y } as ExtendedBlockData;
-            }).filter(Boolean) as ExtendedBlockData[]; // Remove any null entries
+            }).filter(Boolean) as ExtendedBlockData[];
 
             setBlocks(modifiedBlocks);
             setRefreshKey(prevKey => prevKey + 1);
@@ -120,6 +123,7 @@ const DesignCanvas: React.FC = () => {
         const functionBlocks = blocks.filter(block => block.type === 'class_function');
         const codeBlocks = blocks.filter(block => block.type === 'code');
         const classStandaloneBlocks = blocks.filter(block => block.type === 'class_standalone');
+        const standaloneFunctionBlocks = blocks.filter(block => block.type === 'standalone_function');
 
         classBlocks.forEach(classBlock => {
             functionBlocks.forEach(functionBlock => {
@@ -213,6 +217,23 @@ const DesignCanvas: React.FC = () => {
             }
         });
 
+        standaloneFunctionBlocks.forEach(functionBlock => {
+            const ideBlock = { x: idePosition.x, y: idePosition.y, id: 'python-ide' } as ExtendedBlockData;
+            const { startPoint, endPoint } = getConnectionPoints(ideBlock, functionBlock);
+            newConnections.push({
+                id: `IDE-${functionBlock.id}`,
+                start: 'python-ide',
+                end: functionBlock.id,
+                startPoint: { x: startPoint.x + 600, y: startPoint.y + 30 },
+                endPoint,
+                type: 'uses',
+                fromConnector: 'output',
+                toConnector: 'input',
+                startBlockType: 'code',
+                endBlockType: 'standalone_function'
+            });
+        });
+
         setConnections(newConnections);
     }, [blocks, idePosition, getConnectionPoints]);
 
@@ -263,7 +284,7 @@ const DesignCanvas: React.FC = () => {
 
     const getVisibleBlocks = useCallback(() => {
         return blocks.filter(block => {
-            if (block.type === 'class' || block.type === 'code' || block.type === 'class_standalone') return true;
+            if (block.type === 'class' || block.type === 'code' || block.type === 'class_standalone' || block.type === 'standalone_function') return true;
             const parentClass = blocks.find(b => b.type === 'class' && block.id.startsWith(`${b.name}_`));
             return parentClass ? classVisibility[parentClass.id] !== false : true;
         });
