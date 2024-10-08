@@ -96,33 +96,33 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
             <defs>
                 <marker
                     id="arrowhead-triangle"
-                    markerWidth="10"
-                    markerHeight="7"
+                    markerWidth="6"   
+                    markerHeight="4"  
                     refX="0"
-                    refY="3.5"
+                    refY="2"
                     orient="auto"
                 >
-                    <polygon points="0 0, 10 3.5, 0 7" />
+                    <polygon points="0 0, 6 2, 0 4" />
                 </marker>
                 <marker
                     id="arrowhead-diamond"
-                    markerWidth="10"
-                    markerHeight="10"
+                    markerWidth="6" 
+                    markerHeight="6"  
                     refX="0"
-                    refY="5"
+                    refY="3"
                     orient="auto"
                 >
-                    <path d="M0,5 L5,0 L10,5 L5,10 Z" />
+                    <path d="M0,3 L3,0 L6,3 L3,6 Z" />
                 </marker>
                 <marker
                     id="arrowhead-circle"
-                    markerWidth="10"
-                    markerHeight="10"
-                    refX="5"
-                    refY="5"
+                    markerWidth="6"    
+                    markerHeight="6"  
+                    refX="3"
+                    refY="3"
                     orient="auto"
                 >
-                    <circle cx="5" cy="5" r="3" />
+                    <circle cx="3" cy="3" r="2" />
                 </marker>
                 <filter id="glow">
                     <feGaussianBlur stdDeviation="2" result="coloredBlur" />
