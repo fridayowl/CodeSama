@@ -11,16 +11,18 @@ interface ConnectionsProps {
     connections: Connection[];
     zoomLevel: number;
     getBlockPosition: (id: string) => { x: number; y: number; width: number; height: number };
+    getBlockType: (id: string) => string;
     customization: any;
 }
 
 const defaultConnectionColor = "#000000";
+const HEADER_HEIGHT = 40; // Estimated height of the header
+const CONNECTOR_OFFSET_X = 5; // Horizontal offset from the edge of the block
 
-const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBlockPosition, customization }) => {
+const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBlockPosition, getBlockType, customization }) => {
     const [renderedConnections, setRenderedConnections] = useState<Connection[]>([]);
 
     useEffect(() => {
-        // Delay the rendering of connections slightly to ensure block positions are updated
         const timer = setTimeout(() => {
             setRenderedConnections(connections);
         }, 100);
@@ -28,35 +30,35 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
         return () => clearTimeout(timer);
     }, [connections]);
 
-    const getBezierPath = (start: Point, end: Point, type: Connection['type']): string => {
-        const midX = (start.x + end.x) / 2;
-        const dx = end.x - start.x;
-        const dy = end.y - start.y;
-        const curvature = type === 'class_to_standalone' ? 0.7 : 0.5;
+    const getConnectionPoint = (blockId: string, isStart: boolean): Point => {
+        const block = getBlockPosition(blockId);
+        const blockType = getBlockType(blockId);
+        const isIdeOrClass = blockId === 'python-ide' || blockType === 'class';
 
-        let controlPoint1, controlPoint2;
-
-        if (dx < 0) {
-            controlPoint1 = {
-                x: start.x - Math.abs(dx) * curvature,
-                y: start.y
-            };
-            controlPoint2 = {
-                x: end.x + Math.abs(dx) * curvature,
-                y: end.y
+        if (isStart && isIdeOrClass) {
+            // Start from the right side for IDE and class blocks
+            return {
+                x: block.x + block.width - CONNECTOR_OFFSET_X,
+                y: block.y + HEADER_HEIGHT / 2
             };
         } else {
-            controlPoint1 = {
-                x: start.x + dx * curvature,
-                y: start.y
-            };
-            controlPoint2 = {
-                x: end.x - dx * curvature,
-                y: end.y
+            // All other cases, use the left side
+            return {
+                x: block.x + CONNECTOR_OFFSET_X,
+                y: block.y + HEADER_HEIGHT / 2
             };
         }
+    };
 
-        return `M ${start.x},${start.y} C ${controlPoint1.x},${controlPoint1.y} ${controlPoint2.x},${controlPoint2.y} ${end.x},${end.y}`;
+    const getBezierPath = (start: Point, end: Point): string => {
+        const midX = (start.x + end.x) / 2;
+        const controlPoint1 = { x: midX, y: start.y };
+        const controlPoint2 = { x: midX, y: end.y };
+
+        return `M ${start.x},${start.y} 
+                C ${controlPoint1.x},${controlPoint1.y} 
+                  ${controlPoint2.x},${controlPoint2.y} 
+                  ${end.x},${end.y}`;
     };
 
     const getConnectionColor = (type: Connection['type']): string => {
@@ -131,17 +133,9 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
                 </filter>
             </defs>
             {renderedConnections.map((connection) => {
-                const startBlock = getBlockPosition(connection.start);
-                const endBlock = getBlockPosition(connection.end);
-                const startPos = {
-                    x: startBlock.x + startBlock.width / 2,
-                    y: startBlock.y + startBlock.height / 2
-                };
-                const endPos = {
-                    x: endBlock.x + endBlock.width / 2,
-                    y: endBlock.y + endBlock.height / 2
-                };
-                const path = getBezierPath(startPos, endPos, connection.type);
+                const startPos = getConnectionPoint(connection.start, true);
+                const endPos = getConnectionPoint(connection.end, false);
+                const path = getBezierPath(startPos, endPos);
                 const color = getConnectionColor(connection.type);
                 const style = getConnectionStyle(connection.type);
                 const IconComponent = getConnectionIcon(connection.type);

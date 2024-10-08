@@ -38,6 +38,9 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
     idePosition,
     customization
 }) => {
+    const HEADER_HEIGHT = 40; // Estimated height of the header
+    const CONNECTOR_OFFSET_X = 5; // Horizontal offset from the left edge of the block
+
     const getBlockPosition = (id: string) => {
         if (id === 'python-ide') {
             return {
@@ -52,17 +55,35 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
         return {
             x: block.x * zoomLevel,
             y: block.y * zoomLevel,
-            width: 300 * zoomLevel,  // Increased width to accommodate new features
-            height: 150 * zoomLevel  // Increased height to accommodate new features
+            width: 300 * zoomLevel,
+            height: 150 * zoomLevel // Assuming total height including header and content
         };
     };
 
+    const getBlockType = (id: string) => {
+        if (id === 'python-ide') return 'ide';
+        const block = blocks.find(b => b.id === id);
+        return block ? block.type : 'unknown';
+    };
+
     const getAdjustedPosition = (id: string, isStart: boolean) => {
-        const { x, y, width, height } = getBlockPosition(id);
-        if (id === 'python-ide' && isStart) {
-            return { x: x + width, y: y + height / 2 };
+        const { x, y, width } = getBlockPosition(id);
+        const blockType = getBlockType(id);
+        const isIdeOrClass = id === 'python-ide' || blockType === 'class';
+
+        if (isStart && isIdeOrClass) {
+            // Start from the right side for IDE and class blocks
+            return {
+                x: x + width - CONNECTOR_OFFSET_X * zoomLevel,
+                y: y + HEADER_HEIGHT / 2 * zoomLevel
+            };
+        } else {
+            // All other cases, use the left side
+            return {
+                x: x + CONNECTOR_OFFSET_X * zoomLevel,
+                y: y + HEADER_HEIGHT / 2 * zoomLevel
+            };
         }
-        return { x: isStart ? x : x + width, y: y + height / 2 };
     };
 
     const renderBlock = (item: ExtendedBlockData) => {
@@ -108,7 +129,6 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                     initialX={item.x}
                     initialY={item.y}
                     onPositionChange={onPositionChange}
-                    title={item.name}
                     zoomLevel={zoomLevel}
                 >
                     {renderBlock(item)}
@@ -120,7 +140,6 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                 initialX={idePosition.x}
                 initialY={idePosition.y}
                 onPositionChange={onPositionChange}
-                title="Python IDE"
                 zoomLevel={zoomLevel}
             >
                 <PythonIDE
@@ -141,6 +160,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                     }))}
                     zoomLevel={zoomLevel}
                     getBlockPosition={getBlockPosition}
+                    getBlockType={getBlockType}
                     customization={customization.connections}
                 />
             )}

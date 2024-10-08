@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Move } from 'lucide-react';
 
 interface DraggableWrapperProps {
     id: string;
@@ -7,7 +6,6 @@ interface DraggableWrapperProps {
     initialY: number;
     onPositionChange: (id: string, x: number, y: number) => void;
     children: React.ReactNode;
-    title?: string;
     zoomLevel: number;
 }
 
@@ -17,7 +15,6 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
     initialY,
     onPositionChange,
     children,
-    title = "Draggable Item",
     zoomLevel
 }) => {
     const [position, setPosition] = useState({ x: initialX, y: initialY });
@@ -57,10 +54,8 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
     }, [isDragging, id, onPositionChange, position, zoomLevel]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
-        if (e.target === ref.current?.firstChild) {
-            setIsDragging(true);
-            dragStartPosition.current = { x: e.clientX, y: e.clientY };
-        }
+        setIsDragging(true);
+        dragStartPosition.current = { x: e.clientX, y: e.clientY };
     };
 
     return (
@@ -77,13 +72,7 @@ const DraggableWrapper: React.FC<DraggableWrapperProps> = ({
             }}
             onMouseDown={handleMouseDown}
         >
-            <div className="bg-gray-200 p-2 rounded-t flex items-center justify-between cursor-move">
-                <Move size={16} />
-                <span className="text-sm font-semibold">{title}</span>
-            </div>
-            <div className="bg-white border border-gray-300 rounded-b">
-                {children}
-            </div>
+            {children}
         </div>
     );
 };

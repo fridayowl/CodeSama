@@ -79,12 +79,14 @@ working 2.6 - Closing functions for single file
 Version 2.7 - Setting Connectors exact line of the ide  and also make this blocks smaller and compact 
             - add a directory viewer  @done 
             - make the block much more simpler and easy to view
+            Bug 
+            - for some reason  class stand alone codes are starting from ide not from class 
 
 
 
 
 
-Version 2.8 - Import (first phase of multiple pages) and inhertience  block (in heritinece in single file )
+Version 2.8 - Import (first phase of mul tiple pages) and inhertience  block (in heritinece in single file )
 
 
 
