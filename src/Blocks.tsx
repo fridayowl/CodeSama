@@ -146,7 +146,7 @@ const Block: React.FC<BlockProps> = ({
                                 }}
                             />
                             <button
-                                onClick={handleSave}
+                                // onClick={handleSave}
                                 className="mt-2 px-4 py-2 text-white rounded hover:bg-opacity-80"
                                 style={{ backgroundColor: customization.ide?.highlightColor || '#3b82f6' }}
                             >

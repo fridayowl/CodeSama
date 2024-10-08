@@ -84,6 +84,7 @@ Version 2.7 - Setting Connectors exact line of the ide  and also make this block
             Bug 
             - for some reason  class stand alone codes are starting from ide not from class  @done
             - fix when class hide is cliked it should hide the class standalone
+            - connecyion and blocks should update when ide updates 
 
 
 

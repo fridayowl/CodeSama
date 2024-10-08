@@ -126,7 +126,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
                                 }}
                             />
                             <button
-                                onClick={handleSave}
+                                // onClick={handleSave}
                                 className="mt-2 px-4 py-2 text-white rounded hover:bg-opacity-80"
                                 style={{ backgroundColor: customization.ide.highlightColor }}
                             >
