@@ -78,7 +78,9 @@ working 2.6 - Closing functions for single file
 
 Version 2.7 - Setting Connectors exact line of the ide  and also make this blocks smaller and compact 
             - add a directory viewer  @done 
-            - make the block much more simpler and easy to view
+            - make the block much more simpler and easy to view @done
+            -save last opened folder and last save settings
+            - gesture zoom in and zoom out on canvas
             Bug 
             - for some reason  class stand alone codes are starting from ide not from class  @done
             - fix when class hide is cliked it should hide the class standalone
