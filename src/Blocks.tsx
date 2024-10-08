@@ -79,9 +79,10 @@ const Block: React.FC<BlockProps> = ({
                 borderColor: blockStyle.borderColor || '#000000',
                 color: blockStyle.textColor || '#000000',
                 borderWidth: '2px',
-                borderStyle: 'solid'
+                borderStyle: 'solid',
+                paddingLeft: '20px' // Add this line for 20px left padding
             }}>
-            <div className="p-2 flex justify-between items-center" style={{ backgroundColor: blockStyle.headerColor || '#f0f0f0' }}>
+            <div className="p-2 flex justify-between items-center" style={{ backgroundColor: blockStyle.headerColor || '#f0f0f0', paddingLeft: '20px' }}>
                 <h3 className="font-bold text-lg">{name}</h3>
                 <div className="flex space-x-2">
                     <button
@@ -122,7 +123,7 @@ const Block: React.FC<BlockProps> = ({
                 </div>
             </div>
             {isDetailsVisible && (
-                <div className="px-4 py-2 bg-gray-100">
+                <div className="px-4 py-2 bg-gray-100" style={{ paddingLeft: '20px' }}>
                     <p className="text-sm">Type: {type}</p>
                     <p className="text-sm">File: {fileType}</p>
                     <p className="text-sm">Location: {location}</p>
@@ -130,7 +131,7 @@ const Block: React.FC<BlockProps> = ({
                 </div>
             )}
             {isVisible && (
-                <div className="p-4">
+                <div className="p-4" style={{ paddingLeft: '20px' }}>
                     {isEditing ? (
                         <>
                             <textarea
@@ -140,7 +141,8 @@ const Block: React.FC<BlockProps> = ({
                                 rows={currentCode.split('\n').length}
                                 style={{
                                     backgroundColor: customization.ide?.backgroundColor || '#f0f0f0',
-                                    color: customization.ide?.textColor || '#000000'
+                                    color: customization.ide?.textColor || '#000000',
+                                    paddingLeft: '20px' // Add padding here
                                 }}
                             />
                             <button
@@ -155,7 +157,8 @@ const Block: React.FC<BlockProps> = ({
                         <pre className="w-full p-2 border rounded overflow-auto font-mono text-sm"
                             style={{
                                 backgroundColor: customization.ide?.backgroundColor || '#f0f0f0',
-                                color: customization.ide?.textColor || '#000000'
+                                color: customization.ide?.textColor || '#000000',
+                                paddingLeft: '20px' // Add padding here
                             }}>
                             {currentCode}
                         </pre>
@@ -163,13 +166,13 @@ const Block: React.FC<BlockProps> = ({
                 </div>
             )}
             {isDocumentationVisible && (
-                <div className="p-4 bg-gray-50 border-t">
+                <div className="p-4 bg-gray-50 border-t" style={{ paddingLeft: '20px' }}>
                     <h4 className="font-semibold mb-2">Documentation</h4>
                     <p className="text-sm">This is a sample documentation for the {name} {type}. Replace this with actual documentation.</p>
                 </div>
             )}
             {isTestingVisible && (
-                <div className="p-4 bg-gray-50 border-t">
+                <div className="p-4 bg-gray-50 border-t" style={{ paddingLeft: '20px' }}>
                     <h4 className="font-semibold mb-2">Testing</h4>
                     <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
                         Run Tests
@@ -179,6 +182,7 @@ const Block: React.FC<BlockProps> = ({
             )}
         </div>
     );
+
 };
 
 export const ClassBlock: React.FC<BlockProps> = (props) => <Block {...props} />;

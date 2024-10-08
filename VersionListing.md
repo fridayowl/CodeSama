@@ -80,7 +80,8 @@ Version 2.7 - Setting Connectors exact line of the ide  and also make this block
             - add a directory viewer  @done 
             - make the block much more simpler and easy to view
             Bug 
-            - for some reason  class stand alone codes are starting from ide not from class 
+            - for some reason  class stand alone codes are starting from ide not from class  @done
+            - fix when class hide is cliked it should hide the class standalone
 
 
 

@@ -183,16 +183,15 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         });
 
         classStandaloneBlocks.forEach(classStandaloneBlock => {
-            const usageBlocks = blocks.filter(block =>
-                block.code.includes(classStandaloneBlock.name) &&
-                block.type === 'class'
+            const parentClass = classBlocks.find(classBlock =>
+                classStandaloneBlock.connections.some(conn => conn.to === classBlock.id)
             );
 
-            usageBlocks.forEach(usageBlock => {
-                const { startPoint, endPoint } = getConnectionPoints(usageBlock, classStandaloneBlock);
+            if (parentClass) {
+                const { startPoint, endPoint } = getConnectionPoints(parentClass, classStandaloneBlock);
                 newConnections.push({
-                    id: `${usageBlock.id}-${classStandaloneBlock.id}`,
-                    start: usageBlock.id,
+                    id: `${parentClass.id}-${classStandaloneBlock.id}`,
+                    start: parentClass.id,
                     end: classStandaloneBlock.id,
                     startPoint,
                     endPoint,
@@ -200,23 +199,6 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                     fromConnector: 'output',
                     toConnector: 'input',
                     startBlockType: 'class',
-                    endBlockType: 'class_standalone'
-                });
-            });
-
-            if (usageBlocks.length === 0) {
-                const ideBlock = { x: idePosition.x, y: idePosition.y, id: 'python-ide' } as ExtendedBlockData;
-                const { startPoint, endPoint } = getConnectionPoints(ideBlock, classStandaloneBlock);
-                newConnections.push({
-                    id: `IDE-${classStandaloneBlock.id}`,
-                    start: 'python-ide',
-                    end: classStandaloneBlock.id,
-                    startPoint: { x: startPoint.x + 600, y: startPoint.y + 30 },
-                    endPoint,
-                    type: 'class_to_standalone',
-                    fromConnector: 'output',
-                    toConnector: 'input',
-                    startBlockType: 'code',
                     endBlockType: 'class_standalone'
                 });
             }
@@ -368,8 +350,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const TemplateCard: React.FC<{ template: any }> = ({ template }) => (
         <div
             className="w-48 h-64 bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform hover:scale-105"
-            onClick={() => handleTemplateChange(template)}
-        >
+            onClick={() => handleTemplateChange(template)}>
             <div className="h-1/2 p-2 flex flex-col justify-between" style={{ backgroundColor: template.canvas.backgroundColor }}>
                 <div className="flex justify-between">
                     <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks.class.backgroundColor }} />

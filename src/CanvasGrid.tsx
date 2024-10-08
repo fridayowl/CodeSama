@@ -38,8 +38,8 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
     idePosition,
     customization
 }) => {
-    const HEADER_HEIGHT = 40; // Estimated height of the header
-    const CONNECTOR_OFFSET_X = 5; // Horizontal offset from the left edge of the block
+    const HEADER_HEIGHT = 40;
+    const CONNECTOR_OFFSET_X = 5;
 
     const getBlockPosition = (id: string) => {
         if (id === 'python-ide') {
@@ -56,7 +56,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
             x: block.x * zoomLevel,
             y: block.y * zoomLevel,
             width: 300 * zoomLevel,
-            height: 150 * zoomLevel // Assuming total height including header and content
+            height: 150 * zoomLevel
         };
     };
 
@@ -72,13 +72,11 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
         const isIdeOrClass = id === 'python-ide' || blockType === 'class';
 
         if (isStart && isIdeOrClass) {
-            // Start from the right side for IDE and class blocks
             return {
                 x: x + width - CONNECTOR_OFFSET_X * zoomLevel,
                 y: y + HEADER_HEIGHT / 2 * zoomLevel
             };
         } else {
-            // All other cases, use the left side
             return {
                 x: x + CONNECTOR_OFFSET_X * zoomLevel,
                 y: y + HEADER_HEIGHT / 2 * zoomLevel
