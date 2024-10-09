@@ -14,6 +14,7 @@ export interface BlockData {
     x: number;
     y: number;
     connections: ConnectionData[];
+    lineNumber: number
 }
 
 export interface ConnectionData {

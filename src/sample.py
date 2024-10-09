@@ -1,3 +1,6 @@
+
+print("heello")
+
 class DataProcessor:
     print("hello")
     def __init__(self, data):

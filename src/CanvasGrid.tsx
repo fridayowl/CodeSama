@@ -92,6 +92,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
             author: item.author,
             fileType: item.fileType,
             code: item.code,
+            lineNumber:item.lineNumber,
             onVisibilityChange: onVisibilityChange,
             onCodeChange: (newCode: string) => onCodeChange(item.id, newCode),
             customization: customization

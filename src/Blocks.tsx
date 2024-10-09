@@ -9,6 +9,7 @@ interface BlockProps {
     author: string;
     fileType: string;
     code: string;
+    lineNumber?: number;
     onVisibilityChange: (id: string, isVisible: boolean) => void;
     onCodeChange?: (id: string, newCode: string) => void;
     customization: any;
@@ -22,10 +23,12 @@ const Block: React.FC<BlockProps> = ({
     author,
     fileType,
     code,
+    lineNumber,
     onVisibilityChange,
     onCodeChange,
     customization
 }) => {
+    console.log("Line number ",lineNumber)
     const [isVisible, setIsVisible] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [isDetailsVisible, setIsDetailsVisible] = useState(false);
@@ -72,6 +75,19 @@ const Block: React.FC<BlockProps> = ({
         setIsTestingVisible(!isTestingVisible);
     };
 
+    const renderCodeWithLineNumbers = () => {
+        const lines = currentCode.split('\n');
+        const startLineNumber = lineNumber || 1;
+        return lines.map((line, index) => (
+            <div key={index} className="flex">
+                <span className="mr-4 text-gray-500 select-none" style={{ minWidth: '2em' }}>
+                    {startLineNumber + index}
+                </span>
+                <span>{line}</span>
+            </div>
+        ));
+    };
+
     return (
         <div className="w-full max-w-3xl rounded-lg shadow-md overflow-hidden"
             style={{
@@ -80,10 +96,13 @@ const Block: React.FC<BlockProps> = ({
                 color: blockStyle.textColor || '#000000',
                 borderWidth: '2px',
                 borderStyle: 'solid',
-                paddingLeft: '20px' // Add this line for 20px left padding
+                paddingLeft: '20px'
             }}>
             <div className="p-2 flex justify-between items-center" style={{ backgroundColor: blockStyle.headerColor || '#f0f0f0', paddingLeft: '20px' }}>
-                <h3 className="font-bold text-lg">{name}</h3>
+                <h3 className="font-bold text-lg">
+                    {name}
+                    {lineNumber && <span className="ml-2 text-sm font-normal">(Line {lineNumber})</span>}
+                </h3>
                 <div className="flex space-x-2">
                     <button
                         onClick={toggleDetails}
@@ -128,6 +147,7 @@ const Block: React.FC<BlockProps> = ({
                     <p className="text-sm">File: {fileType}</p>
                     <p className="text-sm">Location: {location}</p>
                     <p className="text-sm">Author: {author}</p>
+                    {lineNumber && <p className="text-sm">Line Number: {lineNumber}</p>}
                 </div>
             )}
             {isVisible && (
@@ -142,11 +162,11 @@ const Block: React.FC<BlockProps> = ({
                                 style={{
                                     backgroundColor: customization.ide?.backgroundColor || '#f0f0f0',
                                     color: customization.ide?.textColor || '#000000',
-                                    paddingLeft: '20px' // Add padding here
+                                    paddingLeft: '20px'
                                 }}
                             />
                             <button
-                                // onClick={handleSave}
+                                onClick={handleSave}
                                 className="mt-2 px-4 py-2 text-white rounded hover:bg-opacity-80"
                                 style={{ backgroundColor: customization.ide?.highlightColor || '#3b82f6' }}
                             >
@@ -158,9 +178,9 @@ const Block: React.FC<BlockProps> = ({
                             style={{
                                 backgroundColor: customization.ide?.backgroundColor || '#f0f0f0',
                                 color: customization.ide?.textColor || '#000000',
-                                paddingLeft: '20px' // Add padding here
+                                paddingLeft: '20px'
                             }}>
-                            {currentCode}
+                            {renderCodeWithLineNumbers()}
                         </pre>
                     )}
                 </div>
@@ -182,7 +202,6 @@ const Block: React.FC<BlockProps> = ({
             )}
         </div>
     );
-
 };
 
 export const ClassBlock: React.FC<BlockProps> = (props) => <Block {...props} />;

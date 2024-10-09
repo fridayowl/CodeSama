@@ -1,6 +1,5 @@
-import { BlockData, ConnectionData } from './fileProcessor';
-
-export function identifyFunctionsAndConnections(fileContent: string, classes: BlockData[],fileName:string): BlockData[] {
+import { BlockData  } from './fileProcessor';
+export function identifyFunctionsAndConnections(fileContent: string, classes: BlockData[], fileName: string): BlockData[] {
     const lines = fileContent.split('\n');
     const functions: BlockData[] = [];
     let currentFunction: BlockData | null = null;
@@ -38,7 +37,8 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
                 code: line,
                 x: 1200,
                 y: 100 + functions.length * 100,
-                connections: []
+                connections: [],
+                lineNumber: index + 1  // Set the correct line number
             };
 
             classIndentationLevel = currentIndentation;
@@ -63,7 +63,8 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
                 code: line,
                 x: 1200,
                 y: 100 + functions.length * 100,
-                connections: []
+                connections: [],
+                lineNumber: index + 1  // Set the correct line number for the function
             };
 
             indentationLevel = currentIndentation;
