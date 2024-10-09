@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Eye, EyeOff, RefreshCw } from 'lucide-react';
 
 interface PythonIDECustomization {
@@ -23,12 +23,10 @@ interface PythonIDEProps {
 }
 
 const defaultCustomization: PythonIDECustomization = {
-    
     backgroundColor: '#1E293B',
     textColor: '#E2E8F0',
     lineNumbersColor: '#64748B',
     highlightColor: '#2563EB'
-     
 };
 
 const PythonIDE: React.FC<PythonIDEProps> = ({
@@ -42,33 +40,45 @@ const PythonIDE: React.FC<PythonIDEProps> = ({
     const [isFlowVisible, setIsFlowVisible] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [localCustomization, setLocalCustomization] = useState({ ...defaultCustomization, ...propCustomization });
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [contentHeight, setContentHeight] = useState(0);
+
+    const lineHeight = 20; // Compact line height
+    const headerHeight = 40; // Height of the header
+    const extraLines = 2; // Number of extra lines to add at the end
+    const bottomPadding = 20; // Additional padding at the bottom
 
     useEffect(() => {
         if (propCustomization.ide) {
-            // Override default values with the nested 'ide' object properties
             setLocalCustomization({
                 ...defaultCustomization,
                 ...propCustomization.ide
             });
         } else {
-            // Use the values from propCustomization as is
             setLocalCustomization({
                 ...defaultCustomization,
                 ...propCustomization
             });
         }
     }, [propCustomization]);
+
     useEffect(() => {
         if (fileContent) {
-            setLines(fileContent.split('\n'));
+            const newLines = fileContent.split('\n');
+            setLines(newLines);
+            setContentHeight((newLines.length + extraLines) * lineHeight + headerHeight + bottomPadding);
         } else {
             setLines([]);
+            setContentHeight(lineHeight + headerHeight + bottomPadding);
         }
     }, [fileContent]);
 
     const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newContent = e.target.value;
-        setLines(newContent.split('\n'));
+        const newLines = newContent.split('\n');
+        setLines(newLines);
+        setContentHeight((newLines.length + extraLines) * lineHeight + headerHeight + bottomPadding);
         onCodeChange(newContent);
     };
 
@@ -88,8 +98,16 @@ const PythonIDE: React.FC<PythonIDEProps> = ({
     };
 
     return (
-        <div className="w-[600px] h-full rounded-lg shadow-md overflow-hidden flex flex-col" style={{ backgroundColor: localCustomization.backgroundColor }}>
-            <div className="py-2 px-4 font-semibold flex justify-between items-center" style={{ backgroundColor: localCustomization.highlightColor, color: localCustomization.textColor }}>
+        <div
+            ref={containerRef}
+            className="w-[600px] rounded-lg shadow-md overflow-hidden flex flex-col"
+            style={{
+                backgroundColor: localCustomization.backgroundColor,
+                height: `${contentHeight}px`
+            }}
+        >
+            <div className="py-2 px-4 font-semibold flex justify-between items-center"
+                style={{ backgroundColor: localCustomization.highlightColor, color: localCustomization.textColor, height: `${headerHeight}px` }}>
                 <span>{fileName}</span>
                 <div className="flex items-center">
                     <span className="text-sm mr-2" style={{ color: localCustomization.textColor }}>Location: Uploaded file</span>
@@ -114,23 +132,35 @@ const PythonIDE: React.FC<PythonIDEProps> = ({
                     </button>
                 </div>
             </div>
-            <div className="flex flex-grow overflow-hidden">
-                <div className="p-2 text-right select-none overflow-y-hidden" style={{ width: '40px', backgroundColor: localCustomization.lineNumbersColor, color: localCustomization.textColor }}>
-                    {lines.map((_, index) => (
-                        <div key={index} className="leading-6 text-xs">
+            <div className="flex flex-grow">
+                <div
+                    className="p-1 text-right select-none"
+                    style={{
+                        width: '30px',
+                        backgroundColor: localCustomization.lineNumbersColor,
+                        color: localCustomization.textColor
+                    }}
+                >
+                    {[...Array(lines.length + extraLines)].map((_, index) => (
+                        <div key={index} style={{ height: `${lineHeight}px`, fontSize: '10px', lineHeight: `${lineHeight}px` }}>
                             {index + 1}
                         </div>
                     ))}
                 </div>
                 <textarea
-                    className="flex-grow p-2 font-mono text-sm border-none resize-none outline-none overflow-y-scroll"
+                    ref={textareaRef}
+                    className="flex-grow p-1 font-mono text-sm border-none resize-none outline-none"
                     value={lines.join('\n')}
                     onChange={handleTextareaChange}
                     placeholder="Enter your Python code here..."
                     spellCheck="false"
                     style={{
                         backgroundColor: localCustomization.backgroundColor,
-                        color: localCustomization.textColor
+                        color: localCustomization.textColor,
+                        lineHeight: `${lineHeight}px`,
+                        fontSize: '12px',
+                        height: `${contentHeight - headerHeight}px`,
+                        paddingBottom: `${bottomPadding}px`
                     }}
                 />
             </div>
