@@ -155,10 +155,25 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     }, [selectedFile, selectedFileName, processFile]);
 
     const getConnectionPoints = useCallback((startBlock: ExtendedBlockData, endBlock: ExtendedBlockData) => {
-        
+        if (startBlock.type === 'class' && (endBlock.type === 'class_function' || endBlock.type === 'class_standalone')) {
+            const classLines = startBlock.code.split('\n');
+            const functionStartLine = classLines.findIndex(line =>
+                line.includes(`def ${endBlock.name}(`) || line.includes(endBlock.code.split('\n')[0])
+            );
+
+            if (functionStartLine !== -1) {
+                const startY = startBlock.y + (functionStartLine + 1) * 20; // Assuming 20px line height
+                return {
+                    startPoint: { x: startBlock.x + 640, y: startY +40 },
+                    endPoint: { x: endBlock.x, y: endBlock.y + 25 }
+                };
+            }
+        }
+
+        // Default connection points if not a class-to-function/standalone connection
         return {
             startPoint: { x: startBlock.x + 200, y: startBlock.y + 50 },
-            endPoint: { x: endBlock.x, y: endBlock.y + 50 }
+            endPoint: { x: endBlock.x, y: endBlock.y + 25 }
         };
     }, []);
 
