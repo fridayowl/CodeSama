@@ -24,6 +24,7 @@ export interface Connection {
     toConnector: string;
     startBlockType: 'class' | 'class_function' | 'code' | 'class_standalone' | 'standalone_function';
     endBlockType: 'class' | 'class_function' | 'code' | 'class_standalone' | 'standalone_function';
+    isVisible?: boolean;
 }
 
 interface DesignCanvasProps {
@@ -49,56 +50,57 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const [isSettingsPanelOpen, setIsSettingsPanelOpen] = useState(false);
     const [isTemplatesPanelOpen, setIsTemplatesPanelOpen] = useState(false);
 
+    const handleConnectionVisibilityChange = useCallback((connectionId: string, isVisible: boolean) => {
+        setConnections(prevConnections =>
+            prevConnections.map(conn =>
+                conn.id === connectionId ? { ...conn, isVisible } : conn
+            )
+        );
+    }, []);
 
     const processFile = useCallback(async (content: string, fileName: string) => {
         try {
             const jsonData = await generateJsonFromPythonFile(content, fileName);
             console.log('Loaded JSON data:', jsonData);
 
-            const UNIFORM_SPACING = 40; // Consistent spacing between blocks
-            const COLUMN_WIDTH = 300; // Width of each column
-            const IDE_WIDTH = 600; // Estimated width of the IDE
-            const X_OFFSET = IDE_WIDTH + 250; // Extra space after the IDE
+            const UNIFORM_SPACING = 40;
+            const COLUMN_WIDTH = 300;
+            const IDE_WIDTH = 600;
+            const X_OFFSET = IDE_WIDTH + 250;
 
             const getBlockHeight = (block: BlockData) => {
                 const lineCount = block.code.split('\n').length;
-                return Math.max(120, lineCount * 20 + 60); // 20px per line + 60px padding
+                return Math.max(120, lineCount * 20 + 60);
             };
 
-            // Separate blocks by type
             const classes = jsonData.filter(block => block.type === 'class');
             const standaloneCodes = jsonData.filter(block => block.type === 'code');
             const standaloneFunctions = jsonData.filter(block => block.type === 'standalone_function');
             const classFunctions = jsonData.filter(block => block.type === 'class_function');
             const classStandalones = jsonData.filter(block => block.type === 'class_standalone');
 
-            // Sort classes, standalone codes, and standalone functions by line number
             const sortedMainBlocks = [...classes, ...standaloneCodes, ...standaloneFunctions]
                 .sort((a, b) => a.lineNumber - b.lineNumber);
 
-            const sortedMainClassBlocks = [ ...classFunctions, ...classStandalones]
+            const sortedMainClassBlocks = [...classFunctions, ...classStandalones]
                 .sort((a, b) => a.lineNumber - b.lineNumber);
-            
-            console.log("sorted calss",sortedMainClassBlocks)
-            let currentY = 100; // Starting Y position
+
+            console.log("sorted class", sortedMainClassBlocks)
+            let currentY = 100;
 
             const modifiedBlocks: ExtendedBlockData[] = sortedMainBlocks.map((block) => {
-                const height = getBlockHeight(block) + 20; // Add extra 20px to each block
+                const height = getBlockHeight(block) + 20;
                 let x: number;
 
-                // Assign X position based on block type
                 switch (block.type) {
                     case 'class':
                         x = X_OFFSET;
                         break;
                     case 'code':
-                        x = X_OFFSET  ;
-                        break;
                     case 'standalone_function':
-                        x = X_OFFSET ;
-                        break;
                     default:
-                        x = X_OFFSET ; // For any other types
+                        x = X_OFFSET;
+                        break;
                 }
 
                 const newBlock = {
@@ -113,7 +115,6 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                 return newBlock;
             });
 
-            // Process class functions and class standalones (keep existing logic)
             let methodY = 100;
             const classFunctionBlocks = classFunctions.map((block) => {
                 const height = getBlockHeight(block) + 20;
@@ -152,6 +153,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             console.error('Error processing file:', error);
         }
     }, []);
+
     useEffect(() => {
         if (selectedFile && selectedFileName) {
             processFile(selectedFile, selectedFileName);
@@ -166,15 +168,14 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             );
 
             if (functionStartLine !== -1) {
-                const startY = startBlock.y + (functionStartLine + 1) * 20; // Assuming 20px line height
+                const startY = startBlock.y + (functionStartLine + 1) * 20;
                 return {
-                    startPoint: { x: startBlock.x + 640, y: startY +40 },
+                    startPoint: { x: startBlock.x + 640, y: startY + 40 },
                     endPoint: { x: endBlock.x, y: endBlock.y + 25 }
                 };
             }
         }
 
-        // Default connection points if not a class-to-function/standalone connection
         return {
             startPoint: { x: startBlock.x + 200, y: startBlock.y + 50 },
             endPoint: { x: endBlock.x, y: endBlock.y + 25 }
@@ -188,18 +189,18 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         );
 
         const getIDEConnectionStartPoint = (blockLineNumber: number) => {
-            const lineHeight = 20; // Adjust this value based on your IDE's line height
+            const lineHeight = 20;
             return {
-                x: idePosition.x + 600, // Assuming IDE width is 600px
-                y: idePosition.y + ((blockLineNumber - 1) * lineHeight)  +40// Subtract 1 to align with 0-indexed lines
+                x: idePosition.x + 600,
+                y: idePosition.y + ((blockLineNumber - 1) * lineHeight) + 40
             };
         };
 
         const connectBlockToIDE = (block: ExtendedBlockData) => {
-            console.log(block.id,block.lineNumber)
+            console.log(block.id, block.lineNumber)
             const startPoint = getIDEConnectionStartPoint(block.lineNumber);
             console.log("start point", startPoint)
-            const endPoint = { x: block.x, y: block.y + 25 }; // Adjust Y to connect to the top of the block
+            const endPoint = { x: block.x, y: block.y + 25 };
             newConnections.push({
                 id: `IDE-${block.id}`,
                 start: 'python-ide',
@@ -216,7 +217,6 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
 
         allBlocks.forEach(connectBlockToIDE);
 
-        // Keep existing connections for class functions and class standalones
         blocks.forEach(block => {
             if (block.type === 'class') {
                 const classFunctions = blocks.filter(b =>
@@ -259,7 +259,12 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             }
         });
 
-        setConnections(newConnections);
+        setConnections(prevConnections => {
+            return newConnections.map(newConn => {
+                const existingConn = prevConnections.find(conn => conn.id === newConn.id);
+                return existingConn ? { ...newConn, isVisible: existingConn.isVisible } : newConn;
+            });
+        });
     }, [blocks, idePosition, getConnectionPoints]);
 
     useEffect(() => {
@@ -302,15 +307,11 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     }, [blocks, classVisibility]);
 
     const getVisibleConnections = useCallback(() => {
-        return connections.filter(conn => {
-            const startBlock = blocks.find(b => b.id === conn.start);
-            const endBlock = blocks.find(b => b.id === conn.end);
-            if (startBlock?.type === 'class' && endBlock?.type === 'class_function') {
-                return classVisibility[startBlock.id] !== false;
-            }
-            return true;
-        });
-    }, [connections, blocks, classVisibility]);
+        return connections.map(conn => ({
+            ...conn,
+            isVisible: conn.isVisible !== false
+        }));
+    }, [connections]);
 
     const handleZoomIn = () => {
         setZoomLevel(prevZoom => Math.min(prevZoom + 0.1, 2));
@@ -465,7 +466,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                     <CanvasGrid
                         key={refreshKey}
                         blocks={blocks}
-                        connections={connections}
+                        connections={getVisibleConnections()}
                         isFlowVisible={isFlowVisible}
                         onPositionChange={handlePositionChange}
                         onVisibilityChange={handleClassVisibilityChange}
@@ -478,6 +479,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                         zoomLevel={zoomLevel}
                         idePosition={idePosition}
                         customization={customization}
+                        onConnectionVisibilityChange={handleConnectionVisibilityChange}
                     />
                 </div>
             </div>

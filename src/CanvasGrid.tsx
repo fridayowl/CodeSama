@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import DraggableWrapper from './DraggableWrapper';
 import Connections from './Connections';
 import { ClassBlock, FunctionBlock, ClassStandaloneBlock, CodeBlock, StandaloneFunctionBlock } from './Blocks';
@@ -20,6 +20,7 @@ interface CanvasGridProps {
     zoomLevel: number;
     idePosition: { x: number; y: number };
     customization: any;
+    onConnectionVisibilityChange: (connectionId: string, isVisible: boolean) => void;
 }
 
 const CanvasGrid: React.FC<CanvasGridProps> = ({
@@ -36,7 +37,8 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
     onFlowVisibilityChange,
     zoomLevel,
     idePosition,
-    customization
+    customization,
+    onConnectionVisibilityChange
 }) => {
     const HEADER_HEIGHT = 40;
     const CONNECTOR_OFFSET_X = 5;
@@ -66,24 +68,6 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
         return block ? block.type : 'unknown';
     };
 
-    const getAdjustedPosition = (id: string, isStart: boolean) => {
-        const { x, y, width } = getBlockPosition(id);
-        const blockType = getBlockType(id);
-        const isIdeOrClass = id === 'python-ide' || blockType === 'class';
-
-        if (isStart && isIdeOrClass) {
-            return {
-                x: x + width - CONNECTOR_OFFSET_X * zoomLevel,
-                y: y + HEADER_HEIGHT / 2 * zoomLevel
-            };
-        } else {
-            return {
-                x: x + CONNECTOR_OFFSET_X * zoomLevel,
-                y: y + HEADER_HEIGHT / 2 * zoomLevel
-            };
-        }
-    };
-
     const renderBlock = (item: ExtendedBlockData) => {
         const commonProps = {
             id: item.id,
@@ -92,7 +76,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
             author: item.author,
             fileType: item.fileType,
             code: item.code,
-            lineNumber:item.lineNumber,
+            lineNumber: item.lineNumber,
             onVisibilityChange: onVisibilityChange,
             onCodeChange: (newCode: string) => onCodeChange(item.id, newCode),
             customization: customization
@@ -157,7 +141,8 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                     getBlockPosition={getBlockPosition}
                     getBlockType={getBlockType}
                     customization={customization.connections}
-                />  
+                    onConnectionVisibilityChange={onConnectionVisibilityChange}
+                />
             )}
         </div>
     );

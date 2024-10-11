@@ -13,12 +13,21 @@ interface ConnectionsProps {
     getBlockPosition: (id: string) => { x: number; y: number; width: number; height: number };
     getBlockType: (id: string) => string;
     customization: any;
+    onConnectionVisibilityChange: (connectionId: string, isVisible: boolean) => void;
 }
 
 const defaultConnectionColor = "#000000";
 
-const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBlockPosition, getBlockType, customization }) => {
+const Connections: React.FC<ConnectionsProps> = ({
+    connections,
+    zoomLevel,
+    getBlockPosition,
+    getBlockType,
+    customization,
+    onConnectionVisibilityChange
+}) => {
     const [renderedConnections, setRenderedConnections] = useState<Connection[]>([]);
+    const [invisibleConnections, setInvisibleConnections] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         setRenderedConnections(connections);
@@ -70,8 +79,21 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
         return {};
     };
 
+    const handleConnectionClick = (connectionId: string) => {
+        setInvisibleConnections(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(connectionId)) {
+                newSet.delete(connectionId);
+            } else {
+                newSet.add(connectionId);
+            }
+            onConnectionVisibilityChange(connectionId, !newSet.has(connectionId));
+            return newSet;
+        });
+    };
+
     return (
-        <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
+        <svg className="absolute top-0 left-0 w-full h-full">
             <defs>
                 <marker
                     id="arrowhead-triangle"
@@ -124,40 +146,60 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
                 };
 
                 const arrowHead = customization[connection.type]?.arrowHead || 'arrow';
+                const isVisible = !invisibleConnections.has(connection.id);
 
                 return (
                     <g key={connection.id}>
-                        <path
-                            d={path}
-                            fill="none"
-                            stroke={color}
-                            strokeWidth={2}
-                            strokeLinecap="round"
-                            filter="url(#glow)"
-                            style={style}
-                            markerEnd={`url(#arrowhead-${arrowHead})`}
-                        />
-                        <circle cx={scaledStart.x} cy={scaledStart.y} r={4} fill={color} />
-                        <circle cx={scaledEnd.x} cy={scaledEnd.y} r={4} fill={color} />
-                        <foreignObject
-                            x={midPoint.x - 8}
-                            y={midPoint.y - 8}
-                            width={16}
-                            height={16}
-                        >
-                            <div className="flex items-center justify-center w-full h-full bg-white rounded-full shadow-md">
-                                <IconComponent size={16} color={color} />
-                            </div>
-                        </foreignObject>
-                        <text
-                            x={midPoint.x + 16}
-                            y={midPoint.y}
-                            fontSize={10}
+                        {isVisible && (
+                            <>
+                                <path
+                                    d={path}
+                                    fill="none"
+                                    stroke={color}
+                                    strokeWidth={2}
+                                    strokeLinecap="round"
+                                    filter="url(#glow)"
+                                    style={style}
+                                    markerEnd={`url(#arrowhead-${arrowHead})`}
+                                />
+                                <foreignObject
+                                    x={midPoint.x - 8}
+                                    y={midPoint.y - 8}
+                                    width={16}
+                                    height={16}
+                                >
+                                    <div className="flex items-center justify-center w-full h-full bg-white rounded-full shadow-md">
+                                        <IconComponent size={16} color={color} />
+                                    </div>
+                                </foreignObject>
+                                <text
+                                    x={midPoint.x + 16}
+                                    y={midPoint.y}
+                                    fontSize={10}
+                                    fill={color}
+                                    filter="url(#glow)"
+                                >
+                                    {`${connection.fromConnector} → ${connection.toConnector}`}
+                                </text>
+                            </>
+                        )}
+                        {/* Always render the connector points */}
+                        <circle
+                            cx={scaledStart.x}
+                            cy={scaledStart.y}
+                            r={4}
                             fill={color}
-                            filter="url(#glow)"
-                        >
-                            {`${connection.fromConnector} → ${connection.toConnector}`}
-                        </text>
+                            onClick={() => handleConnectionClick(connection.id)}
+                            style={{ cursor: 'pointer' }}
+                        />
+                        <circle
+                            cx={scaledEnd.x}
+                            cy={scaledEnd.y}
+                            r={4}
+                            fill={color}
+                            onClick={() => handleConnectionClick(connection.id)}
+                            style={{ cursor: 'pointer' }}
+                        />
                     </g>
                 );
             })}
