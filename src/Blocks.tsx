@@ -28,7 +28,6 @@ const Block: React.FC<BlockProps> = ({
     onCodeChange,
     customization
 }) => {
-    console.log("Line number ",lineNumber)
     const [isVisible, setIsVisible] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [isDetailsVisible, setIsDetailsVisible] = useState(false);
@@ -75,6 +74,11 @@ const Block: React.FC<BlockProps> = ({
         setIsTestingVisible(!isTestingVisible);
     };
 
+    const handleButtonClick = (e: React.MouseEvent, action: () => void) => {
+        e.stopPropagation();
+        action();
+    };
+
     const renderCodeWithLineNumbers = () => {
         const lines = currentCode.split('\n');
         const startLineNumber = lineNumber || 1;
@@ -105,35 +109,35 @@ const Block: React.FC<BlockProps> = ({
                 </h3>
                 <div className="flex space-x-2">
                     <button
-                        onClick={toggleDetails}
+                        onClick={(e) => handleButtonClick(e, toggleDetails)}
                         className="p-1 bg-gray-200 rounded hover:bg-gray-300"
                         title="Details"
                     >
                         <Info size={16} />
                     </button>
                     <button
-                        onClick={toggleEditing}
+                        onClick={(e) => handleButtonClick(e, toggleEditing)}
                         className="p-1 bg-gray-200 rounded hover:bg-gray-300"
                         title={isEditing ? "Save" : "Edit"}
                     >
                         {isEditing ? <Save size={16} /> : <Edit size={16} />}
                     </button>
                     <button
-                        onClick={toggleVisibility}
+                        onClick={(e) => handleButtonClick(e, toggleVisibility)}
                         className="p-1 bg-gray-200 rounded hover:bg-gray-300"
                         title={isVisible ? "Hide code" : "Show code"}
                     >
                         {isVisible ? <Eye size={16} /> : <EyeOff size={16} />}
                     </button>
                     <button
-                        onClick={toggleDocumentation}
+                        onClick={(e) => handleButtonClick(e, toggleDocumentation)}
                         className="p-1 bg-gray-200 rounded hover:bg-gray-300"
                         title="Documentation"
                     >
                         <FileText size={16} />
                     </button>
                     <button
-                        onClick={toggleTesting}
+                        onClick={(e) => handleButtonClick(e, toggleTesting)}
                         className="p-1 bg-gray-200 rounded hover:bg-gray-300"
                         title="Testing"
                     >
@@ -166,7 +170,7 @@ const Block: React.FC<BlockProps> = ({
                                 }}
                             />
                             <button
-                                onClick={handleSave}
+                                onClick={(e) => handleButtonClick(e, handleSave)}
                                 className="mt-2 px-4 py-2 text-white rounded hover:bg-opacity-80"
                                 style={{ backgroundColor: customization.ide?.highlightColor || '#3b82f6' }}
                             >
@@ -194,7 +198,10 @@ const Block: React.FC<BlockProps> = ({
             {isTestingVisible && (
                 <div className="p-4 bg-gray-50 border-t" style={{ paddingLeft: '20px' }}>
                     <h4 className="font-semibold mb-2">Testing</h4>
-                    <button className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                    <button
+                        onClick={(e) => handleButtonClick(e, () => console.log('Run tests'))}
+                        className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                    >
                         Run Tests
                     </button>
                     <p className="mt-2 text-sm">Click the button above to run tests for this {type}.</p>

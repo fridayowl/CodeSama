@@ -79,7 +79,8 @@ const Connections: React.FC<ConnectionsProps> = ({
         return {};
     };
 
-    const handleConnectionClick = (connectionId: string) => {
+    const handleConnectionClick = (e: React.MouseEvent, connectionId: string) => {
+        e.stopPropagation();
         setInvisibleConnections(prev => {
             const newSet = new Set(prev);
             if (newSet.has(connectionId)) {
@@ -93,7 +94,7 @@ const Connections: React.FC<ConnectionsProps> = ({
     };
 
     return (
-        <svg className="absolute top-0 left-0 w-full h-full">
+        <svg className="absolute top-0 left-0 w-full h-full" style={{ pointerEvents: 'none' }}>
             <defs>
                 <marker
                     id="arrowhead-triangle"
@@ -183,22 +184,21 @@ const Connections: React.FC<ConnectionsProps> = ({
                                 </text>
                             </>
                         )}
-                        {/* Always render the connector points */}
                         <circle
                             cx={scaledStart.x}
                             cy={scaledStart.y}
                             r={4}
                             fill={color}
-                            onClick={() => handleConnectionClick(connection.id)}
-                            style={{ cursor: 'pointer' }}
+                            onClick={(e) => handleConnectionClick(e, connection.id)}
+                            style={{ cursor: 'pointer', pointerEvents: 'all' }}
                         />
                         <circle
                             cx={scaledEnd.x}
                             cy={scaledEnd.y}
                             r={4}
                             fill={color}
-                            onClick={() => handleConnectionClick(connection.id)}
-                            style={{ cursor: 'pointer' }}
+                            onClick={(e) => handleConnectionClick(e, connection.id)}
+                            style={{ cursor: 'pointer', pointerEvents: 'all' }}
                         />
                     </g>
                 );
