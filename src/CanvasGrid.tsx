@@ -152,16 +152,12 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
 
             {isFlowVisible && (
                 <Connections
-                    connections={getVisibleConnections().map(conn => ({
-                        ...conn,
-                        startPoint: getAdjustedPosition(conn.start, true),
-                        endPoint: getAdjustedPosition(conn.end, false)
-                    }))}
+                    connections={getVisibleConnections()}
                     zoomLevel={zoomLevel}
                     getBlockPosition={getBlockPosition}
                     getBlockType={getBlockType}
                     customization={customization.connections}
-                />
+                />  
             )}
         </div>
     );

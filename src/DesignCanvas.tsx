@@ -5,6 +5,7 @@ import { generateJsonFromPythonFile, BlockData, ConnectionData as FileProcessorC
 import SettingsPanel from './Settings';
 import defaultCustomization from './customization.json';
 import customTemplates from './customTemplates';
+import { start } from 'repl';
 
 export interface ConnectionData extends FileProcessorConnectionData { }
 
@@ -154,6 +155,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     }, [selectedFile, selectedFileName, processFile]);
 
     const getConnectionPoints = useCallback((startBlock: ExtendedBlockData, endBlock: ExtendedBlockData) => {
+        
         return {
             startPoint: { x: startBlock.x + 200, y: startBlock.y + 50 },
             endPoint: { x: endBlock.x, y: endBlock.y + 50 }
@@ -162,19 +164,50 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
 
     const updateConnections = useCallback(() => {
         const newConnections: Connection[] = [];
-        const classBlocks = blocks.filter(block => block.type === 'class');
-        const functionBlocks = blocks.filter(block => block.type === 'class_function');
-        const codeBlocks = blocks.filter(block => block.type === 'code');
-        const classStandaloneBlocks = blocks.filter(block => block.type === 'class_standalone');
-        const standaloneFunctionBlocks = blocks.filter(block => block.type === 'standalone_function');
+        const allBlocks = blocks.filter(block =>
+            ['class', 'code', 'standalone_function'].includes(block.type)
+        );
 
-        classBlocks.forEach(classBlock => {
-            functionBlocks.forEach(functionBlock => {
-                if (functionBlock.id.startsWith(`${classBlock.name}_`)) {
-                    const { startPoint, endPoint } = getConnectionPoints(classBlock, functionBlock);
+        const getIDEConnectionStartPoint = (blockLineNumber: number) => {
+            const lineHeight = 20; // Adjust this value based on your IDE's line height
+            return {
+                x: idePosition.x + 600, // Assuming IDE width is 600px
+                y: idePosition.y + ((blockLineNumber - 1) * lineHeight)  +40// Subtract 1 to align with 0-indexed lines
+            };
+        };
+
+        const connectBlockToIDE = (block: ExtendedBlockData) => {
+            console.log(block.id,block.lineNumber)
+            const startPoint = getIDEConnectionStartPoint(block.lineNumber);
+            console.log("start point", startPoint)
+            const endPoint = { x: block.x, y: block.y + 25 }; // Adjust Y to connect to the top of the block
+            newConnections.push({
+                id: `IDE-${block.id}`,
+                start: 'python-ide',
+                end: block.id,
+                startPoint,
+                endPoint,
+                type: 'uses',
+                fromConnector: 'output',
+                toConnector: 'input',
+                startBlockType: 'code',
+                endBlockType: block.type
+            });
+        };
+
+        allBlocks.forEach(connectBlockToIDE);
+
+        // Keep existing connections for class functions and class standalones
+        blocks.forEach(block => {
+            if (block.type === 'class') {
+                const classFunctions = blocks.filter(b =>
+                    b.type === 'class_function' && b.id.startsWith(`${block.name}_`)
+                );
+                classFunctions.forEach(functionBlock => {
+                    const { startPoint, endPoint } = getConnectionPoints(block, functionBlock);
                     newConnections.push({
-                        id: `${classBlock.id}-${functionBlock.id}`,
-                        start: classBlock.id,
+                        id: `${block.id}-${functionBlock.id}`,
+                        start: block.id,
                         end: functionBlock.id,
                         startPoint,
                         endPoint,
@@ -184,79 +217,27 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                         startBlockType: 'class',
                         endBlockType: 'class_function'
                     });
-                }
-            });
+                });
 
-            const ideBlock = { x: idePosition.x, y: idePosition.y, id: 'python-ide' } as ExtendedBlockData;
-            const { startPoint, endPoint } = getConnectionPoints(ideBlock, classBlock);
-            newConnections.push({
-                id: `IDE-${classBlock.id}`,
-                start: 'python-ide',
-                end: classBlock.id,
-                startPoint: { x: startPoint.x + 600, y: startPoint.y + 30 },
-                endPoint,
-                type: 'uses',
-                fromConnector: 'output',
-                toConnector: 'input',
-                startBlockType: 'code',
-                endBlockType: 'class'
-            });
-        });
-
-        codeBlocks.forEach(codeBlock => {
-            const ideBlock = { x: idePosition.x, y: idePosition.y, id: 'python-ide' } as ExtendedBlockData;
-            const { startPoint, endPoint } = getConnectionPoints(ideBlock, codeBlock);
-            newConnections.push({
-                id: `IDE-${codeBlock.id}`,
-                start: 'python-ide',
-                end: codeBlock.id,
-                startPoint: { x: startPoint.x + 600, y: startPoint.y + 30 },
-                endPoint,
-                type: 'uses',
-                fromConnector: 'output',
-                toConnector: 'input',
-                startBlockType: 'code',
-                endBlockType: 'code'
-            });
-        });
-
-        classStandaloneBlocks.forEach(classStandaloneBlock => {
-            const parentClass = classBlocks.find(classBlock =>
-                classStandaloneBlock.connections.some(conn => conn.to === classBlock.id)
-            );
-
-            if (parentClass) {
-                const { startPoint, endPoint } = getConnectionPoints(parentClass, classStandaloneBlock);
-                newConnections.push({
-                    id: `${parentClass.id}-${classStandaloneBlock.id}`,
-                    start: parentClass.id,
-                    end: classStandaloneBlock.id,
-                    startPoint,
-                    endPoint,
-                    type: 'class_to_standalone',
-                    fromConnector: 'output',
-                    toConnector: 'input',
-                    startBlockType: 'class',
-                    endBlockType: 'class_standalone'
+                const classStandalones = blocks.filter(b =>
+                    b.type === 'class_standalone' && b.connections.some(conn => conn.to === block.id)
+                );
+                classStandalones.forEach(standaloneBlock => {
+                    const { startPoint, endPoint } = getConnectionPoints(block, standaloneBlock);
+                    newConnections.push({
+                        id: `${block.id}-${standaloneBlock.id}`,
+                        start: block.id,
+                        end: standaloneBlock.id,
+                        startPoint,
+                        endPoint,
+                        type: 'class_to_standalone',
+                        fromConnector: 'output',
+                        toConnector: 'input',
+                        startBlockType: 'class',
+                        endBlockType: 'class_standalone'
+                    });
                 });
             }
-        });
-
-        standaloneFunctionBlocks.forEach(functionBlock => {
-            const ideBlock = { x: idePosition.x, y: idePosition.y, id: 'python-ide' } as ExtendedBlockData;
-            const { startPoint, endPoint } = getConnectionPoints(ideBlock, functionBlock);
-            newConnections.push({
-                id: `IDE-${functionBlock.id}`,
-                start: 'python-ide',
-                end: functionBlock.id,
-                startPoint: { x: startPoint.x + 600, y: startPoint.y + 30 },
-                endPoint,
-                type: 'uses',
-                fromConnector: 'output',
-                toConnector: 'input',
-                startBlockType: 'code',
-                endBlockType: 'standalone_function'
-            });
         });
 
         setConnections(newConnections);

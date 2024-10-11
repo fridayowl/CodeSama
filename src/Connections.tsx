@@ -16,39 +16,18 @@ interface ConnectionsProps {
 }
 
 const defaultConnectionColor = "#000000";
-const HEADER_HEIGHT = 40; // Estimated height of the header
-const CONNECTOR_OFFSET_X = 5; // Horizontal offset from the edge of the block
 
 const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBlockPosition, getBlockType, customization }) => {
     const [renderedConnections, setRenderedConnections] = useState<Connection[]>([]);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setRenderedConnections(connections);
-        }, 100);
-
-        return () => clearTimeout(timer);
+        setRenderedConnections(connections);
     }, [connections]);
 
-    const getConnectionPoint = (blockId: string, isStart: boolean): Point => {
-        const block = getBlockPosition(blockId);
-        const blockType = getBlockType(blockId);
-        const isIdeOrClass = blockId === 'python-ide' || blockType === 'class';
-
-        if (isStart && isIdeOrClass) {
-            // Start from the right side for IDE and class blocks
-            return {
-                x: block.x + block.width - CONNECTOR_OFFSET_X,
-                y: block.y + HEADER_HEIGHT / 2
-            };
-        } else {
-            // All other cases, use the left side
-            return {
-                x: block.x + CONNECTOR_OFFSET_X,
-                y: block.y + HEADER_HEIGHT / 2
-            };
-        }
-    };
+    const scalePoint = (point: Point): Point => ({
+        x: point.x * zoomLevel,
+        y: point.y * zoomLevel
+    });
 
     const getBezierPath = (start: Point, end: Point): string => {
         const midX = (start.x + end.x) / 2;
@@ -96,8 +75,8 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
             <defs>
                 <marker
                     id="arrowhead-triangle"
-                    markerWidth="6"   
-                    markerHeight="4"  
+                    markerWidth="6"
+                    markerHeight="4"
                     refX="0"
                     refY="2"
                     orient="auto"
@@ -106,8 +85,8 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
                 </marker>
                 <marker
                     id="arrowhead-diamond"
-                    markerWidth="6" 
-                    markerHeight="6"  
+                    markerWidth="6"
+                    markerHeight="6"
                     refX="0"
                     refY="3"
                     orient="auto"
@@ -116,8 +95,8 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
                 </marker>
                 <marker
                     id="arrowhead-circle"
-                    markerWidth="6"    
-                    markerHeight="6"  
+                    markerWidth="6"
+                    markerHeight="6"
                     refX="3"
                     refY="3"
                     orient="auto"
@@ -133,15 +112,15 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
                 </filter>
             </defs>
             {renderedConnections.map((connection) => {
-                const startPos = getConnectionPoint(connection.start, true);
-                const endPos = getConnectionPoint(connection.end, false);
-                const path = getBezierPath(startPos, endPos);
+                const scaledStart = scalePoint(connection.startPoint);
+                const scaledEnd = scalePoint(connection.endPoint);
+                const path = getBezierPath(scaledStart, scaledEnd);
                 const color = getConnectionColor(connection.type);
                 const style = getConnectionStyle(connection.type);
                 const IconComponent = getConnectionIcon(connection.type);
                 const midPoint = {
-                    x: (startPos.x + endPos.x) / 2,
-                    y: (startPos.y + endPos.y) / 2
+                    x: (scaledStart.x + scaledEnd.x) / 2,
+                    y: (scaledStart.y + scaledEnd.y) / 2
                 };
 
                 const arrowHead = customization[connection.type]?.arrowHead || 'arrow';
@@ -152,28 +131,28 @@ const Connections: React.FC<ConnectionsProps> = ({ connections, zoomLevel, getBl
                             d={path}
                             fill="none"
                             stroke={color}
-                            strokeWidth={2 / zoomLevel}
+                            strokeWidth={2}
                             strokeLinecap="round"
                             filter="url(#glow)"
                             style={style}
                             markerEnd={`url(#arrowhead-${arrowHead})`}
                         />
-                        <circle cx={startPos.x} cy={startPos.y} r={4 / zoomLevel} fill={color} />
-                        <circle cx={endPos.x} cy={endPos.y} r={4 / zoomLevel} fill={color} />
+                        <circle cx={scaledStart.x} cy={scaledStart.y} r={4} fill={color} />
+                        <circle cx={scaledEnd.x} cy={scaledEnd.y} r={4} fill={color} />
                         <foreignObject
-                            x={midPoint.x - 8 / zoomLevel}
-                            y={midPoint.y - 8 / zoomLevel}
-                            width={16 / zoomLevel}
-                            height={16 / zoomLevel}
+                            x={midPoint.x - 8}
+                            y={midPoint.y - 8}
+                            width={16}
+                            height={16}
                         >
                             <div className="flex items-center justify-center w-full h-full bg-white rounded-full shadow-md">
-                                <IconComponent size={16 / zoomLevel} color={color} />
+                                <IconComponent size={16} color={color} />
                             </div>
                         </foreignObject>
                         <text
-                            x={midPoint.x + 16 / zoomLevel}
+                            x={midPoint.x + 16}
                             y={midPoint.y}
-                            fontSize={10 / zoomLevel}
+                            fontSize={10}
                             fill={color}
                             filter="url(#glow)"
                         >

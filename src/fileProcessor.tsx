@@ -32,17 +32,19 @@ export async function generateJsonFromPythonFile(fileContent: string, name: stri
     const classStandaloneCode = identifyClassStandaloneCode(fileContent, classes);
     const standaloneFunctions = identifyStandaloneFunctions(fileContent, name);
 
-    // Combine class standalone code and standalone functions
-    const combinedStandaloneBlocks = [...classStandaloneCode, ...standaloneFunctions];
-
-    // Sort the combined blocks by line number
-    combinedStandaloneBlocks.sort((a, b) => a.lineNumber - b.lineNumber);
-
     // Combine all blocks
-    const allBlocks = [...classes, ...functions, ...standaloneCodeBlocks, ...combinedStandaloneBlocks];
+    const allBlocks = [...classes, ...functions, ...standaloneCodeBlocks, ...classStandaloneCode, ...standaloneFunctions];
 
-    // Sort all blocks by line number
+    // Sort blocks by line number
     allBlocks.sort((a, b) => a.lineNumber - b.lineNumber);
+
+    // Assign x and y positions based on sorted order
+    const VERTICAL_SPACING = 150;
+    const HORIZONTAL_OFFSET = 650; // Increased to leave space for the IDE
+    allBlocks.forEach((block, index) => {
+        block.x = HORIZONTAL_OFFSET;
+        block.y = 50 + index * VERTICAL_SPACING;
+    });
 
     return allBlocks;
 }
