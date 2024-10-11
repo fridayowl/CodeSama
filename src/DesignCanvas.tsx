@@ -57,7 +57,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             const UNIFORM_SPACING = 40; // Consistent spacing between blocks
             const COLUMN_WIDTH = 300; // Width of each column
             const IDE_WIDTH = 600; // Estimated width of the IDE
-            const X_OFFSET = IDE_WIDTH + 100; // Extra space after the IDE
+            const X_OFFSET = IDE_WIDTH + 250; // Extra space after the IDE
 
             const getBlockHeight = (block: BlockData) => {
                 const lineCount = block.code.split('\n').length;
