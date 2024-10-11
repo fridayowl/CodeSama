@@ -16,6 +16,7 @@ export interface BlockData {
     y: number;
     connections: ConnectionData[];
     lineNumber: number;
+    parentClass?: string; // Add this line
 }
 
 export interface ConnectionData {

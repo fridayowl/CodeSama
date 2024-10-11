@@ -76,6 +76,10 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             const sortedMainBlocks = [...classes, ...standaloneCodes, ...standaloneFunctions]
                 .sort((a, b) => a.lineNumber - b.lineNumber);
 
+            const sortedMainClassBlocks = [ ...classFunctions, ...classStandalones]
+                .sort((a, b) => a.lineNumber - b.lineNumber);
+            
+            console.log("sorted calss",sortedMainClassBlocks)
             let currentY = 100; // Starting Y position
 
             const modifiedBlocks: ExtendedBlockData[] = sortedMainBlocks.map((block) => {
