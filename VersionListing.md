@@ -79,12 +79,15 @@ working 2.6 - Closing functions for single file
 Version 2.7 - Setting Connectors exact line of the ide  and also make this blocks smaller and compact 
             - add a directory viewer  @done 
             - make the block much more simpler and easy to view @done
-            -save last opened folder and last save settings
-            - gesture zoom in and zoom out on canvas
+            -save last opened folder and last save settings folderview / file type
+            - gesture zoom in and zoom out on canvas 
+            - order the function and standalone code based on the line number  @done
+            - passing line number to the blocks @done 
+            - connectors comming from the line numbers rater than the block headers
             Bug 
             - for some reason  class stand alone codes are starting from ide not from class  @done
-            - fix when class hide is cliked it should hide the class standalone
-            - connecyion and blocks should update when ide updates 
+            - fix when class hide is cliked it should hide the class standalone 
+            - connection and blocks should update when ide updates 
 
 
 

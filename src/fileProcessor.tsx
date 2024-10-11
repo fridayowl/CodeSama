@@ -3,6 +3,7 @@ import { identifyFunctionsAndConnections } from './class_functions_Identifier';
 import { identifyCodeBlocks } from './standalone_codeBlockIdentifier';
 import { identifyClassStandaloneCode } from './class_standalone_Identifier';
 import { identifyStandaloneFunctions } from './standalone_codeFunctionIdentifier';
+
 export interface BlockData {
     id: string;
     type: 'class' | 'class_function' | 'code' | 'class_standalone' | 'standalone_function';
@@ -14,7 +15,7 @@ export interface BlockData {
     x: number;
     y: number;
     connections: ConnectionData[];
-    lineNumber: number
+    lineNumber: number;
 }
 
 export interface ConnectionData {
@@ -23,19 +24,25 @@ export interface ConnectionData {
     fromConnector: string;
     toConnector: string;
 }
-export async function generateJsonFromPythonFile(fileContent: string,name:string): Promise<BlockData[]> {
-    const classes = identifyClasses(fileContent,name);
-    const functions = identifyFunctionsAndConnections(fileContent, classes,name);
-    console.log("functions",functions)
-    const standaloneCodeBlocks = identifyCodeBlocks(fileContent,name);
-    const ClassStandaloneCode = identifyClassStandaloneCode(fileContent,classes);
-    const standaloneFunctions = identifyStandaloneFunctions(fileContent,name);
-    console.log(standaloneFunctions)
 
-    // Only include standalone classes if there are regular classes
-    const finalBlocks = classes.length > 0
-        ? [...classes, ...functions, ...standaloneCodeBlocks, ...ClassStandaloneCode, ...standaloneFunctions]
-        : [...classes, ...functions, ...standaloneCodeBlocks, ...standaloneFunctions];
+export async function generateJsonFromPythonFile(fileContent: string, name: string): Promise<BlockData[]> {
+    const classes = identifyClasses(fileContent, name);
+    const functions = identifyFunctionsAndConnections(fileContent, classes, name);
+    const standaloneCodeBlocks = identifyCodeBlocks(fileContent, name);
+    const classStandaloneCode = identifyClassStandaloneCode(fileContent, classes);
+    const standaloneFunctions = identifyStandaloneFunctions(fileContent, name);
 
-    return finalBlocks;
+    // Combine class standalone code and standalone functions
+    const combinedStandaloneBlocks = [...classStandaloneCode, ...standaloneFunctions];
+
+    // Sort the combined blocks by line number
+    combinedStandaloneBlocks.sort((a, b) => a.lineNumber - b.lineNumber);
+
+    // Combine all blocks
+    const allBlocks = [...classes, ...functions, ...standaloneCodeBlocks, ...combinedStandaloneBlocks];
+
+    // Sort all blocks by line number
+    allBlocks.sort((a, b) => a.lineNumber - b.lineNumber);
+
+    return allBlocks;
 }

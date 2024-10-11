@@ -48,67 +48,105 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const [isSettingsPanelOpen, setIsSettingsPanelOpen] = useState(false);
     const [isTemplatesPanelOpen, setIsTemplatesPanelOpen] = useState(false);
 
+
     const processFile = useCallback(async (content: string, fileName: string) => {
         try {
             const jsonData = await generateJsonFromPythonFile(content, fileName);
             console.log('Loaded JSON data:', jsonData);
 
-            let classY = 100;
-            let functionY = 220;
-            let codeY = 100;
-            let standaloneY = 220;
-            let standaloneFunctionY = 340;
+            const UNIFORM_SPACING = 40; // Consistent spacing between blocks
+            const COLUMN_WIDTH = 300; // Width of each column
+            const IDE_WIDTH = 600; // Estimated width of the IDE
+            const X_OFFSET = IDE_WIDTH + 100; // Extra space after the IDE
 
+            const getBlockHeight = (block: BlockData) => {
+                const lineCount = block.code.split('\n').length;
+                return Math.max(120, lineCount * 20 + 60); // 20px per line + 60px padding
+            };
+
+            // Separate blocks by type
             const classes = jsonData.filter(block => block.type === 'class');
+            const standaloneCodes = jsonData.filter(block => block.type === 'code');
+            const standaloneFunctions = jsonData.filter(block => block.type === 'standalone_function');
+            const classFunctions = jsonData.filter(block => block.type === 'class_function');
+            const classStandalones = jsonData.filter(block => block.type === 'class_standalone');
 
-            const modifiedBlocks: ExtendedBlockData[] = jsonData.map((block) => {
-                let x, y;
-                if (block.type === 'class') {
-                    x = 700;
-                    y = classY;
-                    classY += 250;
-                } else if (block.type === 'class_function') {
-                    const parentClass = jsonData.find(b => b.type === 'class' && b.code.includes(`def ${block.name}(`));
-                    if (parentClass) {
-                        x = 1500;
-                        y = functionY;
-                        functionY += 150;
-                        return {
-                            ...block,
-                            id: `${parentClass.name}_${block.id}`,
-                            parentClass: parentClass.name,
-                            x,
-                            y
-                        } as ExtendedBlockData;
-                    }
-                } else if (block.type === 'code') {
-                    x = 700;
-                    y = Math.max(classY, functionY, codeY);
-                    codeY = y + 150;
-                } else if (block.type === 'class_standalone') {
-                    if (classes.length > 0) {
-                        x = 2200;
-                        y = standaloneY;
-                        standaloneY += 250;
-                    } else {
-                        return null;
-                    }
-                } else if (block.type === 'standalone_function') {
-                    x = 700;
-                    y = Math.max(classY, functionY, codeY);
-                    codeY = y + 150;
+            // Sort classes, standalone codes, and standalone functions by line number
+            const sortedMainBlocks = [...classes, ...standaloneCodes, ...standaloneFunctions]
+                .sort((a, b) => a.lineNumber - b.lineNumber);
+
+            let currentY = 100; // Starting Y position
+
+            const modifiedBlocks: ExtendedBlockData[] = sortedMainBlocks.map((block) => {
+                const height = getBlockHeight(block) + 20; // Add extra 20px to each block
+                let x: number;
+
+                // Assign X position based on block type
+                switch (block.type) {
+                    case 'class':
+                        x = X_OFFSET;
+                        break;
+                    case 'code':
+                        x = X_OFFSET  ;
+                        break;
+                    case 'standalone_function':
+                        x = X_OFFSET ;
+                        break;
+                    default:
+                        x = X_OFFSET ; // For any other types
                 }
-                return { ...block, x, y } as ExtendedBlockData;
-            }).filter(Boolean) as ExtendedBlockData[];
 
-            setBlocks(modifiedBlocks);
-            console.log('Set blocks:', modifiedBlocks);
+                const newBlock = {
+                    ...block,
+                    x,
+                    y: currentY,
+                    height
+                } as ExtendedBlockData;
+
+                currentY += height + UNIFORM_SPACING;
+
+                return newBlock;
+            });
+
+            // Process class functions and class standalones (keep existing logic)
+            let methodY = 100;
+            const classFunctionBlocks = classFunctions.map((block) => {
+                const height = getBlockHeight(block) + 20;
+                const parentClass = classes.find(c => c.code.includes(`def ${block.name}(`));
+                const newBlock = {
+                    ...block,
+                    id: parentClass ? `${parentClass.name}_${block.id}` : block.id,
+                    parentClass: parentClass?.name,
+                    x: X_OFFSET + 3 * COLUMN_WIDTH,
+                    y: methodY,
+                    height
+                } as ExtendedBlockData;
+                methodY += height + UNIFORM_SPACING;
+                return newBlock;
+            });
+
+            let standaloneY = methodY;
+            const classStandaloneBlocks = classStandalones.map((block) => {
+                const height = getBlockHeight(block) + 20;
+                const newBlock = {
+                    ...block,
+                    x: X_OFFSET + 3 * COLUMN_WIDTH,
+                    y: standaloneY,
+                    height
+                } as ExtendedBlockData;
+                standaloneY += height + UNIFORM_SPACING;
+                return newBlock;
+            });
+
+            const allBlocks = [...modifiedBlocks, ...classFunctionBlocks, ...classStandaloneBlocks];
+
+            setBlocks(allBlocks);
+            console.log('Set blocks:', allBlocks);
             setRefreshKey(prevKey => prevKey + 1);
         } catch (error) {
             console.error('Error processing file:', error);
         }
     }, []);
-
     useEffect(() => {
         if (selectedFile && selectedFileName) {
             processFile(selectedFile, selectedFileName);
