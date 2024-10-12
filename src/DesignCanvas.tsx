@@ -52,33 +52,35 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const [isTemplatesPanelOpen, setIsTemplatesPanelOpen] = useState(false);
 
     const handleConnectionVisibilityChange = useCallback((connectionId: string, isVisible: boolean) => {
-        console.log("connection to be invisible ", connectionId)
+        console.log("Connection visibility change for", connectionId, "to", isVisible);
+
         setConnections(prevConnections =>
             prevConnections.map(conn =>
                 conn.id === connectionId ? { ...conn, isVisible } : conn
             )
         );
+
         // Find the connection that was toggled
         const connection = connections.find(conn => conn.id === connectionId);
         if (connection) {
             console.log("Connection found:", connection);
-            console.log("Updating visibility for blocks:", connection.start, connection.end);
-            // Update the visibility of the start and end blocks
+
             setBlocks(prevBlocks => {
                 console.log("Previous blocks:", prevBlocks);
                 return prevBlocks.map(block => {
-                    if (block.id === connection.start || block.id === connection.end) {
-                        console.log(`Updating block ${block.id} visibility to ${isVisible}`);
+                    if (block.id === connection.end) {
+                        // Only update the visibility of the end block (function block)
+                        console.log(`Updating visibility for end block ${block.id} to ${isVisible}`);
                         return { ...block, isVisible };
                     }
+                    // Start block (class block) remains unchanged
                     return block;
                 });
             });
-            console.log("Finished updating blocks");
         } else {
             console.log("No connection found for ID:", connectionId);
         }
-    }, []);
+    }, [connections]);
 
     const processFile = useCallback(async (content: string, fileName: string) => {
         try {
