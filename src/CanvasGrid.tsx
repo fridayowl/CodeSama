@@ -80,7 +80,8 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
             onVisibilityChange: onVisibilityChange,
             onCodeChange: (newCode: string) => onCodeChange(item.id, newCode),
             customization: customization,
-            isVisible: item.isVisible !== false // Add this line
+            isVisible: item.isVisible !== false,
+            parentClass: item.parentClass  // Add this line
         };
 
         switch (item.type) {

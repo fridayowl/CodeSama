@@ -14,6 +14,7 @@ interface BlockProps {
     onCodeChange?: (id: string, newCode: string) => void;
     customization: any;
     isConnectorVisible?: boolean;
+    parentClass?: string;
 }
 
 const Block: React.FC<BlockProps> = ({
@@ -29,6 +30,7 @@ const Block: React.FC<BlockProps> = ({
     onCodeChange,
     customization,
     isConnectorVisible = true,
+    parentClass
 }) => {
     const [isVisible, setIsVisible] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
@@ -158,6 +160,7 @@ const Block: React.FC<BlockProps> = ({
                     <p className="text-sm">Location: {location}</p>
                     <p className="text-sm">Author: {author}</p>
                     {lineNumber && <p className="text-sm">Line Number: {lineNumber}</p>}
+                    {parentClass && <p className="text-sm">Parent Class: {parentClass}</p>}
                 </div>
             )}
             {isVisible && (

@@ -63,7 +63,7 @@ const Connections: React.FC<ConnectionsProps> = ({
             case 'uses': return ArrowUpRight;
             case 'class_contains_functions': return Layers;
             case 'codeLink': return FileCode2;
-            case 'class_to_standalone': return Cog;
+            case 'class_contains_standalone': return Cog;
             default: return Cog;
         }
     };

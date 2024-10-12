@@ -2,11 +2,10 @@ import { BlockData, ConnectionData } from './fileProcessor';
 
 export function identifyClassStandaloneCode(fileContent: string, classes: BlockData[]): BlockData[] {
     const standaloneBlocks: BlockData[] = [];
-    let blockCount = 0;
-
     const fileLines = fileContent.split('\n');
 
     classes.forEach(classBlock => {
+        let blockCount = 0;
         const classLines = classBlock.code.split('\n');
         let currentBlock: string[] = [];
         let isInsideFunction = false;
@@ -22,22 +21,23 @@ export function identifyClassStandaloneCode(fileContent: string, classes: BlockD
                 blockCount++;
                 const connection: ConnectionData = {
                     to: classBlock.id,
-                    type: 'class_to_standalone',
-                    fromConnector: 'output',
+                    type: 'class_contains_standalone',
+                    fromConnector: 'method',
                     toConnector: 'input'
                 };
                 return {
-                    id: `class_standalone_${blockCount}`,
+                    id: `${classBlock.id}.standalone_${blockCount}`,
                     type: 'class_standalone',
                     name: `${classBlock.name} Standalone Block ${blockCount}`,
                     location: classBlock.location,
                     author: classBlock.author,
                     fileType: classBlock.fileType,
                     code: code.join('\n'),
-                    x: classBlock.x + 300,
-                    y: classBlock.y + (standaloneBlocks.length % 3) * 150,
+                    x: classBlock.x + 50,
+                    y: classBlock.y + blockCount * 50,
                     connections: [connection],
-                    lineNumber: startLineNumber
+                    lineNumber: startLineNumber,
+                    parentClass: classBlock.id
                 };
             }
             return null;

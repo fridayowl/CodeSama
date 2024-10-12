@@ -86,14 +86,16 @@ Version 2.7 - Setting Connectors exact line of the ide  and also make this block
             - connectors comming from the line numbers rater than the block headers
             Bug 
             - for some reason  class stand alone codes are starting from ide not from class  @done
-            - fix when class hide is cliked it should hide the class standalone 
+            - fix when class hide is cliked it should hide the class standalone @done
             - connection and blocks should update when ide updates 
 
         Notes 👍
-            connector end should be invisble 
+            connector end should be invisible 
             ide to block workig fine but the all the sub connected also should invisible 
             subblock to class bloack  both first block and second block is getting invisible
-            
+            ---
+            What i have to do is now make sure the class standalone is treated as class sub nodes 
+
 
 
 

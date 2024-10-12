@@ -301,7 +301,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                 );
                 classFunctions.forEach(functionBlock => {
                     const { startPoint, endPoint } = getConnectionPoints(block, functionBlock);
-                    //console.log("nameing id", `${functionBlock.id}`)
+                   
                     newConnections.push({
                         id: `${block.id}-${functionBlock.id}`,
                         start: block.id,
@@ -327,7 +327,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                         end: standaloneBlock.id,
                         startPoint,
                         endPoint,
-                        type: 'class_to_standalone',
+                        type: 'class_contains_standalone',
                         fromConnector: 'output',
                         toConnector: 'input',
                         startBlockType: 'class',
