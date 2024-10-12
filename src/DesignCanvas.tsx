@@ -50,6 +50,8 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const canvasRef = useRef<HTMLDivElement>(null);
     const [isSettingsPanelOpen, setIsSettingsPanelOpen] = useState(false);
     const [isTemplatesPanelOpen, setIsTemplatesPanelOpen] = useState(false);
+    const [hiddenSubConnections, setHiddenSubConnections] = useState<string[]>([]);
+    const [hiddenSubBlocks, setHiddenSubBlocks] = useState<string[]>([]);
 
     const handleConnectionVisibilityChange = useCallback((connectionId: string, isVisible: boolean) => {
         console.log("Connection visibility change for", connectionId, "to", isVisible);
@@ -60,28 +62,79 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             )
         );
 
-        // Find the connection that was toggled
         const connection = connections.find(conn => conn.id === connectionId);
         if (connection) {
             console.log("Connection found:", connection);
 
             setBlocks(prevBlocks => {
-                console.log("Previous blocks:", prevBlocks);
-                return prevBlocks.map(block => {
+                const updatedBlocks = prevBlocks.map(block => {
                     if (block.id === connection.end) {
-                        // Only update the visibility of the end block (function block)
                         console.log(`Updating visibility for end block ${block.id} to ${isVisible}`);
                         return { ...block, isVisible };
                     }
-                    // Start block (class block) remains unchanged
+                    if (block.parentClass === connection.end) {
+                        console.log(`Setting sub-block ${block.id} visibility to ${isVisible}`);
+                        return { ...block, isVisible };
+                    }
                     return block;
                 });
+
+                // Collect all sub-block IDs that need to be updated
+                const subBlockIds = updatedBlocks
+                    .filter(block => block.id === connection.end)
+                    .flatMap(block => {
+                        return block.connections.map(subConn => {
+                            const className = block.id.split('.').pop(); // Extract class name (e.g., DataProcessor)
+                            const subConnTo = subConn.to; // Sub-connection 'to' value
+
+                            // Extract the full class name without the last segment
+                            const fullClassName = block.id.split(':')[0];
+
+                            // Construct the connection format
+                            const connectionFormat = `${fullClassName}:-${className}_${subConnTo}`;
+
+                            console.log("connection format", connectionFormat); // Log for debugging
+
+                            return {
+                                subBlockFormat: `${className}_${subConnTo}`,   // Format for setHiddenSubBlocks
+                                connectionFormat  // Format for setHiddenSubConnections
+                            };
+                        });
+                    });
+
+                // Extract subBlockIds and connectionIds separately
+                const subBlockIdsFormatted = subBlockIds.map(item => item.subBlockFormat); // For setHiddenSubBlocks
+                const connectionIdsFormatted = subBlockIds.map(item => item.connectionFormat); // For setHiddenSubConnections
+
+                console.log("SubBlock IDs:", subBlockIdsFormatted);
+                console.log("Connection IDs:", connectionIdsFormatted);
+
+                // Update hiddenSubBlocks
+                setHiddenSubBlocks(prev => {
+                    if (isVisible) {
+                        return prev.filter(id => !subBlockIdsFormatted.includes(id));
+                    } else {
+                        return [...new Set([...prev, ...subBlockIdsFormatted])];
+                    }
+                });
+
+                // Update hiddenSubConnections
+                setHiddenSubConnections(prev => {
+                    if (isVisible) {
+                        return prev.filter(id => !connectionIdsFormatted.includes(id));
+                    } else {
+                        return [...new Set([...prev, ...connectionIdsFormatted])];
+                    }
+                });
+
+
+                return updatedBlocks;
             });
         } else {
             console.log("No connection found for ID:", connectionId);
         }
     }, [connections]);
-
+    
     const processFile = useCallback(async (content: string, fileName: string) => {
         try {
             const jsonData = await generateJsonFromPythonFile(content, fileName);
@@ -248,6 +301,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                 );
                 classFunctions.forEach(functionBlock => {
                     const { startPoint, endPoint } = getConnectionPoints(block, functionBlock);
+                    //console.log("nameing id", `${functionBlock.id}`)
                     newConnections.push({
                         id: `${block.id}-${functionBlock.id}`,
                         start: block.id,
@@ -324,7 +378,10 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
 
     const getVisibleBlocks = useCallback(() => {
         return blocks.filter(block => {
+           // console.log("hd",hiddenSubBlocks)
             if (block.isVisible === false) return false;
+          //console.log("block id",block)
+            if (hiddenSubBlocks.includes(block.id)) return false;
             if (block.type === 'class' || block.type === 'code' || block.type === 'class_standalone' || block.type === 'standalone_function') return true;
             const parentClass = blocks.find(b => b.type === 'class' && block.id.startsWith(`${b.name}_`));
             return parentClass ? classVisibility[parentClass.id] !== false : true;
@@ -332,11 +389,22 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     }, [blocks, classVisibility]);
 
     const getVisibleConnections = useCallback(() => {
-        return connections.map(conn => ({
-            ...conn,
-            isVisible: conn.isVisible !== false
-        }));
-    }, [connections]);
+        console.log(hiddenSubConnections)
+        return connections
+            .filter(conn =>
+                !hiddenSubConnections.includes(conn.id) // Exclude connections whose IDs are in hiddenSubBlocks
+            )
+            .map(conn => {
+                console.log(`Processing connection with ID: ${conn.id}`); // Log connection ID
+
+                return {
+                    ...conn,
+                    isVisible: conn.isVisible !== false
+                };
+            });
+    }, [connections, hiddenSubBlocks]);
+
+
 
     const handleZoomIn = () => {
         setZoomLevel(prevZoom => Math.min(prevZoom + 0.1, 2));
