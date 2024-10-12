@@ -11,6 +11,7 @@ export interface ConnectionData extends FileProcessorConnectionData { }
 
 export interface ExtendedBlockData extends BlockData {
     parentClass?: string;
+    isVisible?: boolean;
 }
 
 export interface Connection {
@@ -51,11 +52,32 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const [isTemplatesPanelOpen, setIsTemplatesPanelOpen] = useState(false);
 
     const handleConnectionVisibilityChange = useCallback((connectionId: string, isVisible: boolean) => {
+        console.log("connection to be invisible ", connectionId)
         setConnections(prevConnections =>
             prevConnections.map(conn =>
                 conn.id === connectionId ? { ...conn, isVisible } : conn
             )
         );
+        // Find the connection that was toggled
+        const connection = connections.find(conn => conn.id === connectionId);
+        if (connection) {
+            console.log("Connection found:", connection);
+            console.log("Updating visibility for blocks:", connection.start, connection.end);
+            // Update the visibility of the start and end blocks
+            setBlocks(prevBlocks => {
+                console.log("Previous blocks:", prevBlocks);
+                return prevBlocks.map(block => {
+                    if (block.id === connection.start || block.id === connection.end) {
+                        console.log(`Updating block ${block.id} visibility to ${isVisible}`);
+                        return { ...block, isVisible };
+                    }
+                    return block;
+                });
+            });
+            console.log("Finished updating blocks");
+        } else {
+            console.log("No connection found for ID:", connectionId);
+        }
     }, []);
 
     const processFile = useCallback(async (content: string, fileName: string) => {
@@ -300,6 +322,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
 
     const getVisibleBlocks = useCallback(() => {
         return blocks.filter(block => {
+            if (block.isVisible === false) return false;
             if (block.type === 'class' || block.type === 'code' || block.type === 'class_standalone' || block.type === 'standalone_function') return true;
             const parentClass = blocks.find(b => b.type === 'class' && block.id.startsWith(`${b.name}_`));
             return parentClass ? classVisibility[parentClass.id] !== false : true;

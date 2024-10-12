@@ -89,7 +89,11 @@ Version 2.7 - Setting Connectors exact line of the ide  and also make this block
             - fix when class hide is cliked it should hide the class standalone 
             - connection and blocks should update when ide updates 
 
-
+        Notes 👍
+            connector end should be invisble 
+            ide to block workig fine but the all the sub connected also should invisible 
+            subblock to class bloack  both first block and second block is getting invisible
+            
 
 
 

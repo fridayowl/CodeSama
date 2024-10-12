@@ -13,6 +13,7 @@ interface BlockProps {
     onVisibilityChange: (id: string, isVisible: boolean) => void;
     onCodeChange?: (id: string, newCode: string) => void;
     customization: any;
+    isConnectorVisible?: boolean;
 }
 
 const Block: React.FC<BlockProps> = ({
@@ -26,7 +27,8 @@ const Block: React.FC<BlockProps> = ({
     lineNumber,
     onVisibilityChange,
     onCodeChange,
-    customization
+    customization,
+    isConnectorVisible = true,
 }) => {
     const [isVisible, setIsVisible] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
@@ -91,6 +93,10 @@ const Block: React.FC<BlockProps> = ({
             </div>
         ));
     };
+
+    if (!isConnectorVisible) {
+        return null;
+    }
 
     return (
         <div className="w-full max-w-3xl rounded-lg shadow-md overflow-hidden"
