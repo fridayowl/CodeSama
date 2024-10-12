@@ -192,14 +192,16 @@ const Connections: React.FC<ConnectionsProps> = ({
                             onClick={(e) => handleConnectionClick(e, connection.id)}
                             style={{ cursor: 'pointer', pointerEvents: 'all' }}
                         />
-                        <circle
-                            cx={scaledEnd.x}
-                            cy={scaledEnd.y}
-                            r={4}
-                            fill={color}
-                            onClick={(e) => handleConnectionClick(e, connection.id)}
-                            style={{ cursor: 'pointer', pointerEvents: 'all' }}
-                        />
+                        {isVisible && (
+                            <circle
+                                cx={scaledEnd.x}
+                                cy={scaledEnd.y}
+                                r={4}
+                                fill={color}
+                                onClick={(e) => handleConnectionClick(e, connection.id)}
+                                style={{ cursor: 'pointer', pointerEvents: 'all' }}
+                            />
+                        )}
                     </g>
                 );
             })}
