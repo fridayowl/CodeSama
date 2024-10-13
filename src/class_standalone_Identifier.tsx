@@ -13,13 +13,13 @@ export function identifyClassStandaloneCode(fileContent: string, classes: BlockD
         let functionIndentation = -1;
         let blockStartLineNumber = 0;
 
-        // Find the starting line number of the class in the entire file
         const classStartLineNumber = fileLines.findIndex(line => line.trim().startsWith(`class ${classBlock.name}`)) + 1;
 
         const createBlock = (code: string[], startLineNumber: number): BlockData | null => {
             if (code.length > 0) {
                 blockCount++;
                 const connection: ConnectionData = {
+                    id: `${classBlock.id}.standalone_${blockCount}`,
                     to: classBlock.id,
                     type: 'class_contains_standalone',
                     fromConnector: 'method',
@@ -46,8 +46,6 @@ export function identifyClassStandaloneCode(fileContent: string, classes: BlockD
         const processLine = (line: string, index: number) => {
             const trimmedLine = line.trim();
             const indentation = line.length - trimmedLine.length;
-
-            // Calculate the actual line number in the original file
             const actualLineNumber = classStartLineNumber + index;
 
             if (index === 0) {

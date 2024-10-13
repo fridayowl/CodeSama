@@ -7,20 +7,16 @@ export function identifyClasses(fileContent: string, fileName: string): BlockDat
     let classIndentationLevel = 0;
 
     const processLine = (line: string, index: number) => {
-        // Capture the line number before trimming any whitespace
-        const originalLine = line;  // Keep the original line with its indentation
-        const trimmedLine = line.trimLeft();  // Trim the left side only for detecting class
-
+        const originalLine = line;
+        const trimmedLine = line.trimLeft();
         const currentIndentation = line.length - trimmedLine.length;
 
-        // Detect if the line is a class definition
         if (trimmedLine.startsWith('class ')) {
-            // If there's an existing class, push it to the array before starting a new one
             if (currentClass) {
                 classes.push(currentClass);
             }
 
-            const name = trimmedLine.split(' ')[1].split('(')[0];  // Extract class name
+            const name = trimmedLine.split(' ')[1].split('(')[0];
 
             currentClass = {
                 id: `${fileName}.${name}`,
@@ -29,20 +25,18 @@ export function identifyClasses(fileContent: string, fileName: string): BlockDat
                 location: 'Uploaded file',
                 author: 'File author',
                 fileType: 'Python',
-                code: originalLine,  // Use the original line here to keep indentation
+                code: originalLine,
                 x: 800,
                 y: 200 + classes.length * 100,
                 connections: [],
-                lineNumber: index + 1  // Capture the line number before any trimming
+                lineNumber: index + 1
             };
 
             classIndentationLevel = currentIndentation;
         } else if (currentClass) {
-            // Append additional lines to the current class code, if they are part of the class
             if (currentIndentation > classIndentationLevel || trimmedLine === '') {
-                currentClass.code += '\n' + originalLine;  // Use the original line here
+                currentClass.code += '\n' + originalLine;
             } else {
-                // Class definition has ended, push the class and reset currentClass
                 classes.push(currentClass);
                 currentClass = null;
                 classIndentationLevel = 0;
@@ -50,10 +44,8 @@ export function identifyClasses(fileContent: string, fileName: string): BlockDat
         }
     };
 
-    // Process each line of the file
     lines.forEach(processLine);
 
-    // If there's still an open class, push it to the classes array
     if (currentClass) {
         classes.push(currentClass);
     }

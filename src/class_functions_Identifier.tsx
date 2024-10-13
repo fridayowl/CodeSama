@@ -1,4 +1,5 @@
-import { BlockData  } from './fileProcessor';
+import { BlockData, ConnectionData } from './fileProcessor';
+
 export function identifyFunctionsAndConnections(fileContent: string, classes: BlockData[], fileName: string): BlockData[] {
     const lines = fileContent.split('\n');
     const functions: BlockData[] = [];
@@ -11,9 +12,7 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
         const trimmedLine = line.trimLeft();
         const currentIndentation = line.length - trimmedLine.length;
 
-        // Detect if we're inside a class
         if (trimmedLine.startsWith('class ')) {
-            // If there's a class already, save its methods before starting a new class
             if (currentClass) {
                 if (currentFunction) {
                     functions.push(currentFunction);
@@ -23,12 +22,11 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
                 classIndentationLevel = 0;
             }
 
-            // Match class name
             const classNameMatch = trimmedLine.match(/class\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*:/);
             const className = classNameMatch ? classNameMatch[1] : 'UnknownClass';
 
             currentClass = {
-                id: `${className}Class`,
+                id: `${fileName}.${className}`,
                 type: 'class',
                 name: className,
                 location: 'Uploaded file',
@@ -38,13 +36,12 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
                 x: 1200,
                 y: 100 + functions.length * 100,
                 connections: [],
-                lineNumber: index + 1  // Set the correct line number
+                lineNumber: index + 1
             };
 
             classIndentationLevel = currentIndentation;
         }
 
-        // Detect method definition inside the current class
         if (currentClass && trimmedLine.startsWith('def ') && currentIndentation > classIndentationLevel) {
             if (currentFunction) {
                 functions.push(currentFunction);
@@ -64,16 +61,14 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
                 x: 1200,
                 y: 100 + functions.length * 100,
                 connections: [],
-                lineNumber: index + 1  // Set the correct line number for the function
+                lineNumber: index + 1
             };
 
             indentationLevel = currentIndentation;
         } else if (currentFunction) {
-            // Continuation of the function definition
             if (currentIndentation > indentationLevel || trimmedLine === '') {
                 currentFunction.code += '\n' + line;
             } else {
-                // Function has ended
                 functions.push(currentFunction);
                 currentFunction = null;
                 indentationLevel = 0;
@@ -83,15 +78,14 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
 
     lines.forEach(processLine);
 
-    // If a function is still open, close it
     if (currentFunction) {
         functions.push(currentFunction);
     }
 
-    // Connect classes to their methods
     classes.forEach(classBlock => {
         const classFunctions = functions.filter(fn => fn.code.includes(`def ${fn.name}(self`));
         classBlock.connections = classFunctions.map(fn => ({
+            id: `${classBlock.id}.${fn.id}`,
             to: fn.id,
             type: 'class_contains_functions',
             fromConnector: 'method',

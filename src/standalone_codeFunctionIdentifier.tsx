@@ -57,7 +57,7 @@ export function identifyStandaloneFunctions(fileContent: string, fileName: strin
             insideFunction = true;
             functionIndentation = currentIndentation;
             functionName = trimmedLine.split('def ')[1].split('(')[0].trim();
-            functionStartLine = index + 1; // Set the start line for the new function
+            functionStartLine = index + 1;
             currentFunction.push(line);
             return;
         }

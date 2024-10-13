@@ -39,3 +39,5 @@ def process(self):
         )
         return self.processed_data
 print("test3") 
+class DataProcessor1:
+    print("jk")

@@ -12,6 +12,7 @@ interface CodeBlockProps {
     onVisibilityChange: (id: string, isVisible: boolean) => void;
     onCodeChange?: (id: string, newCode: string) => void;
     customization: any;
+    
 }
 
 const CodeBlock: React.FC<CodeBlockProps> = ({

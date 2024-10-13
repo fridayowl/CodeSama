@@ -20,6 +20,7 @@ export interface BlockData {
 }
 
 export interface ConnectionData {
+    id: string; 
     to: string;
     type: 'inherits' | 'composes' | 'uses' | 'class_contains_functions' | 'codeLink' | 'class_contains_standalone';
     fromConnector: string;

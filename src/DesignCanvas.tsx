@@ -5,9 +5,10 @@ import { generateJsonFromPythonFile, BlockData, ConnectionData as FileProcessorC
 import SettingsPanel from './Settings';
 import defaultCustomization from './customization.json';
 import customTemplates from './customTemplates';
-import { start } from 'repl';
 
-export interface ConnectionData extends FileProcessorConnectionData { }
+export interface ConnectionData extends FileProcessorConnectionData {
+    id: string;  // Added id field
+}
 
 export interface ExtendedBlockData extends BlockData {
     parentClass?: string;
@@ -79,37 +80,30 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                     return block;
                 });
 
-                // Collect all sub-block IDs that need to be updated
                 const subBlockIds = updatedBlocks
                     .filter(block => block.id === connection.end)
                     .flatMap(block => {
                         return block.connections.map(subConn => {
-                            const className = block.id.split('.').pop(); // Extract class name (e.g., DataProcessor)
-                            const subConnTo = subConn.to; // Sub-connection 'to' value
-
-                            // Extract the full class name without the last segment
+                            const className = block.id.split('.').pop();
+                            const subConnTo = subConn.to;
                             const fullClassName = block.id.split(':')[0];
-
-                            // Construct the connection format
                             const connectionFormat = `${fullClassName}:-${className}_${subConnTo}`;
 
-                            console.log("connection format", connectionFormat); // Log for debugging
+                            console.log("connection format", connectionFormat);
 
                             return {
-                                subBlockFormat: `${className}_${subConnTo}`,   // Format for setHiddenSubBlocks
-                                connectionFormat  // Format for setHiddenSubConnections
+                                subBlockFormat: `${className}_${subConnTo}`,
+                                connectionFormat
                             };
                         });
                     });
 
-                // Extract subBlockIds and connectionIds separately
-                const subBlockIdsFormatted = subBlockIds.map(item => item.subBlockFormat); // For setHiddenSubBlocks
-                const connectionIdsFormatted = subBlockIds.map(item => item.connectionFormat); // For setHiddenSubConnections
+                const subBlockIdsFormatted = subBlockIds.map(item => item.subBlockFormat);
+                const connectionIdsFormatted = subBlockIds.map(item => item.connectionFormat);
 
                 console.log("SubBlock IDs:", subBlockIdsFormatted);
                 console.log("Connection IDs:", connectionIdsFormatted);
 
-                // Update hiddenSubBlocks
                 setHiddenSubBlocks(prev => {
                     if (isVisible) {
                         return prev.filter(id => !subBlockIdsFormatted.includes(id));
@@ -118,7 +112,6 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                     }
                 });
 
-                // Update hiddenSubConnections
                 setHiddenSubConnections(prev => {
                     if (isVisible) {
                         return prev.filter(id => !connectionIdsFormatted.includes(id));
@@ -127,14 +120,13 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                     }
                 });
 
-
                 return updatedBlocks;
             });
         } else {
             console.log("No connection found for ID:", connectionId);
         }
     }, [connections]);
-    
+
     const processFile = useCallback(async (content: string, fileName: string) => {
         try {
             const jsonData = await generateJsonFromPythonFile(content, fileName);
@@ -159,26 +151,11 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             const sortedMainBlocks = [...classes, ...standaloneCodes, ...standaloneFunctions]
                 .sort((a, b) => a.lineNumber - b.lineNumber);
 
-            const sortedMainClassBlocks = [...classFunctions, ...classStandalones]
-                .sort((a, b) => a.lineNumber - b.lineNumber);
-
-            console.log("sorted class", sortedMainClassBlocks)
             let currentY = 100;
 
             const modifiedBlocks: ExtendedBlockData[] = sortedMainBlocks.map((block) => {
                 const height = getBlockHeight(block) + 20;
-                let x: number;
-
-                switch (block.type) {
-                    case 'class':
-                        x = X_OFFSET;
-                        break;
-                    case 'code':
-                    case 'standalone_function':
-                    default:
-                        x = X_OFFSET;
-                        break;
-                }
+                let x = X_OFFSET;
 
                 const newBlock = {
                     ...block,
@@ -301,7 +278,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                 );
                 classFunctions.forEach(functionBlock => {
                     const { startPoint, endPoint } = getConnectionPoints(block, functionBlock);
-                   
+
                     newConnections.push({
                         id: `${block.id}-${functionBlock.id}`,
                         start: block.id,
@@ -378,33 +355,29 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
 
     const getVisibleBlocks = useCallback(() => {
         return blocks.filter(block => {
-           // console.log("hd",hiddenSubBlocks)
             if (block.isVisible === false) return false;
-          //console.log("block id",block)
             if (hiddenSubBlocks.includes(block.id)) return false;
             if (block.type === 'class' || block.type === 'code' || block.type === 'class_standalone' || block.type === 'standalone_function') return true;
             const parentClass = blocks.find(b => b.type === 'class' && block.id.startsWith(`${b.name}_`));
             return parentClass ? classVisibility[parentClass.id] !== false : true;
         });
-    }, [blocks, classVisibility]);
+    }, [blocks, classVisibility, hiddenSubBlocks]);
 
     const getVisibleConnections = useCallback(() => {
         console.log(hiddenSubConnections)
         return connections
             .filter(conn =>
-                !hiddenSubConnections.includes(conn.id) // Exclude connections whose IDs are in hiddenSubBlocks
+                !hiddenSubConnections.includes(conn.id)
             )
             .map(conn => {
-                console.log(`Processing connection with ID: ${conn.id}`); // Log connection ID
+                console.log(`Processing connection with ID: ${conn.id}`);
 
                 return {
                     ...conn,
                     isVisible: conn.isVisible !== false
                 };
             });
-    }, [connections, hiddenSubBlocks]);
-
-
+    }, [connections, hiddenSubConnections]);
 
     const handleZoomIn = () => {
         setZoomLevel(prevZoom => Math.min(prevZoom + 0.1, 2));

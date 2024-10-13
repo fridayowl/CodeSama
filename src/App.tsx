@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import NavBarMinimal from './NavBar';
 import DesignCanvas from './DesignCanvas';
-import Directory, { FileSystemItem } from './Directory';
-
+import Directory, { FileSystemItem } from './Directory'; 
+// import ReactFlowApp from './newversion/Canvas';
 function App() {
   const [directoryStructure, setDirectoryStructure] = useState<FileSystemItem[]>([]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
@@ -33,7 +33,8 @@ function App() {
           />
         </main>
       </div>
-    </div>
+    </div> 
+    // <ReactFlowApp/>
   );
 }
 

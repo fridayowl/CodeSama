@@ -8,7 +8,7 @@ export function identifyCodeBlocks(fileContent: string, fileName: string): Block
     let insideFunction = false;
     let classIndentation: number | null = null;
     let functionIndentation: number | null = null;
-    let blockStartLine = 1; // Start from line 1
+    let blockStartLine = 1;
 
     const getIndentationLevel = (line: string): number => line.match(/^\s*/)?.[0]?.length || 0;
 
@@ -34,17 +34,16 @@ export function identifyCodeBlocks(fileContent: string, fileName: string): Block
         const currentIndentation = getIndentationLevel(line);
 
         if (!trimmedLine || trimmedLine.startsWith('#')) {
-            return; // Ignore empty lines or comments, but don't reset blockStartLine
+            return;
         }
 
         if (trimmedLine.startsWith('class ')) {
-            if (currentBlock.length > 0) { 
+            if (currentBlock.length > 0) {
                 codeBlocks.push(createBlock(currentBlock, codeBlocks.length + 1, blockStartLine));
                 currentBlock = [];
             }
             insideClass = true;
             classIndentation = currentIndentation;
-           // blockStartLine = index + 1; // Update for the next potential block
             return;
         }
 
@@ -60,7 +59,7 @@ export function identifyCodeBlocks(fileContent: string, fileName: string): Block
             }
             insideFunction = true;
             functionIndentation = currentIndentation;
-           blockStartLine = index + 1; // Update for the next potential block
+            blockStartLine = index + 1;
             return;
         }
 
@@ -71,7 +70,7 @@ export function identifyCodeBlocks(fileContent: string, fileName: string): Block
 
         if (!insideClass && !insideFunction) {
             if (currentBlock.length === 0) {
-                blockStartLine = index + 1; // Only update if this is the start of a new block
+                blockStartLine = index + 1;
             }
             currentBlock.push(line);
         }
