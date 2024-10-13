@@ -21,6 +21,7 @@ interface CanvasGridProps {
     idePosition: { x: number; y: number };
     customization: any;
     onConnectionVisibilityChange: (connectionId: string, isVisible: boolean) => void;
+    onBlockWidthChange: (id: string, newWidth: number) => void; // New prop
 }
 
 const CanvasGrid: React.FC<CanvasGridProps> = ({
@@ -38,7 +39,9 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
     zoomLevel,
     idePosition,
     customization,
-    onConnectionVisibilityChange
+    onConnectionVisibilityChange,
+    onBlockWidthChange, 
+    
 }) => {
     const HEADER_HEIGHT = 40;
     const CONNECTOR_OFFSET_X = 5;
@@ -67,7 +70,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
         const block = blocks.find(b => b.id === id);
         return block ? block.type : 'unknown';
     };
-
+     
     const renderBlock = (item: ExtendedBlockData) => {
         const commonProps = {
             id: item.id,
@@ -81,7 +84,9 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
             onCodeChange: (newCode: string) => onCodeChange(item.id, newCode),
             customization: customization,
             isVisible: item.isVisible !== false,
-            parentClass: item.parentClass  // Add this line
+            parentClass: item.parentClass , // Add this line,
+            onWidthChange: (newWidth: number) => onBlockWidthChange(item.id, newWidth),
+            initialWidth: item.width,
         };
 
         switch (item.type) {
@@ -101,12 +106,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
     };
 
     return (
-        <div className="relative w-full h-full" style={{
-            backgroundImage: `linear-gradient(to right, ${customization.canvas.gridColor} 1px, transparent 1px),
-                               linear-gradient(to bottom, ${customization.canvas.gridColor} 1px, transparent 1px)`,
-            backgroundSize: `${customization.canvas.gridSpacing * zoomLevel}px ${customization.canvas.gridSpacing * zoomLevel}px`,
-            backgroundColor: customization.canvas.backgroundColor,
-        }}>
+        <div className="relative w-full h-full" style={{             }}>
             {isFlowVisible && getVisibleBlocks().map((item) => (
                 <DraggableWrapper
                     key={item.id}

@@ -13,6 +13,7 @@ export interface ConnectionData extends FileProcessorConnectionData {
 export interface ExtendedBlockData extends BlockData {
     parentClass?: string;
     isVisible?: boolean;
+    width: number;
 }
 
 export interface Connection {
@@ -44,6 +45,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const [idePosition, setIdePosition] = useState({ x: 20, y: 20 });
     const [refreshKey, setRefreshKey] = useState(0);
     const [autoZoom, setAutoZoom] = useState(true);
+    const [isAutoZoomLocked, setIsAutoZoomLocked] = useState(false);
     const [customization, setCustomization] = useState(() => {
         const savedCustomization = localStorage.getItem('customization');
         return savedCustomization ? JSON.parse(savedCustomization) : defaultCustomization;
@@ -53,7 +55,38 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const [isTemplatesPanelOpen, setIsTemplatesPanelOpen] = useState(false);
     const [hiddenSubConnections, setHiddenSubConnections] = useState<string[]>([]);
     const [hiddenSubBlocks, setHiddenSubBlocks] = useState<string[]>([]);
+    const toggleAutoZoom = () => {
+        if (!isAutoZoomLocked) {
+            setAutoZoom(!autoZoom);
+        }
+    };
 
+    const calculateBoundingBox = useCallback(() => {
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        blocks.forEach(block => {
+            minX = Math.min(minX, block.x);
+            minY = Math.min(minY, block.y);
+            maxX = Math.max(maxX, block.x + 200);
+            maxY = Math.max(maxY, block.y + 100);
+        });
+        return { minX, minY, maxX, maxY };
+    }, [blocks]);
+    const toggleAutoZoomLock = () => {
+        setIsAutoZoomLocked(!isAutoZoomLocked);
+        if (!isAutoZoomLocked) {
+            setAutoZoom(false);
+        }
+    };
+
+    const adjustZoom = useCallback(() => {
+        if (!canvasRef.current || !autoZoom) return;
+
+        // ... (keep the existing zoom adjustment logic)
+    }, [blocks, autoZoom,calculateBoundingBox ]);
+
+    useEffect(() => {
+            adjustZoom();
+        }, [blocks, adjustZoom]);
     const handleConnectionVisibilityChange = useCallback((connectionId: string, isVisible: boolean) => {
         console.log("Connection visibility change for", connectionId, "to", isVisible);
 
@@ -126,6 +159,13 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             console.log("No connection found for ID:", connectionId);
         }
     }, [connections]);
+    const estimateInitialWidth = (code: string): number => {
+        const lines = code.split('\n');
+        const maxLineLength = Math.max(...lines.map(line => line.length));
+        const CHAR_WIDTH = 8; // Approximate width of a character in pixels
+        const PADDING = 40; // Extra padding
+        return Math.max(200, maxLineLength * CHAR_WIDTH + PADDING); // Minimum width of 200px
+    };
 
     const processFile = useCallback(async (content: string, fileName: string) => {
         try {
@@ -133,7 +173,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             console.log('Loaded JSON data:', jsonData);
 
             const UNIFORM_SPACING = 40;
-            const COLUMN_WIDTH = 300;
+            const COLUMN_WIDTH = 350;
             const IDE_WIDTH = 600;
             const X_OFFSET = IDE_WIDTH + 250;
 
@@ -141,6 +181,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                 const lineCount = block.code.split('\n').length;
                 return Math.max(120, lineCount * 20 + 60);
             };
+            
 
             const classes = jsonData.filter(block => block.type === 'class');
             const standaloneCodes = jsonData.filter(block => block.type === 'code');
@@ -159,9 +200,10 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
 
                 const newBlock = {
                     ...block,
+                    width: estimateInitialWidth(block.code),
                     x,
                     y: currentY,
-                    height
+                    height, 
                 } as ExtendedBlockData;
 
                 currentY += height + UNIFORM_SPACING;
@@ -175,6 +217,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                 const parentClass = classes.find(c => c.code.includes(`def ${block.name}(`));
                 const newBlock = {
                     ...block,
+                    width: estimateInitialWidth(block.code),
                     id: parentClass ? `${parentClass.name}_${block.id}` : block.id,
                     parentClass: parentClass?.name,
                     x: X_OFFSET + 3 * COLUMN_WIDTH,
@@ -190,6 +233,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                 const height = getBlockHeight(block) + 20;
                 const newBlock = {
                     ...block,
+                    width: estimateInitialWidth(block.code),
                     x: X_OFFSET + 3 * COLUMN_WIDTH,
                     y: standaloneY,
                     height
@@ -207,7 +251,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             console.error('Error processing file:', error);
         }
     }, []);
-
+   
     useEffect(() => {
         if (selectedFile && selectedFileName) {
             processFile(selectedFile, selectedFileName);
@@ -215,6 +259,8 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     }, [selectedFile, selectedFileName, processFile]);
 
     const getConnectionPoints = useCallback((startBlock: ExtendedBlockData, endBlock: ExtendedBlockData) => {
+        const CONNECTOR_OFFSET = 20;
+
         if (startBlock.type === 'class' && (endBlock.type === 'class_function' || endBlock.type === 'class_standalone')) {
             const classLines = startBlock.code.split('\n');
             const functionStartLine = classLines.findIndex(line =>
@@ -224,14 +270,14 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             if (functionStartLine !== -1) {
                 const startY = startBlock.y + (functionStartLine + 1) * 20;
                 return {
-                    startPoint: { x: startBlock.x + 640, y: startY + 40 },
+                    startPoint: { x: startBlock.x + 750, y: startY + 40 },
                     endPoint: { x: endBlock.x, y: endBlock.y + 25 }
                 };
             }
         }
 
         return {
-            startPoint: { x: startBlock.x + 200, y: startBlock.y + 50 },
+            startPoint: { x: startBlock.x + startBlock.width - CONNECTOR_OFFSET, y: startBlock.y + 50 },
             endPoint: { x: endBlock.x, y: endBlock.y + 25 }
         };
     }, []);
@@ -391,55 +437,43 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         setZoomLevel(1);
     };
 
-    const calculateBoundingBox = useCallback(() => {
-        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        blocks.forEach(block => {
-            minX = Math.min(minX, block.x);
-            minY = Math.min(minY, block.y);
-            maxX = Math.max(maxX, block.x + 200);
-            maxY = Math.max(maxY, block.y + 100);
-        });
-        return { minX, minY, maxX, maxY };
-    }, [blocks]);
 
-    const adjustZoom = useCallback(() => {
-        if (!canvasRef.current) return;
+    // const adjustZoom = useCallback(() => {
+    //     if (!canvasRef.current) return;
 
-        if (blocks.length === 0) {
-            setZoomLevel(1);
-            const { clientWidth, clientHeight } = canvasRef.current;
-            setCanvasSize({ width: clientWidth, height: clientHeight });
-            return;
-        }
+    //     if (blocks.length === 0) {
+    //         setZoomLevel(1);
+    //         const { clientWidth, clientHeight } = canvasRef.current;
+    //         setCanvasSize({ width: clientWidth, height: clientHeight });
+    //         return;
+    //     }
 
-        if (!autoZoom) return;
+    //     if (!autoZoom) return;
 
-        const { minX, minY, maxX, maxY } = calculateBoundingBox();
-        const canvasWidth = canvasRef.current.clientWidth;
-        const canvasHeight = canvasRef.current.clientHeight;
+    //     const { minX, minY, maxX, maxY } = calculateBoundingBox();
+    //     const canvasWidth = canvasRef.current.clientWidth;
+    //     const canvasHeight = canvasRef.current.clientHeight;
 
-        const contentWidth = maxX - minX;
-        const contentHeight = maxY - minY;
+    //     const contentWidth = maxX - minX;
+    //     const contentHeight = maxY - minY;
 
-        const horizontalScale = canvasWidth / contentWidth;
-        const verticalScale = canvasHeight / contentHeight;
+    //     const horizontalScale = canvasWidth / contentWidth;
+    //     const verticalScale = canvasHeight / contentHeight;
 
-        const newZoom = Math.min(horizontalScale, verticalScale, 1) * 0.9;
+    //     const newZoom = Math.min(horizontalScale, verticalScale, 1) * 0.9;
 
-        setZoomLevel(newZoom);
-        setCanvasSize({
-            width: Math.max(contentWidth / newZoom, canvasWidth / newZoom),
-            height: Math.max(contentHeight / newZoom, canvasHeight / newZoom)
-        });
-    }, [blocks, autoZoom, calculateBoundingBox]);
+    //     setZoomLevel(newZoom);
+    //     setCanvasSize({
+    //         width: Math.max(contentWidth / newZoom, canvasWidth / newZoom),
+    //         height: Math.max(contentHeight / newZoom, canvasHeight / newZoom)
+    //     });
+    // }, [blocks, autoZoom, calculateBoundingBox]);
 
     useEffect(() => {
         adjustZoom();
     }, [blocks, adjustZoom]);
 
-    const toggleAutoZoom = () => {
-        setAutoZoom(!autoZoom);
-    };
+    
 
     const handleCustomizationChange = (newCustomization: any) => {
         setCustomization(newCustomization);
@@ -451,6 +485,13 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         localStorage.setItem('customization', JSON.stringify(template));
         setIsTemplatesPanelOpen(false);
     };
+    const handleBlockWidthChange = useCallback((id: string, newWidth: number) => {
+        setBlocks(prevBlocks =>
+            prevBlocks.map(block =>
+                block.id === id ? { ...block, width: newWidth } : block
+            )
+        );
+    }, []);
 
     const TemplateCard: React.FC<{ template: any }> = ({ template }) => (
         <div
@@ -546,6 +587,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                         idePosition={idePosition}
                         customization={customization}
                         onConnectionVisibilityChange={handleConnectionVisibilityChange}
+                        onBlockWidthChange={handleBlockWidthChange}
                     />
                 </div>
             </div>

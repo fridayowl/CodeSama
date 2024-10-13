@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Eye, EyeOff, Edit, Save, Info, FileText, TestTube } from 'lucide-react';
 
 interface BlockProps {
@@ -15,6 +15,8 @@ interface BlockProps {
     customization: any;
     isConnectorVisible?: boolean;
     parentClass?: string;
+    initialWidth: number;
+    onWidthChange: (width: number) => void;
 }
 
 const Block: React.FC<BlockProps> = ({
@@ -30,7 +32,9 @@ const Block: React.FC<BlockProps> = ({
     onCodeChange,
     customization,
     isConnectorVisible = true,
-    parentClass
+    parentClass,
+    initialWidth,
+    onWidthChange,
 }) => {
     const [isVisible, setIsVisible] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
@@ -38,7 +42,9 @@ const Block: React.FC<BlockProps> = ({
     const [isDocumentationVisible, setIsDocumentationVisible] = useState(false);
     const [isTestingVisible, setIsTestingVisible] = useState(false);
     const [currentCode, setCurrentCode] = useState(code);
-
+    const [calculatedWidth, setCalculatedWidth] = useState(initialWidth);
+    const codeRef = useRef<HTMLPreElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     const blockStyle = customization?.blocks?.[type] || {};
 
     const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -82,7 +88,18 @@ const Block: React.FC<BlockProps> = ({
         e.stopPropagation();
         action();
     };
+    useEffect(() => {
+        if (codeRef.current && containerRef.current) {
+            const codeWidth = codeRef.current.scrollWidth;
+            const containerWidth = containerRef.current.offsetWidth;
+            const newWidth = Math.max(codeWidth, containerWidth, initialWidth);
 
+            if (newWidth !== calculatedWidth) {
+                setCalculatedWidth(newWidth);
+                onWidthChange(newWidth);
+            }
+        }
+    }, [code, onWidthChange, calculatedWidth, initialWidth]);
     const renderCodeWithLineNumbers = () => {
         const lines = currentCode.split('\n');
         const startLineNumber = lineNumber || 1;
@@ -101,14 +118,15 @@ const Block: React.FC<BlockProps> = ({
     }
 
     return (
-        <div className="w-full max-w-3xl rounded-lg shadow-md overflow-hidden"
+        <div ref={containerRef}   className="w-full max-w-3xl rounded-lg shadow-md overflow-hidden"
             style={{
                 backgroundColor: blockStyle.backgroundColor || '#ffffff',
                 borderColor: blockStyle.borderColor || '#000000',
                 color: blockStyle.textColor || '#000000',
                 borderWidth: '2px',
                 borderStyle: 'solid',
-                paddingLeft: '20px'
+                paddingLeft: '20px', 
+                width:'850px'
             }}>
             <div className="p-2 flex justify-between items-center" style={{ backgroundColor: blockStyle.headerColor || '#f0f0f0', paddingLeft: '20px' }}>
                 <h3 className="font-bold text-lg">

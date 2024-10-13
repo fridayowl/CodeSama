@@ -7,15 +7,6 @@ class DataProcessor:
         self.data = data
         self.processed_data = None
 
-    def clean_data(self):
-        """Remove any null or empty values from the data."""
-        self.data = [item for item in self.data if item]
-        return self
-
-    def sort_data(self, reverse=False):
-        """Sort the data in ascending or descending order."""
-        self.data.sort(reverse=reverse)
-        return self
     print("abc")
     print("efg")
     def process(self):
