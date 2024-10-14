@@ -45,7 +45,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const [canvasSize, setCanvasSize] = useState({ width: 3000, height: 2000 });
     const [idePosition, setIdePosition] = useState({ x: 20, y: 20 });
     const [refreshKey, setRefreshKey] = useState(0);
-    const [autoZoom, setAutoZoom] = useState(true);
+    const [autoZoom, setAutoZoom] = useState(false);
     const [isAutoZoomLocked, setIsAutoZoomLocked] = useState(false);
     const [customization, setCustomization] = useState(() => {
         const savedCustomization = localStorage.getItem('customization');
