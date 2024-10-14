@@ -57,6 +57,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
     const [hiddenSubConnections, setHiddenSubConnections] = useState<string[]>([]);
     const [hiddenSubBlocks, setHiddenSubBlocks] = useState<string[]>([]);
+    const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
 
     const toggleAutoZoom = () => {
         if (!isAutoZoomLocked) {
@@ -460,6 +461,46 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         );
     }, []);
 
+    const handleBlockSelect = useCallback((blockId: string) => {
+        setSelectedBlockId(blockId);
+        const selectedBlock = blocks.find(block => block.id === blockId);
+        if (selectedBlock && canvasRef.current) {
+            const newZoom = calculateZoomForBlock(selectedBlock);
+            const newScrollPosition = calculateScrollPositionForBlock(selectedBlock, newZoom);
+
+            setZoomLevel(newZoom);
+            canvasRef.current.scrollTo({
+                left: newScrollPosition.x,
+                top: newScrollPosition.y,
+                behavior: 'smooth'
+            });
+        }
+    }, [blocks]);
+
+    const calculateZoomForBlock = (block: ExtendedBlockData) => {
+        if (!canvasRef.current) return zoomLevel;
+        const viewportWidth = canvasRef.current.clientWidth;
+        const viewportHeight = canvasRef.current.clientHeight;
+        const blockWidth = block.width;
+        const blockHeight = 150; // Assuming a fixed height for blocks
+
+        const widthRatio = viewportWidth / (blockWidth * 2);
+        const heightRatio = viewportHeight / (blockHeight * 2);
+
+        return Math.min(widthRatio, heightRatio, 2); // Cap at 200% zoom
+    };
+
+    const calculateScrollPositionForBlock = (block: ExtendedBlockData, newZoom: number) => {
+        if (!canvasRef.current) return { x: 0, y: 0 };
+        const viewportWidth = canvasRef.current.clientWidth;
+        const viewportHeight = canvasRef.current.clientHeight;
+
+        const scrollX = (block.x * newZoom) - (viewportWidth / 2) + (block.width * newZoom / 2);
+        const scrollY = (block.y * newZoom) - (viewportHeight / 2) + (75 * newZoom); // 75 is half of the assumed block height
+
+        return { x: scrollX, y: scrollY };
+    };
+
     const TemplateCard: React.FC<{ template: any }> = ({ template }) => (
         <div
             className="w-48 h-64 bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform hover:scale-105"
@@ -562,6 +603,8 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                             customization={customization}
                             onConnectionVisibilityChange={handleConnectionVisibilityChange}
                             onBlockWidthChange={handleBlockWidthChange}
+                            onBlockSelect={handleBlockSelect}
+                            selectedBlockId={selectedBlockId}
                         />
                     </div>
                 </div>
@@ -595,6 +638,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                 isOpen={isInfoPanelOpen}
                 onClose={() => setIsInfoPanelOpen(false)}
                 blocks={blocks}
+                onBlockSelect={handleBlockSelect}
             />
         </div>
     );

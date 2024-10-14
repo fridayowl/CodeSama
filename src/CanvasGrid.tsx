@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import DraggableWrapper from './DraggableWrapper';
 import Connections from './Connections';
 import { ClassBlock, FunctionBlock, ClassStandaloneBlock, CodeBlock, StandaloneFunctionBlock } from './Blocks';
@@ -21,7 +21,9 @@ interface CanvasGridProps {
     idePosition: { x: number; y: number };
     customization: any;
     onConnectionVisibilityChange: (connectionId: string, isVisible: boolean) => void;
-    onBlockWidthChange: (id: string, newWidth: number) => void; // New prop
+    onBlockWidthChange: (id: string, newWidth: number) => void;
+    onBlockSelect: (id: string) => void;
+    selectedBlockId: string | null;
 }
 
 const CanvasGrid: React.FC<CanvasGridProps> = ({
@@ -40,8 +42,9 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
     idePosition,
     customization,
     onConnectionVisibilityChange,
-    onBlockWidthChange, 
-    
+    onBlockWidthChange,
+    onBlockSelect,
+    selectedBlockId,
 }) => {
     const HEADER_HEIGHT = 40;
     const CONNECTOR_OFFSET_X = 5;
@@ -60,7 +63,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
         return {
             x: block.x * zoomLevel,
             y: block.y * zoomLevel,
-            width: 300 * zoomLevel,
+            width: block.width * zoomLevel,
             height: 150 * zoomLevel
         };
     };
@@ -84,9 +87,11 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
             onCodeChange: (newCode: string) => onCodeChange(item.id, newCode),
             customization: customization,
             isVisible: item.isVisible !== false,
-            parentClass: item.parentClass , // Add this line,
+            parentClass: item.parentClass,
             onWidthChange: (newWidth: number) => onBlockWidthChange(item.id, newWidth),
             initialWidth: item.width,
+            onSelect: () => onBlockSelect(item.id),
+            isSelected: item.id === selectedBlockId,
         };
 
         switch (item.type) {
@@ -106,7 +111,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
     };
 
     return (
-        <div className="relative w-full h-full" style={{             }}>
+        <div className="relative w-full h-full">
             {isFlowVisible && getVisibleBlocks().map((item) => (
                 <DraggableWrapper
                     key={item.id}

@@ -17,6 +17,8 @@ interface BlockProps {
     parentClass?: string;
     initialWidth: number;
     onWidthChange: (width: number) => void;
+    onSelect: () => void;
+    isSelected: boolean;
 }
 
 const Block: React.FC<BlockProps> = ({
@@ -35,6 +37,8 @@ const Block: React.FC<BlockProps> = ({
     parentClass,
     initialWidth,
     onWidthChange,
+    onSelect,
+    isSelected,
 }) => {
     const [isVisible, setIsVisible] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
@@ -88,6 +92,7 @@ const Block: React.FC<BlockProps> = ({
         e.stopPropagation();
         action();
     };
+
     useEffect(() => {
         if (codeRef.current && containerRef.current) {
             const codeWidth = codeRef.current.scrollWidth;
@@ -100,6 +105,7 @@ const Block: React.FC<BlockProps> = ({
             }
         }
     }, [code, onWidthChange, calculatedWidth, initialWidth]);
+
     const renderCodeWithLineNumbers = () => {
         const lines = currentCode.split('\n');
         const startLineNumber = lineNumber || 1;
@@ -118,16 +124,21 @@ const Block: React.FC<BlockProps> = ({
     }
 
     return (
-        <div ref={containerRef}   className="w-full max-w-3xl rounded-lg shadow-md overflow-hidden"
+        <div
+            ref={containerRef}
+            className={`w-full max-w-3xl rounded-lg shadow-md overflow-hidden ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
             style={{
                 backgroundColor: blockStyle.backgroundColor || '#ffffff',
                 borderColor: blockStyle.borderColor || '#000000',
                 color: blockStyle.textColor || '#000000',
                 borderWidth: '2px',
                 borderStyle: 'solid',
-                paddingLeft: '20px', 
-                width:'850px'
-            }}>
+                paddingLeft: '20px',
+                width: `850px`,
+                cursor: 'pointer',
+            }}
+            onClick={() => onSelect()}
+        >
             <div className="p-2 flex justify-between items-center" style={{ backgroundColor: blockStyle.headerColor || '#f0f0f0', paddingLeft: '20px' }}>
                 <h3 className="font-bold text-lg">
                     {name}
@@ -205,12 +216,15 @@ const Block: React.FC<BlockProps> = ({
                             </button>
                         </>
                     ) : (
-                        <pre className="w-full p-2 border rounded overflow-auto font-mono text-sm"
+                        <pre
+                            ref={codeRef}
+                            className="w-full p-2 border rounded overflow-auto font-mono text-sm"
                             style={{
                                 backgroundColor: customization.ide?.backgroundColor || '#f0f0f0',
                                 color: customization.ide?.textColor || '#000000',
                                 paddingLeft: '20px'
-                            }}>
+                            }}
+                        >
                             {renderCodeWithLineNumbers()}
                         </pre>
                     )}

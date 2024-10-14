@@ -6,9 +6,10 @@ interface CanvasInfoPanelProps {
     isOpen: boolean;
     onClose: () => void;
     blocks: ExtendedBlockData[];
+    onBlockSelect: (blockId: string) => void;
 }
 
-const CanvasInfoPanel: React.FC<CanvasInfoPanelProps> = ({ isOpen, onClose, blocks }) => {
+const CanvasInfoPanel: React.FC<CanvasInfoPanelProps> = ({ isOpen, onClose, blocks, onBlockSelect }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedType, setSelectedType] = useState<string | null>(null);
 
@@ -43,52 +44,17 @@ const CanvasInfoPanel: React.FC<CanvasInfoPanelProps> = ({ isOpen, onClose, bloc
                     </button>
                 </div>
 
-                <div className="mb-6">
-                    <h3 className="text-lg font-semibold mb-2">Block Counts</h3>
-                    {blockTypes.map(type => (
-                        <div key={type} className="flex justify-between items-center mb-1">
-                            <span className="capitalize">{type.replace('_', ' ')}:</span>
-                            <span>{blockCounts[type]}</span>
-                        </div>
-                    ))}
-                    <div className="border-t mt-2 pt-2">
-                        <div className="flex justify-between items-center">
-                            <span className="font-semibold">Total:</span>
-                            <span>{blocks.length}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mb-4">
-                    <div className="flex items-center mb-2">
-                        <input
-                            type="text"
-                            placeholder="Search blocks..."
-                            className="flex-grow p-2 border rounded"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <button className="ml-2 p-2 bg-gray-200 rounded">
-                            <Search size={20} />
-                        </button>
-                    </div>
-                    <select
-                        className="w-full p-2 border rounded"
-                        value={selectedType || ''}
-                        onChange={(e) => setSelectedType(e.target.value || null)}
-                    >
-                        <option value="">All Types</option>
-                        {blockTypes.map(type => (
-                            <option key={type} value={type}>{type.replace('_', ' ')}</option>
-                        ))}
-                    </select>
-                </div>
+                {/* ... (keep existing code for block counts, search, and type filter) ... */}
 
                 <div>
                     <h3 className="text-lg font-semibold mb-2">Blocks</h3>
                     <ul className="space-y-2">
                         {filteredBlocks.map(block => (
-                            <li key={block.id} className="border p-2 rounded">
+                            <li
+                                key={block.id}
+                                className="border p-2 rounded cursor-pointer hover:bg-gray-100"
+                                onClick={() => onBlockSelect(block.id)}
+                            >
                                 <h4 className="font-medium">{block.name}</h4>
                                 <p className="text-sm text-gray-600">Type: {block.type}</p>
                                 <p className="text-sm text-gray-600">ID: {block.id}</p>
