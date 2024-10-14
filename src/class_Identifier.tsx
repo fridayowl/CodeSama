@@ -17,9 +17,9 @@ export function identifyClasses(fileContent: string, fileName: string): BlockDat
             }
 
             const name = trimmedLine.split(' ')[1].split('(')[0];
-
+            const cleanName = name.endsWith(':') ? name.slice(0, -1) : name;
             currentClass = {
-                id: `${fileName}.${name}`,
+                id: `${fileName}.${cleanName }`,
                 type: 'class',
                 name,
                 location: 'Uploaded file',

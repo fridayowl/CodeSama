@@ -3,6 +3,7 @@ import NavBarMinimal from './NavBar';
 import DesignCanvas from './DesignCanvas';
 import Directory, { FileSystemItem } from './Directory'; 
 // import ReactFlowApp from './newversion/Canvas';
+import DisableZoom from './DisableZoom';
 function App() {
   const [directoryStructure, setDirectoryStructure] = useState<FileSystemItem[]>([]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
@@ -19,6 +20,7 @@ function App() {
 
   return (
     <div className="App flex flex-col h-screen">
+      <DisableZoom/>
       <NavBarMinimal />
       <div className="flex-grow flex overflow-hidden">
         <Directory

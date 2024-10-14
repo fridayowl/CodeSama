@@ -102,7 +102,8 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
 
             setBlocks(prevBlocks => {
                 const updatedBlocks = prevBlocks.map(block => {
-                    if (block.id === connection.end) {
+                  
+                    if (block.id === connection.end ){
                         console.log(`Updating visibility for end block ${block.id} to ${isVisible}`);
                         return { ...block, isVisible };
                     }
@@ -113,45 +114,47 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                     return block;
                 });
 
-                const subBlockIds = updatedBlocks
-                    .filter(block => block.id === connection.end)
-                    .flatMap(block => {
-                        return block.connections.map(subConn => {
-                            const className = block.id.split('.').pop();
-                            const subConnTo = subConn.to;
-                            const fullClassName = block.id.split(':')[0];
-                            const connectionFormat = `${fullClassName}:-${className}_${subConnTo}`;
+                // const subBlockIds = updatedBlocks
+                //     .filter(block => block.id === connection.end)
+                //     .flatMap(block => {
+                //         console.log("connected",blocks)
+                //         return block.connections.map(subConn => {
+                //             console.log("connected1", subConn)
+                //             const className = block.id.split('.').pop();
+                //             const subConnTo = subConn.to;
+                //             const fullClassName = block.id.split(':')[0];
+                //             const connectionFormat = `${fullClassName}:-${className}_${subConnTo}`;
 
-                            console.log("connection format", connectionFormat);
+                //             console.log("connection format", connectionFormat);
 
-                            return {
-                                subBlockFormat: `${className}_${subConnTo}`,
-                                connectionFormat
-                            };
-                        });
-                    });
+                //             return {
+                //                 subBlockFormat: `${className}_${subConnTo}`,
+                //                 connectionFormat
+                //             };
+                //         });
+                //     });
 
-                const subBlockIdsFormatted = subBlockIds.map(item => item.subBlockFormat);
-                const connectionIdsFormatted = subBlockIds.map(item => item.connectionFormat);
+                // const subBlockIdsFormatted = subBlockIds.map(item => item.subBlockFormat);
+                // const connectionIdsFormatted = subBlockIds.map(item => item.connectionFormat);
+       
+                // console.log("SubBlock IDs:", subBlockIdsFormatted);
+                // console.log("Connection IDs:", connectionIdsFormatted);
 
-                console.log("SubBlock IDs:", subBlockIdsFormatted);
-                console.log("Connection IDs:", connectionIdsFormatted);
+                // setHiddenSubBlocks(prev => {
+                //     if (isVisible) {
+                //         return prev.filter(id => !subBlockIdsFormatted.includes(id));
+                //     } else {
+                //         return [...new Set([...prev, ...subBlockIdsFormatted])];
+                //     }
+                // });
 
-                setHiddenSubBlocks(prev => {
-                    if (isVisible) {
-                        return prev.filter(id => !subBlockIdsFormatted.includes(id));
-                    } else {
-                        return [...new Set([...prev, ...subBlockIdsFormatted])];
-                    }
-                });
-
-                setHiddenSubConnections(prev => {
-                    if (isVisible) {
-                        return prev.filter(id => !connectionIdsFormatted.includes(id));
-                    } else {
-                        return [...new Set([...prev, ...connectionIdsFormatted])];
-                    }
-                });
+                // setHiddenSubConnections(prev => {
+                //     if (isVisible) {
+                //         return prev.filter(id => !connectionIdsFormatted.includes(id));
+                //     } else {
+                //         return [...new Set([...prev, ...connectionIdsFormatted])];
+                //     }
+                // });
 
                 return updatedBlocks;
             });
@@ -215,15 +218,21 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             const classFunctionBlocks = classFunctions.map((block) => {
                 const height = getBlockHeight(block) + 20;
                 const parentClass = classes.find(c => c.code.includes(`def ${block.name}(`));
+
+                // Logging the parent class name and block name
+                console.log("pp", block.name);
+                console.log("ppp", parentClass ? parentClass.name : 'No parent class');
+
                 const newBlock = {
                     ...block,
                     width: estimateInitialWidth(block.code),
-                    id: parentClass ? `${parentClass.name}_${block.id}` : block.id,
-                    parentClass: parentClass?.name,
+                    
+                    
                     x: X_OFFSET + 3 * COLUMN_WIDTH,
                     y: methodY,
                     height
                 } as ExtendedBlockData;
+
                 methodY += height + UNIFORM_SPACING;
                 return newBlock;
             });
@@ -297,14 +306,18 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         };
 
         const connectBlockToIDE = (block: ExtendedBlockData) => {
-            console.log(block.id, block.lineNumber)
+            console.log(block.id, block.lineNumber);
             const startPoint = getIDEConnectionStartPoint(block.lineNumber);
-            console.log("start point", startPoint)
+            console.log("start point", startPoint);
             const endPoint = { x: block.x, y: block.y + 25 };
+
+            // Remove the colon from the end of the block.id if it exists
+            const cleanBlockId = block.id.endsWith(':') ? block.id.slice(0, -1) : block.id;
+
             newConnections.push({
-                id: `IDE-${block.id}`,
+                id: `${cleanBlockId}`,
                 start: 'python-ide',
-                end: block.id,
+                end: cleanBlockId,
                 startPoint,
                 endPoint,
                 type: 'uses',
@@ -320,11 +333,10 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         blocks.forEach(block => {
             if (block.type === 'class') {
                 const classFunctions = blocks.filter(b =>
-                    b.type === 'class_function' && b.id.startsWith(`${block.name}_`)
+                    b.type === 'class_function' && b.parentClass === block.id
                 );
                 classFunctions.forEach(functionBlock => {
                     const { startPoint, endPoint } = getConnectionPoints(block, functionBlock);
-
                     newConnections.push({
                         id: `${block.id}-${functionBlock.id}`,
                         start: block.id,
@@ -338,9 +350,10 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                         endBlockType: 'class_function'
                     });
                 });
+                
 
                 const classStandalones = blocks.filter(b =>
-                    b.type === 'class_standalone' && b.connections.some(conn => conn.to === block.id)
+                    b.type === 'class_standalone' && b.parentClass === block.id
                 );
                 classStandalones.forEach(standaloneBlock => {
                     const { startPoint, endPoint } = getConnectionPoints(block, standaloneBlock);
@@ -357,6 +370,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                         endBlockType: 'class_standalone'
                     });
                 });
+            
             }
         });
 

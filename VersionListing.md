@@ -95,6 +95,9 @@ Version 2.7 - Setting Connectors exact line of the ide  and also make this block
             subblock to class bloack  both first block and second block is getting invisible
             ---
             What i have to do is now make sure the class standalone is treated as class sub nodes 
+            ---
+            Now the conenctor to class stand alone is not disappering
+            
 
 
 

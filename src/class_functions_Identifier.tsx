@@ -25,6 +25,7 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
             const classNameMatch = trimmedLine.match(/class\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*:/);
             const className = classNameMatch ? classNameMatch[1] : 'UnknownClass';
 
+            
             currentClass = {
                 id: `${fileName}.${className}`,
                 type: 'class',
@@ -49,10 +50,10 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
 
             const functionNameMatch = trimmedLine.match(/def\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/);
             const functionName = functionNameMatch ? functionNameMatch[1] : 'Unknown';
-
+            //console.log("naming", `${fileName}.${currentClass.name}.${functionName}`)
             currentFunction = {
                 id: `${fileName}.${currentClass.name}.${functionName}`,
-                type: 'class_function',
+                type: 'class_function', 
                 name: functionName,
                 location: 'Uploaded file',
                 author: 'File author',
@@ -61,7 +62,8 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
                 x: 1200,
                 y: 100 + functions.length * 100,
                 connections: [],
-                lineNumber: index + 1
+                lineNumber: index + 1,
+                parentClass: `${fileName}.${currentClass.name}` // Add this line
             };
 
             indentationLevel = currentIndentation;
@@ -83,15 +85,24 @@ export function identifyFunctionsAndConnections(fileContent: string, classes: Bl
     }
 
     classes.forEach(classBlock => {
-        const classFunctions = functions.filter(fn => fn.code.includes(`def ${fn.name}(self`));
-        classBlock.connections = classFunctions.map(fn => ({
-            id: `${classBlock.id}.${fn.id}`,
-            to: fn.id,
-            type: 'class_contains_functions',
-            fromConnector: 'method',
-            toConnector: 'input'
-        }));
+        const classFunctions = functions.filter(fn => fn.parentClass === classBlock.id);
+
+        classBlock.connections = classFunctions.map(fn => {
+            const connectionId = `${classBlock.id}.${fn.name}`;
+
+            // Log the formatted connection ID
+           console.log("naming",connectionId);
+
+            return {
+                id: connectionId,
+                to: fn.id,
+                type: 'class_contains_functions',
+                fromConnector: 'method',
+                toConnector: 'input'
+            };
+        });
     });
+
 
     return functions;
 }
