@@ -20,9 +20,9 @@ export interface BlockData {
 }
 
 export interface ConnectionData {
-    id: string; 
+    id: string;
     to: string;
-    type: 'inherits' | 'composes' | 'uses' | 'class_contains_functions' | 'codeLink' | 'class_contains_standalone';
+    type: 'inherits' | 'composes' | 'class_contains_functions' | 'class_contains_standalone' | 'idecontainsclass' | 'idecontainsstandalonecode';
     fromConnector: string;
     toConnector: string;
 }

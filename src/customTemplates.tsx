@@ -34,7 +34,7 @@ const customTemplates = [
             }
         },
         connections: {
-            uses: {
+            idecontainsclass: {
                 lineColor: "#00FF00",
                 arrowHead: "triangle",
                 lineStyle: "solid"
@@ -59,7 +59,7 @@ const customTemplates = [
                 arrowHead: "diamond",
                 lineStyle: "dashed"
             },
-            codeLink: {
+            idecontainsstandalonecode: {
                 lineColor: "#FFD700",
                 arrowHead: "arrow",
                 lineStyle: "solid"
@@ -112,7 +112,7 @@ const customTemplates = [
             }
         },
         connections: {
-            uses: {
+            idecontainsclass: {
                 lineColor: "#E06C75",
                 arrowHead: "triangle",
                 lineStyle: "solid"
@@ -137,7 +137,7 @@ const customTemplates = [
                 arrowHead: "diamond",
                 lineStyle: "dashed"
             },
-            codeLink: {
+            idecontainsstandalonecode: {
                 lineColor: "#61AFEF",
                 arrowHead: "arrow",
                 lineStyle: "solid"
@@ -190,7 +190,7 @@ const customTemplates = [
             }
         },
         connections: {
-            uses: {
+            idecontainsclass: {
                 lineColor: "#FF4081",
                 arrowHead: "triangle",
                 lineStyle: "solid"
@@ -215,7 +215,7 @@ const customTemplates = [
                 arrowHead: "diamond",
                 lineStyle: "dashed"
             },
-            codeLink: {
+            idecontainsstandalonecode: {
                 lineColor: "#FF5722",
                 arrowHead: "arrow",
                 lineStyle: "solid"
@@ -268,7 +268,7 @@ const customTemplates = [
             }
         },
         connections: {
-            uses: {
+            idecontainsclass: {
                 lineColor: "#FF6E40",
                 arrowHead: "triangle",
                 lineStyle: "solid"
@@ -293,7 +293,7 @@ const customTemplates = [
                 arrowHead: "diamond",
                 lineStyle: "dashed"
             },
-            codeLink: {
+            idecontainsstandalonecode: {
                 lineColor: "#40C4FF",
                 arrowHead: "arrow",
                 lineStyle: "solid"
@@ -346,7 +346,7 @@ const customTemplates = [
             }
         },
         connections: {
-            uses: {
+            idecontainsclass: {
                 lineColor: "#F44336",
                 arrowHead: "triangle",
                 lineStyle: "solid"
@@ -371,7 +371,7 @@ const customTemplates = [
                 arrowHead: "diamond",
                 lineStyle: "dashed"
             },
-            codeLink: {
+            idecontainsstandalonecode: {
                 lineColor: "#2196F3",
                 arrowHead: "arrow",
                 lineStyle: "solid"
@@ -424,7 +424,7 @@ const customTemplates = [
             }
         },
         connections: {
-            uses: {
+            idecontainsclass: {
                 lineColor: "#F07178",
                 arrowHead: "triangle",
                 lineStyle: "solid"
@@ -449,7 +449,7 @@ const customTemplates = [
                 arrowHead: "diamond",
                 lineStyle: "dashed"
             },
-            codeLink: {
+            idecontainsstandalonecode: {
                 lineColor: "#89DDFF",
                 arrowHead: "arrow",
                 lineStyle: "solid"
@@ -502,7 +502,7 @@ const customTemplates = [
             }
         },
         connections: {
-            uses: {
+            idecontainsclass: {
                 lineColor: "#00FF00",
                 arrowHead: "triangle",
                 lineStyle: "solid"
@@ -527,7 +527,7 @@ const customTemplates = [
                 arrowHead: "diamond",
                 lineStyle: "dashed"
             },
-            codeLink: {
+            idecontainsstandalonecode: {
                 lineColor: "#009900",
                 arrowHead: "arrow",
                 lineStyle: "solid"
@@ -580,7 +580,7 @@ const customTemplates = [
             }
         },
         connections: {
-            uses: {
+            idecontainsclass: {
                 lineColor: "#FF00FF",
                 arrowHead: "triangle",
                 lineStyle: "solid"
@@ -605,7 +605,7 @@ const customTemplates = [
                 arrowHead: "diamond",
                 lineStyle: "dashed"
             },
-            codeLink: {
+            idecontainsstandalonecode: {
                 lineColor: "#1E90FF",
                 arrowHead: "arrow",
                 lineStyle: "solid"
@@ -658,7 +658,7 @@ const customTemplates = [
             }
         },
         connections: {
-            uses: {
+            idecontainsclass: {
                 lineColor: "#C3073F",
                 arrowHead: "triangle",
                 lineStyle: "solid"
@@ -683,7 +683,7 @@ const customTemplates = [
                 arrowHead: "diamond",
                 lineStyle: "dashed"
             },
-            codeLink: {
+            idecontainsstandalonecode: {
                 lineColor: "#FF851B",
                 arrowHead: "arrow",
                 lineStyle: "solid"
@@ -736,7 +736,7 @@ const customTemplates = [
             }
         },
         connections: {
-            uses: {
+            idecontainsclass: {
                 lineColor: "#D9B08C",
                 arrowHead: "triangle",
                 lineStyle: "solid"
@@ -761,7 +761,7 @@ const customTemplates = [
                 arrowHead: "diamond",
                 lineStyle: "dashed"
             },
-            codeLink: {
+            idecontainsstandalonecode: {
                 lineColor: "#8E733F",
                 arrowHead: "arrow",
                 lineStyle: "solid"
@@ -814,7 +814,7 @@ const customTemplates = [
             }
         },
         connections: {
-            uses: {
+            idecontainsclass: {
                 lineColor: "#2C5F2D",
                 arrowHead: "triangle",
                 lineStyle: "solid"
@@ -839,7 +839,7 @@ const customTemplates = [
                 arrowHead: "diamond",
                 lineStyle: "dashed"
             },
-            codeLink: {
+            idecontainsstandalonecode: {
                 lineColor: "#A4C3B2",
                 arrowHead: "arrow",
                 lineStyle: "solid"
@@ -892,7 +892,7 @@ const customTemplates = [
             }
         },
         connections: {
-            uses: {
+            idecontainsclass: {
                 lineColor: "#F6A02D",
                 arrowHead: "triangle",
                 lineStyle: "solid"
@@ -917,7 +917,7 @@ const customTemplates = [
                 arrowHead: "diamond",
                 lineStyle: "dashed"
             },
-            codeLink: {
+            idecontainsstandalonecode: {
                 lineColor: "#45B7D1",
                 arrowHead: "arrow",
                 lineStyle: "solid"

@@ -42,24 +42,24 @@
       "arrowHead": "diamond",
       "lineStyle": "dashed"
     },
-    "uses": {
-      "lineColor": "#8B5CF6",
-      "arrowHead": "arrow",
-      "lineStyle": "solid"
-    },
     "class_contains_functions": {
       "lineColor": "#F59E0B",
       "arrowHead": "circle",
       "lineStyle": "dotted"
     },
-    "codeLink": {
-      "lineColor": "#F97316",
-      "arrowHead": "arrow",
-      "lineStyle": "solid"
-    },
     "class_contains_standalone": {
       "lineColor": "#EC4899",
       "arrowHead": "diamond",
+      "lineStyle": "dashed"
+    },
+    "idecontainsclass": {
+      "lineColor": "#6366F1",
+      "arrowHead": "arrow",
+      "lineStyle": "solid"
+    },
+    "idecontainsstandalonecode": {
+      "lineColor": "#8B5CF6",
+      "arrowHead": "arrow",
       "lineStyle": "dashed"
     }
   },

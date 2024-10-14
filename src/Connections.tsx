@@ -60,10 +60,10 @@ const Connections: React.FC<ConnectionsProps> = ({
         switch (type) {
             case 'inherits': return GitFork;
             case 'composes': return Package;
-            case 'uses': return ArrowUpRight;
             case 'class_contains_functions': return Layers;
-            case 'codeLink': return FileCode2;
             case 'class_contains_standalone': return Cog;
+            case 'idecontainsclass': return FileCode2;
+            case 'idecontainsstandalonecode': return FileCode2;
             default: return Cog;
         }
     };

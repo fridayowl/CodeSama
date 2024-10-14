@@ -59,7 +59,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
     };
 
     const renderConnectionSettings = () => {
-        const connectionTypes = ['inherits', 'composes', 'uses', 'class_contains_functions', 'codeLink', 'class_contains_standalone'];
+        const connectionTypes = ['inherits', 'composes', 'class_contains_functions', 'class_contains_standalone', 'idecontainsclass', 'idecontainsstandalonecode'];
         return connectionTypes.map(type => (
             <div key={type} className="mb-4">
                 <h4 className="font-medium mb-2 text-gray-700 capitalize">{type.replace('_', ' ')}</h4>

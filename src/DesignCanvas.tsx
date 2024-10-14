@@ -1,11 +1,12 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, Settings as SettingsIcon, X,Info } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Settings as SettingsIcon, X, Info } from 'lucide-react';
 import CanvasGrid from './CanvasGrid';
 import { generateJsonFromPythonFile, BlockData, ConnectionData as FileProcessorConnectionData } from './fileProcessor';
 import SettingsPanel from './Settings';
 import defaultCustomization from './customization.json';
 import customTemplates from './customTemplates';
 import CanvasInfoPanel from './CanvasInfoPanel';
+
 export interface ConnectionData extends FileProcessorConnectionData {
     id: string;  // Added id field
 }
@@ -56,6 +57,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
     const [hiddenSubConnections, setHiddenSubConnections] = useState<string[]>([]);
     const [hiddenSubBlocks, setHiddenSubBlocks] = useState<string[]>([]);
+
     const toggleAutoZoom = () => {
         if (!isAutoZoomLocked) {
             setAutoZoom(!autoZoom);
@@ -72,6 +74,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         });
         return { minX, minY, maxX, maxY };
     }, [blocks]);
+
     const toggleAutoZoomLock = () => {
         setIsAutoZoomLocked(!isAutoZoomLocked);
         if (!isAutoZoomLocked) {
@@ -82,32 +85,43 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const adjustZoom = useCallback(() => {
         if (!canvasRef.current || !autoZoom) return;
 
-        // ... (keep the existing zoom adjustment logic)
-    }, [blocks, autoZoom,calculateBoundingBox ]);
+        const { minX, minY, maxX, maxY } = calculateBoundingBox();
+        const canvasWidth = canvasRef.current.clientWidth;
+        const canvasHeight = canvasRef.current.clientHeight;
+
+        const contentWidth = maxX - minX;
+        const contentHeight = maxY - minY;
+
+        const horizontalScale = canvasWidth / contentWidth;
+        const verticalScale = canvasHeight / contentHeight;
+
+        const newZoom = Math.min(horizontalScale, verticalScale, 1) * 0.9;
+
+        setZoomLevel(newZoom);
+        setCanvasSize({
+            width: Math.max(contentWidth / newZoom, canvasWidth / newZoom),
+            height: Math.max(contentHeight / newZoom, canvasHeight / newZoom)
+        });
+    }, [blocks, autoZoom, calculateBoundingBox]);
 
     useEffect(() => {
-            adjustZoom();
-        }, [blocks, adjustZoom]);
+        adjustZoom();
+    }, [blocks, adjustZoom]);
+
     const handleConnectionVisibilityChange = useCallback((connectionId: string, isVisible: boolean) => {
         console.log("Connection visibility change for", connectionId, "to", isVisible);
 
-        // Store collected connection IDs
         let connectionIdsFormatted: string[] = [];
 
         setConnections(prevConnections =>
-
             prevConnections.map(conn => {
-                // Update the visibility of the current connection
-                console.log("check3", connectionId, ":", conn.id);
                 const formateConnectionId = `${connectionId}-${connectionId}.`
                 if (conn.id.includes(formateConnectionId)) {
-                    console.log("check2", "found", conn.id);
-                    connectionIdsFormatted.push(conn.id);  // Collect the connection ID
+                    connectionIdsFormatted.push(conn.id);
                     return { ...conn, isVisible };
                 }
-                // Update the visibility of child connections
                 if (conn.start === connectionId.split('-')[0]) {
-                    connectionIdsFormatted.push(conn.id);  // Collect the child connection ID
+                    connectionIdsFormatted.push(conn.id);
                     return { ...conn, isVisible };
                 }
                 return conn;
@@ -134,12 +148,11 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                 return updatedBlocks;
             });
 
-            // Update setHiddenSubConnections with the collected connection IDs
             setHiddenSubConnections(prev => {
                 if (isVisible) {
-                    return prev.filter(id => !connectionIdsFormatted.includes(id)); // Remove IDs from the hidden list if visible
+                    return prev.filter(id => !connectionIdsFormatted.includes(id));
                 } else {
-                    return [...new Set([...prev, ...connectionIdsFormatted])]; // Add IDs to the hidden list if not visible
+                    return [...new Set([...prev, ...connectionIdsFormatted])];
                 }
             });
 
@@ -151,9 +164,9 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const estimateInitialWidth = (code: string): number => {
         const lines = code.split('\n');
         const maxLineLength = Math.max(...lines.map(line => line.length));
-        const CHAR_WIDTH = 8; // Approximate width of a character in pixels
-        const PADDING = 40; // Extra padding
-        return Math.max(200, maxLineLength * CHAR_WIDTH + PADDING); // Minimum width of 200px
+        const CHAR_WIDTH = 8;
+        const PADDING = 40;
+        return Math.max(200, maxLineLength * CHAR_WIDTH + PADDING);
     };
 
     const processFile = useCallback(async (content: string, fileName: string) => {
@@ -170,7 +183,6 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                 const lineCount = block.code.split('\n').length;
                 return Math.max(120, lineCount * 20 + 60);
             };
-            
 
             const classes = jsonData.filter(block => block.type === 'class');
             const standaloneCodes = jsonData.filter(block => block.type === 'code');
@@ -192,7 +204,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                     width: estimateInitialWidth(block.code),
                     x,
                     y: currentY,
-                    height, 
+                    height,
                 } as ExtendedBlockData;
 
                 currentY += height + UNIFORM_SPACING;
@@ -205,15 +217,12 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                 const height = getBlockHeight(block) + 20;
                 const parentClass = classes.find(c => c.code.includes(`def ${block.name}(`));
 
-                // Logging the parent class name and block name
                 console.log("pp", block.name);
                 console.log("ppp", parentClass ? parentClass.name : 'No parent class');
 
                 const newBlock = {
                     ...block,
                     width: estimateInitialWidth(block.code),
-                    
-                    
                     x: X_OFFSET + 3 * COLUMN_WIDTH,
                     y: methodY,
                     height
@@ -246,7 +255,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             console.error('Error processing file:', error);
         }
     }, []);
-   
+
     useEffect(() => {
         if (selectedFile && selectedFileName) {
             processFile(selectedFile, selectedFileName);
@@ -292,13 +301,17 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         };
 
         const connectBlockToIDE = (block: ExtendedBlockData) => {
-            console.log(block.id, block.lineNumber);
             const startPoint = getIDEConnectionStartPoint(block.lineNumber);
-            console.log("start point", startPoint);
             const endPoint = { x: block.x, y: block.y + 25 };
 
-            // Remove the colon from the end of the block.id if it exists
             const cleanBlockId = block.id.endsWith(':') ? block.id.slice(0, -1) : block.id;
+
+            let connectionType: ConnectionData['type'];
+            if (block.type === 'class') {
+                connectionType = 'idecontainsclass';
+            } else {
+                connectionType = 'idecontainsstandalonecode';
+            }
 
             newConnections.push({
                 id: `${cleanBlockId}`,
@@ -306,7 +319,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                 end: cleanBlockId,
                 startPoint,
                 endPoint,
-                type: 'uses',
+                type: connectionType,
                 fromConnector: 'output',
                 toConnector: 'input',
                 startBlockType: 'code',
@@ -336,7 +349,6 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                         endBlockType: 'class_function'
                     });
                 });
-                
 
                 const classStandalones = blocks.filter(b =>
                     b.type === 'class_standalone' && b.parentClass === block.id
@@ -356,7 +368,6 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                         endBlockType: 'class_standalone'
                     });
                 });
-            
             }
         });
 
@@ -410,21 +421,12 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     }, [blocks, classVisibility, hiddenSubBlocks]);
 
     const getVisibleConnections = useCallback(() => {
-        console.log(hiddenSubConnections)
-
         return connections
-            .filter(conn =>
-                !hiddenSubConnections.includes(conn.id)
-            )
-            .map(conn => {
-                console.log(`check21: ${conn.id}`
-                );
-
-                return {
-                    ...conn,
-                    isVisible: conn.isVisible !== false
-                };
-            });
+            .filter(conn => !hiddenSubConnections.includes(conn.id))
+            .map(conn => ({
+                ...conn,
+                isVisible: conn.isVisible !== false
+            }));
     }, [connections, hiddenSubConnections]);
 
     const handleZoomIn = () => {
@@ -439,44 +441,6 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         setZoomLevel(1);
     };
 
-
-    // const adjustZoom = useCallback(() => {
-    //     if (!canvasRef.current) return;
-
-    //     if (blocks.length === 0) {
-    //         setZoomLevel(1);
-    //         const { clientWidth, clientHeight } = canvasRef.current;
-    //         setCanvasSize({ width: clientWidth, height: clientHeight });
-    //         return;
-    //     }
-
-    //     if (!autoZoom) return;
-
-    //     const { minX, minY, maxX, maxY } = calculateBoundingBox();
-    //     const canvasWidth = canvasRef.current.clientWidth;
-    //     const canvasHeight = canvasRef.current.clientHeight;
-
-    //     const contentWidth = maxX - minX;
-    //     const contentHeight = maxY - minY;
-
-    //     const horizontalScale = canvasWidth / contentWidth;
-    //     const verticalScale = canvasHeight / contentHeight;
-
-    //     const newZoom = Math.min(horizontalScale, verticalScale, 1) * 0.9;
-
-    //     setZoomLevel(newZoom);
-    //     setCanvasSize({
-    //         width: Math.max(contentWidth / newZoom, canvasWidth / newZoom),
-    //         height: Math.max(contentHeight / newZoom, canvasHeight / newZoom)
-    //     });
-    // }, [blocks, autoZoom, calculateBoundingBox]);
-
-    useEffect(() => {
-        adjustZoom();
-    }, [blocks, adjustZoom]);
-
-    
-
     const handleCustomizationChange = (newCustomization: any) => {
         setCustomization(newCustomization);
         localStorage.setItem('customization', JSON.stringify(newCustomization));
@@ -487,6 +451,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         localStorage.setItem('customization', JSON.stringify(template));
         setIsTemplatesPanelOpen(false);
     };
+
     const handleBlockWidthChange = useCallback((id: string, newWidth: number) => {
         setBlocks(prevBlocks =>
             prevBlocks.map(block =>
@@ -600,7 +565,6 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                         />
                     </div>
                 </div>
-                 
             </div>
 
             {isTemplatesPanelOpen && (
