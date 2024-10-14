@@ -59,7 +59,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
     };
 
     const renderConnectionSettings = () => {
-        const connectionTypes = ['inherits', 'composes', 'uses', 'class_contains_functions', 'codeLink', 'class_to_standalone'];
+        const connectionTypes = ['inherits', 'composes', 'uses', 'class_contains_functions', 'codeLink', 'class_contains_standalone'];
         return connectionTypes.map(type => (
             <div key={type} className="mb-4">
                 <h4 className="font-medium mb-2 text-gray-700 capitalize">{type.replace('_', ' ')}</h4>
@@ -67,7 +67,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
                 <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-600">Arrow Head</span>
                     <select
-                        value={customization.connections[type].arrowHead || 'arrow'}
+                        value={customization.connections[type]?.arrowHead || 'arrow'}
                         onChange={(e) => handleColorChange('connections', type, 'arrowHead', e.target.value)}
                         className="p-1 border rounded text-sm"
                     >
@@ -80,7 +80,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
                 <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-600">Line Style</span>
                     <select
-                        value={customization.connections[type].lineStyle || 'solid'}
+                        value={customization.connections[type]?.lineStyle || 'solid'}
                         onChange={(e) => handleColorChange('connections', type, 'lineStyle', e.target.value)}
                         className="p-1 border rounded text-sm"
                     >

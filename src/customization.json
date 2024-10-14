@@ -57,7 +57,7 @@
       "arrowHead": "arrow",
       "lineStyle": "solid"
     },
-    "class_to_standalone": {
+    "class_contains_standalone": {
       "lineColor": "#EC4899",
       "arrowHead": "diamond",
       "lineStyle": "dashed"
