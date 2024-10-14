@@ -135,6 +135,7 @@ const Connections: React.FC<ConnectionsProps> = ({
                 </filter>
             </defs>
             {renderedConnections.map((connection) => {
+                
                 const scaledStart = scalePoint(connection.startPoint);
                 const scaledEnd = scalePoint(connection.endPoint);
                 const path = getBezierPath(scaledStart, scaledEnd);

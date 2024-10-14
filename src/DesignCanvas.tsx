@@ -90,10 +90,27 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const handleConnectionVisibilityChange = useCallback((connectionId: string, isVisible: boolean) => {
         console.log("Connection visibility change for", connectionId, "to", isVisible);
 
+        // Store collected connection IDs
+        let connectionIdsFormatted: string[] = [];
+
         setConnections(prevConnections =>
-            prevConnections.map(conn =>
-                conn.id === connectionId ? { ...conn, isVisible } : conn
-            )
+
+            prevConnections.map(conn => {
+                // Update the visibility of the current connection
+                console.log("check3", connectionId, ":", conn.id);
+                const formateConnectionId = `${connectionId}-${connectionId}.`
+                if (conn.id.includes(formateConnectionId)) {
+                    console.log("check2", "found", conn.id);
+                    connectionIdsFormatted.push(conn.id);  // Collect the connection ID
+                    return { ...conn, isVisible };
+                }
+                // Update the visibility of child connections
+                if (conn.start === connectionId.split('-')[0]) {
+                    connectionIdsFormatted.push(conn.id);  // Collect the child connection ID
+                    return { ...conn, isVisible };
+                }
+                return conn;
+            })
         );
 
         const connection = connections.find(conn => conn.id === connectionId);
@@ -102,8 +119,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
 
             setBlocks(prevBlocks => {
                 const updatedBlocks = prevBlocks.map(block => {
-                  
-                    if (block.id === connection.end ){
+                    if (block.id === connection.end) {
                         console.log(`Updating visibility for end block ${block.id} to ${isVisible}`);
                         return { ...block, isVisible };
                     }
@@ -114,54 +130,23 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                     return block;
                 });
 
-                // const subBlockIds = updatedBlocks
-                //     .filter(block => block.id === connection.end)
-                //     .flatMap(block => {
-                //         console.log("connected",blocks)
-                //         return block.connections.map(subConn => {
-                //             console.log("connected1", subConn)
-                //             const className = block.id.split('.').pop();
-                //             const subConnTo = subConn.to;
-                //             const fullClassName = block.id.split(':')[0];
-                //             const connectionFormat = `${fullClassName}:-${className}_${subConnTo}`;
-
-                //             console.log("connection format", connectionFormat);
-
-                //             return {
-                //                 subBlockFormat: `${className}_${subConnTo}`,
-                //                 connectionFormat
-                //             };
-                //         });
-                //     });
-
-                // const subBlockIdsFormatted = subBlockIds.map(item => item.subBlockFormat);
-                // const connectionIdsFormatted = subBlockIds.map(item => item.connectionFormat);
-       
-                // console.log("SubBlock IDs:", subBlockIdsFormatted);
-                // console.log("Connection IDs:", connectionIdsFormatted);
-
-                // setHiddenSubBlocks(prev => {
-                //     if (isVisible) {
-                //         return prev.filter(id => !subBlockIdsFormatted.includes(id));
-                //     } else {
-                //         return [...new Set([...prev, ...subBlockIdsFormatted])];
-                //     }
-                // });
-
-                // setHiddenSubConnections(prev => {
-                //     if (isVisible) {
-                //         return prev.filter(id => !connectionIdsFormatted.includes(id));
-                //     } else {
-                //         return [...new Set([...prev, ...connectionIdsFormatted])];
-                //     }
-                // });
-
                 return updatedBlocks;
             });
+
+            // Update setHiddenSubConnections with the collected connection IDs
+            setHiddenSubConnections(prev => {
+                if (isVisible) {
+                    return prev.filter(id => !connectionIdsFormatted.includes(id)); // Remove IDs from the hidden list if visible
+                } else {
+                    return [...new Set([...prev, ...connectionIdsFormatted])]; // Add IDs to the hidden list if not visible
+                }
+            });
+
         } else {
             console.log("No connection found for ID:", connectionId);
         }
-    }, [connections]);
+    }, [connections, setHiddenSubConnections]);
+
     const estimateInitialWidth = (code: string): number => {
         const lines = code.split('\n');
         const maxLineLength = Math.max(...lines.map(line => line.length));
@@ -425,12 +410,14 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
 
     const getVisibleConnections = useCallback(() => {
         console.log(hiddenSubConnections)
+
         return connections
             .filter(conn =>
                 !hiddenSubConnections.includes(conn.id)
             )
             .map(conn => {
-                console.log(`Processing connection with ID: ${conn.id}`);
+                console.log(`check21: ${conn.id}`
+                );
 
                 return {
                     ...conn,
