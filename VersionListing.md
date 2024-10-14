@@ -79,15 +79,15 @@ working 2.6 - Closing functions for single file
 Version 2.7 - Setting Connectors exact line of the ide  and also make this blocks smaller and compact 
             - add a directory viewer  @done 
             - make the block much more simpler and easy to view @done
-            -save last opened folder and last save settings folderview / file type
-            - gesture zoom in and zoom out on canvas 
+            -save last opened folder and last save settings folderview / file type @moved
+            - gesture zoom in and zoom out on canvas @moved
             - order the function and standalone code based on the line number  @done
             - passing line number to the blocks @done 
-            - connectors comming from the line numbers rater than the block headers
+            - connectors comming from the line numbers rater than the block headers @done
             Bug 
             - for some reason  class stand alone codes are starting from ide not from class  @done
             - fix when class hide is cliked it should hide the class standalone @done
-            - connection and blocks should update when ide updates 
+           
 
         Notes 👍
             connector end should be invisible 
@@ -97,14 +97,16 @@ Version 2.7 - Setting Connectors exact line of the ide  and also make this block
             What i have to do is now make sure the class standalone is treated as class sub nodes 
             ---
             Now the conenctor to class stand alone is not disappering
-            
+
 
 
 
 
 Version 2.8 - Import (first phase of mul tiple pages) and inhertience  block (in heritinece in single file )
-
-
+            - -save last opened folder and last save settings folderview / file type
+            -gesture zoom in and zoom out on canvas 
+            - connection and blocks should update when ide updates  
+            
 
 
 Upcoming Versions : 

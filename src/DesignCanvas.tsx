@@ -1,11 +1,11 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, Settings as SettingsIcon, X } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Settings as SettingsIcon, X,Info } from 'lucide-react';
 import CanvasGrid from './CanvasGrid';
 import { generateJsonFromPythonFile, BlockData, ConnectionData as FileProcessorConnectionData } from './fileProcessor';
 import SettingsPanel from './Settings';
 import defaultCustomization from './customization.json';
 import customTemplates from './customTemplates';
-
+import CanvasInfoPanel from './CanvasInfoPanel';
 export interface ConnectionData extends FileProcessorConnectionData {
     id: string;  // Added id field
 }
@@ -53,6 +53,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const canvasRef = useRef<HTMLDivElement>(null);
     const [isSettingsPanelOpen, setIsSettingsPanelOpen] = useState(false);
     const [isTemplatesPanelOpen, setIsTemplatesPanelOpen] = useState(false);
+    const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
     const [hiddenSubConnections, setHiddenSubConnections] = useState<string[]>([]);
     const [hiddenSubBlocks, setHiddenSubBlocks] = useState<string[]>([]);
     const toggleAutoZoom = () => {
@@ -549,48 +550,57 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                     >
                         <SettingsIcon size={20} />
                     </button>
+                    <button
+                        onClick={() => setIsInfoPanelOpen(true)}
+                        className="p-2 bg-gray-200 rounded hover:bg-gray-300"
+                        title="Open Canvas Info"
+                    >
+                        <Info size={20} />
+                    </button>
                 </div>
             </div>
 
-            <div
-                ref={canvasRef}
-                className="overflow-auto"
-                style={{
-                    width: '100%',
-                    height: 'calc(100vh - 150px)',
-                    backgroundImage: `linear-gradient(to right, ${customization.canvas.gridColor} 1px, transparent 1px),
-                                       linear-gradient(to bottom, ${customization.canvas.gridColor} 1px, transparent 1px)`,
-                    backgroundSize: `${customization.canvas.gridSpacing * zoomLevel}px ${customization.canvas.gridSpacing * zoomLevel}px`,
-                    backgroundColor: customization.canvas.backgroundColor,
-                }}
-            >
-                <div style={{
-                    transform: `scale(${zoomLevel})`,
-                    transformOrigin: 'top left',
-                    transition: 'transform 0.3s ease-in-out',
-                    width: `${canvasSize.width}px`,
-                    height: `${canvasSize.height}px`,
-                }}>
-                    <CanvasGrid
-                        key={refreshKey}
-                        blocks={blocks}
-                        connections={getVisibleConnections()}
-                        isFlowVisible={isFlowVisible}
-                        onPositionChange={handlePositionChange}
-                        onVisibilityChange={handleClassVisibilityChange}
-                        getVisibleBlocks={getVisibleBlocks}
-                        getVisibleConnections={getVisibleConnections}
-                        fileContent={selectedFile}
-                        fileName={selectedFileName || ''}
-                        onCodeChange={handleCodeChange}
-                        onFlowVisibilityChange={handleFlowVisibilityChange}
-                        zoomLevel={zoomLevel}
-                        idePosition={idePosition}
-                        customization={customization}
-                        onConnectionVisibilityChange={handleConnectionVisibilityChange}
-                        onBlockWidthChange={handleBlockWidthChange}
-                    />
+            <div className="flex">
+                <div
+                    ref={canvasRef}
+                    className="overflow-auto flex-grow"
+                    style={{
+                        height: 'calc(100vh - 150px)',
+                        backgroundImage: `linear-gradient(to right, ${customization.canvas.gridColor} 1px, transparent 1px),
+                                           linear-gradient(to bottom, ${customization.canvas.gridColor} 1px, transparent 1px)`,
+                        backgroundSize: `${customization.canvas.gridSpacing * zoomLevel}px ${customization.canvas.gridSpacing * zoomLevel}px`,
+                        backgroundColor: customization.canvas.backgroundColor,
+                    }}
+                >
+                    <div style={{
+                        transform: `scale(${zoomLevel})`,
+                        transformOrigin: 'top left',
+                        transition: 'transform 0.3s ease-in-out',
+                        width: `${canvasSize.width}px`,
+                        height: `${canvasSize.height}px`,
+                    }}>
+                        <CanvasGrid
+                            key={refreshKey}
+                            blocks={blocks}
+                            connections={getVisibleConnections()}
+                            isFlowVisible={isFlowVisible}
+                            onPositionChange={handlePositionChange}
+                            onVisibilityChange={handleClassVisibilityChange}
+                            getVisibleBlocks={getVisibleBlocks}
+                            getVisibleConnections={getVisibleConnections}
+                            fileContent={selectedFile}
+                            fileName={selectedFileName || ''}
+                            onCodeChange={handleCodeChange}
+                            onFlowVisibilityChange={handleFlowVisibilityChange}
+                            zoomLevel={zoomLevel}
+                            idePosition={idePosition}
+                            customization={customization}
+                            onConnectionVisibilityChange={handleConnectionVisibilityChange}
+                            onBlockWidthChange={handleBlockWidthChange}
+                        />
+                    </div>
                 </div>
+                 
             </div>
 
             {isTemplatesPanelOpen && (
@@ -616,6 +626,11 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                 onClose={() => setIsSettingsPanelOpen(false)}
                 customization={customization}
                 onCustomizationChange={handleCustomizationChange}
+            />
+            <CanvasInfoPanel
+                isOpen={isInfoPanelOpen}
+                onClose={() => setIsInfoPanelOpen(false)}
+                blocks={blocks}
             />
         </div>
     );
