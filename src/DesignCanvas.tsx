@@ -1,12 +1,12 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, Settings as SettingsIcon, X, Info } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Settings as SettingsIcon, X, Info ,Layers} from 'lucide-react';
 import CanvasGrid from './CanvasGrid';
 import { generateJsonFromPythonFile, BlockData, ConnectionData as FileProcessorConnectionData } from './fileProcessor';
 import SettingsPanel from './Settings';
 import defaultCustomization from './customization.json';
 import customTemplates from './customTemplates';
 import CanvasInfoPanel from './CanvasInfoPanel';
-
+import BlocksListPanel from './BlocksListPanel';
 export interface ConnectionData extends FileProcessorConnectionData {
     id: string;  // Added id field
 }
@@ -58,7 +58,12 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const [hiddenSubConnections, setHiddenSubConnections] = useState<string[]>([]);
     const [hiddenSubBlocks, setHiddenSubBlocks] = useState<string[]>([]);
     const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
-
+    const [isBlocksListOpen, setIsBlocksListOpen] = useState(false);
+    const handleAddBlock = (blockType: string) => {
+        // Implement the logic to add a new block of the specified type
+        console.log(`Adding new block of type: ${blockType}`);
+        // You'll need to implement the actual logic here
+    };
     const toggleAutoZoom = () => {
         if (!isAutoZoomLocked) {
             setAutoZoom(!autoZoom);
@@ -491,12 +496,12 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         const viewportWidth = canvasRef.current.clientWidth;
         const viewportHeight = canvasRef.current.clientHeight;
         const blockWidth = block.width;
-        const blockHeight = 150; // Assuming a fixed height for blocks
+        const blockHeight = 350; // Assuming a fixed height for blocks
 
         const widthRatio = viewportWidth / (blockWidth * 2);
         const heightRatio = viewportHeight / (blockHeight * 2);
 
-        return Math.min(widthRatio, heightRatio, 2); // Cap at 200% zoom
+        return Math.min(widthRatio, heightRatio, 0.8); // Cap at 200% zoom
     };
 
     const calculateScrollPositionForBlock = (block: ExtendedBlockData, newZoom: number) => {
@@ -514,15 +519,15 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         <div
             className="w-48 h-64 bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform hover:scale-105"
             onClick={() => handleTemplateChange(template)}>
-            <div className="h-1/2 p-2 flex flex-col justify-between" style={{ backgroundColor: template.canvas.backgroundColor }}>
+            <div className="h-1/2 p-2 flex flex-col justify-between" style={{ backgroundColor: template.canvas?.backgroundColor || '#ffffff' }}>
                 <div className="flex justify-between">
-                    <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks.class.backgroundColor }} />
-                    <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks.class_function.backgroundColor }} />
+                    <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks?.class?.backgroundColor || '#cccccc' }} />
+                    <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks?.class_function?.backgroundColor || '#cccccc' }} />
                 </div>
-                <div className="w-full h-1 rounded" style={{ backgroundColor: template.connections.uses.lineColor }} />
+                <div className="w-full h-1 rounded" style={{ backgroundColor: template.connections?.uses?.lineColor || '#000000' }} />
             </div>
             <div className="h-1/2 p-4 flex flex-col justify-between">
-                <h3 className="font-bold text-lg">{template.name}</h3>
+                <h3 className="font-bold text-lg">{template.name || 'Unnamed Template'}</h3>
                 <p className="text-sm text-gray-600">Click to apply</p>
             </div>
         </div>
@@ -551,6 +556,14 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                     <span className="ml-4">Zoom: {Math.round(zoomLevel * 100)}%</span>
                 </div>
                 <div className="flex items-center space-x-2">
+                    <button
+                        onClick={() => setIsBlocksListOpen(true)}
+                        className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm flex items-center"
+                        title="Show Blocks List"
+                    >
+                        <Layers size={16} className="mr-2" />
+                        Blocks
+                    </button>
                     <button
                         onClick={() => setIsTemplatesPanelOpen(true)}
                         className="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300 text-sm"
@@ -636,7 +649,13 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                     </div>
                 </div>
             )}
-
+            <BlocksListPanel
+                isOpen={isBlocksListOpen}
+                onClose={() => setIsBlocksListOpen(false)}
+                blocks={blocks}
+                onBlockSelect={handleBlockSelect}
+                customization={customization}
+            />
             <SettingsPanel
                 isOpen={isSettingsPanelOpen}
                 onClose={() => setIsSettingsPanelOpen(false)}

@@ -122,11 +122,14 @@ const Block: React.FC<BlockProps> = ({
     if (!isConnectorVisible) {
         return null;
     }
+   const glowEffectClass = isSelected
+        ? 'ring-4 ring-green-500 shadow-xl shadow-blue-500/50 '
+        : '';
 
     return (
         <div
             ref={containerRef}
-            className={`w-full max-w-3xl rounded-lg shadow-md overflow-hidden ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
+            className={`w-full max-w-3xl rounded-lg shadow-md overflow-hidden ${glowEffectClass}`}
             style={{
                 backgroundColor: blockStyle.backgroundColor || '#ffffff',
                 borderColor: blockStyle.borderColor || '#000000',
