@@ -122,7 +122,8 @@ const Block: React.FC<BlockProps> = ({
     if (!isConnectorVisible) {
         return null;
     }
-   const glowEffectClass = isSelected
+
+    const glowEffectClass = isSelected
         ? 'ring-4 ring-green-500 shadow-xl shadow-blue-500/50 '
         : '';
 
@@ -137,7 +138,7 @@ const Block: React.FC<BlockProps> = ({
                 borderWidth: '2px',
                 borderStyle: 'solid',
                 paddingLeft: '20px',
-                width: `850px`,
+                width: `${calculatedWidth}px`,
                 cursor: 'pointer',
             }}
             onClick={() => onSelect()}
@@ -150,36 +151,41 @@ const Block: React.FC<BlockProps> = ({
                 <div className="flex space-x-2">
                     <button
                         onClick={(e) => handleButtonClick(e, toggleDetails)}
-                        className="p-1 bg-gray-200 rounded hover:bg-gray-300"
+                        className="p-1 rounded hover:bg-opacity-80"
                         title="Details"
+                        style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
                     >
                         <Info size={16} />
                     </button>
                     <button
                         onClick={(e) => handleButtonClick(e, toggleEditing)}
-                        className="p-1 bg-gray-200 rounded hover:bg-gray-300"
+                        className="p-1 rounded hover:bg-opacity-80"
                         title={isEditing ? "Save" : "Edit"}
+                        style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
                     >
                         {isEditing ? <Save size={16} /> : <Edit size={16} />}
                     </button>
                     <button
                         onClick={(e) => handleButtonClick(e, toggleVisibility)}
-                        className="p-1 bg-gray-200 rounded hover:bg-gray-300"
+                        className="p-1 rounded hover:bg-opacity-80"
                         title={isVisible ? "Hide code" : "Show code"}
+                        style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
                     >
                         {isVisible ? <Eye size={16} /> : <EyeOff size={16} />}
                     </button>
                     <button
                         onClick={(e) => handleButtonClick(e, toggleDocumentation)}
-                        className="p-1 bg-gray-200 rounded hover:bg-gray-300"
+                        className="p-1 rounded hover:bg-opacity-80"
                         title="Documentation"
+                        style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
                     >
                         <FileText size={16} />
                     </button>
                     <button
                         onClick={(e) => handleButtonClick(e, toggleTesting)}
-                        className="p-1 bg-gray-200 rounded hover:bg-gray-300"
+                        className="p-1 rounded hover:bg-opacity-80"
                         title="Testing"
+                        style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
                     >
                         <TestTube size={16} />
                     </button>
@@ -213,7 +219,7 @@ const Block: React.FC<BlockProps> = ({
                             <button
                                 onClick={(e) => handleButtonClick(e, handleSave)}
                                 className="mt-2 px-4 py-2 text-white rounded hover:bg-opacity-80"
-                                style={{ backgroundColor: customization.ide?.highlightColor || '#3b82f6' }}
+                                style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
                             >
                                 Save
                             </button>
@@ -244,7 +250,8 @@ const Block: React.FC<BlockProps> = ({
                     <h4 className="font-semibold mb-2">Testing</h4>
                     <button
                         onClick={(e) => handleButtonClick(e, () => console.log('Run tests'))}
-                        className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                        className="px-4 py-2 text-white rounded hover:bg-opacity-80"
+                        style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
                     >
                         Run Tests
                     </button>

@@ -1,940 +1,713 @@
-const customTemplates = [
+const customTemplates  = [
     {
-        name: "Dark Neon",
+        name: "VSCode Dark+",
         blocks: {
             class: {
-                backgroundColor: "#2D3748",
-                borderColor: "#00FF00",
-                textColor: "#00FFFF",
-                headerColor: "#1A202C"
+                backgroundColor: "#1E1E1E",
+                borderColor: "#569CD6",
+                textColor: "#D4D4D4",
+                headerColor: "#252526"
             },
             class_function: {
-                backgroundColor: "#1A202C",
-                borderColor: "#FF00FF",
-                textColor: "#FFFFFF",
-                headerColor: "#2D3748"
+                backgroundColor: "#252526",
+                borderColor: "#4EC9B0",
+                textColor: "#D4D4D4",
+                headerColor: "#2D2D2D"
             },
             code: {
-                backgroundColor: "#4A5568",
-                borderColor: "#FFA500",
-                textColor: "#F7FAFC",
-                headerColor: "#2D3748"
+                backgroundColor: "#1E1E1E",
+                borderColor: "#CE9178",
+                textColor: "#D4D4D4",
+                headerColor: "#252526"
             },
             class_standalone: {
-                backgroundColor: "#2D3748",
-                borderColor: "#00FFFF",
-                textColor: "#FFFFFF",
-                headerColor: "#1A202C"
+                backgroundColor: "#252526",
+                borderColor: "#9CDCFE",
+                textColor: "#D4D4D4",
+                headerColor: "#2D2D2D"
             },
             standalone_function: {
-                backgroundColor: "#4A5568",
-                borderColor: "#FF69B4",
-                textColor: "#F7FAFC",
-                headerColor: "#2D3748"
+                backgroundColor: "#1E1E1E",
+                borderColor: "#DCDCAA",
+                textColor: "#D4D4D4",
+                headerColor: "#252526"
             }
         },
         connections: {
-            idecontainsclass: {
-                lineColor: "#00FF00",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            class_contains_functions: {
-                lineColor: "#FF00FF",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            class_contains_standalone: {
-                lineColor: "#00FFFF",
-                arrowHead: "diamond",
-                lineStyle: "dotted"
-            },
-            inherits: {
-                lineColor: "#00FFFF",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            composes: {
-                lineColor: "#FF69B4",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            idecontainsstandalonecode: {
-                lineColor: "#FFD700",
-                arrowHead: "arrow",
-                lineStyle: "solid"
-            }
+            idecontainsclass: { lineColor: "#569CD6", arrowHead: "triangle", lineStyle: "solid" },
+            class_contains_functions: { lineColor: "#4EC9B0", arrowHead: "diamond", lineStyle: "dashed" },
+            class_contains_standalone: { lineColor: "#9CDCFE", arrowHead: "diamond", lineStyle: "dotted" },
+            inherits: { lineColor: "#C586C0", arrowHead: "triangle", lineStyle: "solid" },
+            composes: { lineColor: "#4EC9B0", arrowHead: "diamond", lineStyle: "dashed" },
+            idecontainsstandalonecode: { lineColor: "#CE9178", arrowHead: "arrow", lineStyle: "solid" }
         },
         canvas: {
-            backgroundColor: "#1A202C",
-            gridColor: "#4A5568",
+            backgroundColor: "#1E1E1E",
+            gridColor: "#333333",
             gridSpacing: 20
         },
         ide: {
-            backgroundColor: "#2D3748",
-            textColor: "#F7FAFC",
-            lineNumbersColor: "#A0AEC0",
-            highlightColor: "#4299E1"
+            backgroundColor: "#1E1E1E",
+            textColor: "#D4D4D4",
+            lineNumbersColor: "#858585",
+            highlightColor: "#264F78"
+        },
+        buttons: {
+            backgroundColor: "#0E639C",
+            textColor: "#FFFFFF",
+            hoverBackgroundColor: "#1177BB"
         }
     },
     {
-        name: "Syntax Highlighter",
+        name: "Solarized Light",
         blocks: {
             class: {
-                backgroundColor: "#282C34",
-                borderColor: "#61AFEF",
-                textColor: "#ABB2BF",
-                headerColor: "#21252B"
+                backgroundColor: "#FDF6E3",
+                borderColor: "#268BD2",
+                textColor: "#657B83",
+                headerColor: "#EEE8D5"
             },
             class_function: {
-                backgroundColor: "#2C313A",
-                borderColor: "#C678DD",
-                textColor: "#ABB2BF",
-                headerColor: "#21252B"
+                backgroundColor: "#EEE8D5",
+                borderColor: "#2AA198",
+                textColor: "#657B83",
+                headerColor: "#FDF6E3"
             },
             code: {
-                backgroundColor: "#21252B",
-                borderColor: "#98C379",
-                textColor: "#ABB2BF",
-                headerColor: "#282C34"
+                backgroundColor: "#FDF6E3",
+                borderColor: "#CB4B16",
+                textColor: "#657B83",
+                headerColor: "#EEE8D5"
             },
             class_standalone: {
-                backgroundColor: "#282C34",
-                borderColor: "#E5C07B",
-                textColor: "#ABB2BF",
-                headerColor: "#21252B"
+                backgroundColor: "#EEE8D5",
+                borderColor: "#6C71C4",
+                textColor: "#657B83",
+                headerColor: "#FDF6E3"
             },
             standalone_function: {
-                backgroundColor: "#2C313A",
-                borderColor: "#56B6C2",
-                textColor: "#ABB2BF",
-                headerColor: "#21252B"
+                backgroundColor: "#FDF6E3",
+                borderColor: "#B58900",
+                textColor: "#657B83",
+                headerColor: "#EEE8D5"
             }
         },
         connections: {
-            idecontainsclass: {
-                lineColor: "#E06C75",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            class_contains_functions: {
-                lineColor: "#56B6C2",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            class_contains_standalone: {
-                lineColor: "#E5C07B",
-                arrowHead: "diamond",
-                lineStyle: "dotted"
-            },
-            inherits: {
-                lineColor: "#98C379",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            composes: {
-                lineColor: "#C678DD",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            idecontainsstandalonecode: {
-                lineColor: "#61AFEF",
-                arrowHead: "arrow",
-                lineStyle: "solid"
-            }
+            idecontainsclass: { lineColor: "#268BD2", arrowHead: "triangle", lineStyle: "solid" },
+            class_contains_functions: { lineColor: "#2AA198", arrowHead: "diamond", lineStyle: "dashed" },
+            class_contains_standalone: { lineColor: "#6C71C4", arrowHead: "diamond", lineStyle: "dotted" },
+            inherits: { lineColor: "#D33682", arrowHead: "triangle", lineStyle: "solid" },
+            composes: { lineColor: "#2AA198", arrowHead: "diamond", lineStyle: "dashed" },
+            idecontainsstandalonecode: { lineColor: "#CB4B16", arrowHead: "arrow", lineStyle: "solid" }
         },
         canvas: {
-            backgroundColor: "#282C34",
-            gridColor: "#3E4451",
+            backgroundColor: "#FDF6E3",
+            gridColor: "#EEE8D5",
             gridSpacing: 20
         },
         ide: {
-            backgroundColor: "#282C34",
-            textColor: "#ABB2BF",
-            lineNumbersColor: "#4B5263",
-            highlightColor: "#3E4451"
+            backgroundColor: "#FDF6E3",
+            textColor: "#657B83",
+            lineNumbersColor: "#93A1A1",
+            highlightColor: "#EEE8D5"
+        },
+        buttons: {
+            backgroundColor: "#268BD2",
+            textColor: "#FDF6E3",
+            hoverBackgroundColor: "#2AA198"
         }
     },
     {
-        name: "Functional Flow",
+        name: "Monokai",
         blocks: {
             class: {
-                backgroundColor: "#FAFAFA",
-                borderColor: "#0D47A1",
-                textColor: "#1A237E",
-                headerColor: "#E8EAF6"
+                backgroundColor: "#272822",
+                borderColor: "#A6E22E",
+                textColor: "#F8F8F2",
+                headerColor: "#3E3D32"
             },
             class_function: {
-                backgroundColor: "#E8EAF6",
-                borderColor: "#3F51B5",
-                textColor: "#283593",
-                headerColor: "#C5CAE9"
+                backgroundColor: "#3E3D32",
+                borderColor: "#66D9EF",
+                textColor: "#F8F8F2",
+                headerColor: "#272822"
             },
             code: {
-                backgroundColor: "#C5CAE9",
-                borderColor: "#7986CB",
-                textColor: "#1A237E",
-                headerColor: "#E8EAF6"
+                backgroundColor: "#272822",
+                borderColor: "#FD971F",
+                textColor: "#F8F8F2",
+                headerColor: "#3E3D32"
             },
             class_standalone: {
-                backgroundColor: "#E8EAF6",
-                borderColor: "#3F51B5",
-                textColor: "#1A237E",
-                headerColor: "#C5CAE9"
+                backgroundColor: "#3E3D32",
+                borderColor: "#AE81FF",
+                textColor: "#F8F8F2",
+                headerColor: "#272822"
             },
             standalone_function: {
-                backgroundColor: "#C5CAE9",
-                borderColor: "#7986CB",
-                textColor: "#283593",
-                headerColor: "#E8EAF6"
+                backgroundColor: "#272822",
+                borderColor: "#F92672",
+                textColor: "#F8F8F2",
+                headerColor: "#3E3D32"
             }
         },
         connections: {
-            idecontainsclass: {
-                lineColor: "#FF4081",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            class_contains_functions: {
-                lineColor: "#00BCD4",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            class_contains_standalone: {
-                lineColor: "#3F51B5",
-                arrowHead: "diamond",
-                lineStyle: "dotted"
-            },
-            inherits: {
-                lineColor: "#9C27B0",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            composes: {
-                lineColor: "#4CAF50",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            idecontainsstandalonecode: {
-                lineColor: "#FF5722",
-                arrowHead: "arrow",
-                lineStyle: "solid"
-            }
+            idecontainsclass: { lineColor: "#A6E22E", arrowHead: "triangle", lineStyle: "solid" },
+            class_contains_functions: { lineColor: "#66D9EF", arrowHead: "diamond", lineStyle: "dashed" },
+            class_contains_standalone: { lineColor: "#AE81FF", arrowHead: "diamond", lineStyle: "dotted" },
+            inherits: { lineColor: "#F92672", arrowHead: "triangle", lineStyle: "solid" },
+            composes: { lineColor: "#66D9EF", arrowHead: "diamond", lineStyle: "dashed" },
+            idecontainsstandalonecode: { lineColor: "#FD971F", arrowHead: "arrow", lineStyle: "solid" }
         },
         canvas: {
-            backgroundColor: "#E8EAF6",
-            gridColor: "#C5CAE9",
+            backgroundColor: "#272822",
+            gridColor: "#3E3D32",
             gridSpacing: 20
         },
         ide: {
-            backgroundColor: "#FAFAFA",
-            textColor: "#1A237E",
-            lineNumbersColor: "#7986CB",
-            highlightColor: "#3F51B5"
+            backgroundColor: "#272822",
+            textColor: "#F8F8F2",
+            lineNumbersColor: "#90908A",
+            highlightColor: "#49483E"
+        },
+        buttons: {
+            backgroundColor: "#A6E22E",
+            textColor: "#272822",
+            hoverBackgroundColor: "#66D9EF"
         }
     },
     {
-        name: "Data Flow",
+        name: "GitHub Light",
         blocks: {
             class: {
-                backgroundColor: "#E0F7FA",
-                borderColor: "#006064",
-                textColor: "#00363A",
-                headerColor: "#B2EBF2"
+                backgroundColor: "#FFFFFF",
+                borderColor: "#0366D6",
+                textColor: "#24292E",
+                headerColor: "#F6F8FA"
             },
             class_function: {
-                backgroundColor: "#B2EBF2",
-                borderColor: "#0097A7",
-                textColor: "#00363A",
-                headerColor: "#80DEEA"
+                backgroundColor: "#F6F8FA",
+                borderColor: "#28A745",
+                textColor: "#24292E",
+                headerColor: "#FFFFFF"
             },
             code: {
-                backgroundColor: "#80DEEA",
-                borderColor: "#00BCD4",
-                textColor: "#006064",
-                headerColor: "#B2EBF2"
+                backgroundColor: "#FFFFFF",
+                borderColor: "#D73A49",
+                textColor: "#24292E",
+                headerColor: "#F6F8FA"
             },
             class_standalone: {
-                backgroundColor: "#E0F7FA",
-                borderColor: "#00838F",
-                textColor: "#00363A",
-                headerColor: "#B2EBF2"
+                backgroundColor: "#F6F8FA",
+                borderColor: "#6F42C1",
+                textColor: "#24292E",
+                headerColor: "#FFFFFF"
             },
             standalone_function: {
-                backgroundColor: "#B2EBF2",
-                borderColor: "#0097A7",
-                textColor: "#00363A",
-                headerColor: "#80DEEA"
+                backgroundColor: "#FFFFFF",
+                borderColor: "#E36209",
+                textColor: "#24292E",
+                headerColor: "#F6F8FA"
             }
         },
         connections: {
-            idecontainsclass: {
-                lineColor: "#FF6E40",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            class_contains_functions: {
-                lineColor: "#651FFF",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            class_contains_standalone: {
-                lineColor: "#00BCD4",
-                arrowHead: "diamond",
-                lineStyle: "dotted"
-            },
-            inherits: {
-                lineColor: "#00E676",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            composes: {
-                lineColor: "#FF4081",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            idecontainsstandalonecode: {
-                lineColor: "#40C4FF",
-                arrowHead: "arrow",
-                lineStyle: "solid"
-            }
+            idecontainsclass: { lineColor: "#0366D6", arrowHead: "triangle", lineStyle: "solid" },
+            class_contains_functions: { lineColor: "#28A745", arrowHead: "diamond", lineStyle: "dashed" },
+            class_contains_standalone: { lineColor: "#6F42C1", arrowHead: "diamond", lineStyle: "dotted" },
+            inherits: { lineColor: "#D73A49", arrowHead: "triangle", lineStyle: "solid" },
+            composes: { lineColor: "#28A745", arrowHead: "diamond", lineStyle: "dashed" },
+            idecontainsstandalonecode: { lineColor: "#E36209", arrowHead: "arrow", lineStyle: "solid" }
         },
         canvas: {
-            backgroundColor: "#E0F7FA",
-            gridColor: "#B2EBF2",
-            gridSpacing: 25
-        },
-        ide: {
             backgroundColor: "#FFFFFF",
-            textColor: "#00363A",
-            lineNumbersColor: "#26C6DA",
-            highlightColor: "#00BCD4"
-        }
-    },
-    {
-        name: "Object-Oriented Focus",
-        blocks: {
-            class: {
-                backgroundColor: "#E8F5E9",
-                borderColor: "#2E7D32",
-                textColor: "#1B5E20",
-                headerColor: "#C8E6C9"
-            },
-            class_function: {
-                backgroundColor: "#C8E6C9",
-                borderColor: "#43A047",
-                textColor: "#1B5E20",
-                headerColor: "#A5D6A7"
-            },
-            code: {
-                backgroundColor: "#A5D6A7",
-                borderColor: "#66BB6A",
-                textColor: "#1B5E20",
-                headerColor: "#C8E6C9"
-            },
-            class_standalone: {
-                backgroundColor: "#E8F5E9",
-                borderColor: "#388E3C",
-                textColor: "#1B5E20",
-                headerColor: "#C8E6C9"
-            },
-            standalone_function: {
-                backgroundColor: "#C8E6C9",
-                borderColor: "#43A047",
-                textColor: "#1B5E20",
-                headerColor: "#A5D6A7"
-            }
-        },
-        connections: {
-            idecontainsclass: {
-                lineColor: "#F44336",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            class_contains_functions: {
-                lineColor: "#3F51B5",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            class_contains_standalone: {
-                lineColor: "#4CAF50",
-                arrowHead: "diamond",
-                lineStyle: "dotted"
-            },
-            inherits: {
-                lineColor: "#9C27B0",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            composes: {
-                lineColor: "#FF9800",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            idecontainsstandalonecode: {
-                lineColor: "#2196F3",
-                arrowHead: "arrow",
-                lineStyle: "solid"
-            }
-        },
-        canvas: {
-            backgroundColor: "#E8F5E9",
-            gridColor: "#C8E6C9",
+            gridColor: "#E1E4E8",
             gridSpacing: 20
         },
         ide: {
             backgroundColor: "#FFFFFF",
-            textColor: "#1B5E20",
-            lineNumbersColor: "#66BB6A",
-            highlightColor: "#4CAF50"
+            textColor: "#24292E",
+            lineNumbersColor: "#6A737D",
+            highlightColor: "#F1F8FF"
+        },
+        buttons: {
+            backgroundColor: "#0366D6",
+            textColor: "#FFFFFF",
+            hoverBackgroundColor: "#0056B3"
         }
     },
     {
-        name: "Midnight Coder",
+        name: "Dracula",
         blocks: {
             class: {
-                backgroundColor: "#263238",
-                borderColor: "#80CBC4",
-                textColor: "#B2CCD6",
-                headerColor: "#37474F"
+                backgroundColor: "#282A36",
+                borderColor: "#50FA7B",
+                textColor: "#F8F8F2",
+                headerColor: "#44475A"
             },
             class_function: {
-                backgroundColor: "#37474F",
-                borderColor: "#80CBC4",
-                textColor: "#B2CCD6",
-                headerColor: "#455A64"
+                backgroundColor: "#44475A",
+                borderColor: "#8BE9FD",
+                textColor: "#F8F8F2",
+                headerColor: "#282A36"
             },
             code: {
-                backgroundColor: "#455A64",
-                borderColor: "#80CBC4",
-                textColor: "#B2CCD6",
-                headerColor: "#37474F"
+                backgroundColor: "#282A36",
+                borderColor: "#FFB86C",
+                textColor: "#F8F8F2",
+                headerColor: "#44475A"
             },
             class_standalone: {
-                backgroundColor: "#263238",
-                borderColor: "#80CBC4",
-                textColor: "#B2CCD6",
-                headerColor: "#37474F"
+                backgroundColor: "#44475A",
+                borderColor: "#BD93F9",
+                textColor: "#F8F8F2",
+                headerColor: "#282A36"
             },
             standalone_function: {
-                backgroundColor: "#37474F",
-                borderColor: "#80CBC4",
-                textColor: "#B2CCD6",
-                headerColor: "#455A64"
+                backgroundColor: "#282A36",
+                borderColor: "#FF79C6",
+                textColor: "#F8F8F2",
+                headerColor: "#44475A"
             }
         },
         connections: {
-            idecontainsclass: {
-                lineColor: "#F07178",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            class_contains_functions: {
-                lineColor: "#C792EA",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            class_contains_standalone: {
-                lineColor: "#89DDFF",
-                arrowHead: "diamond",
-                lineStyle: "dotted"
-            },
-            inherits: {
-                lineColor: "#82AAFF",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            composes: {
-                lineColor: "#FF5370",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            idecontainsstandalonecode: {
-                lineColor: "#89DDFF",
-                arrowHead: "arrow",
-                lineStyle: "solid"
-            }
+            idecontainsclass: { lineColor: "#50FA7B", arrowHead: "triangle", lineStyle: "solid" },
+            class_contains_functions: { lineColor: "#8BE9FD", arrowHead: "diamond", lineStyle: "dashed" },
+            class_contains_standalone: { lineColor: "#BD93F9", arrowHead: "diamond", lineStyle: "dotted" },
+            inherits: { lineColor: "#FF79C6", arrowHead: "triangle", lineStyle: "solid" },
+            composes: { lineColor: "#8BE9FD", arrowHead: "diamond", lineStyle: "dashed" },
+            idecontainsstandalonecode: { lineColor: "#FFB86C", arrowHead: "arrow", lineStyle: "solid" }
         },
         canvas: {
-            backgroundColor: "#263238",
-            gridColor: "#37474F",
+            backgroundColor: "#282A36",
+            gridColor: "#44475A",
             gridSpacing: 20
         },
         ide: {
-            backgroundColor: "#263238",
-            textColor: "#B2CCD6",
-            lineNumbersColor: "#546E7A",
-            highlightColor: "#80CBC4"
+            backgroundColor: "#282A36",
+            textColor: "#F8F8F2",
+            lineNumbersColor: "#6272A4",
+            highlightColor: "#44475A"
+        },
+        buttons: {
+            backgroundColor: "#50FA7B",
+            textColor: "#282A36",
+            hoverBackgroundColor: "#8BE9FD"
         }
     },
     {
-        name: "Matrix Code",
+        name: "Nord",
         blocks: {
             class: {
-                backgroundColor: "#000000",
-                borderColor: "#00FF00",
-                textColor: "#00FF00",
-                headerColor: "#001100"
+                backgroundColor: "#2E3440",
+                borderColor: "#88C0D0",
+                textColor: "#D8DEE9",
+                headerColor: "#3B4252"
             },
             class_function: {
-                backgroundColor: "#001100",
-                borderColor: "#00FF00",
-                textColor: "#00FF00",
-                headerColor: "#002200"
+                backgroundColor: "#3B4252",
+                borderColor: "#81A1C1",
+                textColor: "#D8DEE9",
+                headerColor: "#2E3440"
             },
             code: {
-                backgroundColor: "#002200",
-                borderColor: "#00FF00",
-                textColor: "#00FF00",
-                headerColor: "#001100"
+                backgroundColor: "#2E3440",
+                borderColor: "#EBCB8B",
+                textColor: "#D8DEE9",
+                headerColor: "#3B4252"
             },
             class_standalone: {
-                backgroundColor: "#000000",
-                borderColor: "#00FF00",
-                textColor: "#00FF00",
-                headerColor: "#001100"
+                backgroundColor: "#3B4252",
+                borderColor: "#B48EAD",
+                textColor: "#D8DEE9",
+                headerColor: "#2E3440"
             },
             standalone_function: {
-                backgroundColor: "#001100",
-                borderColor: "#00FF00",
-                textColor: "#00FF00",
-                headerColor: "#002200"
+                backgroundColor: "#2E3440",
+                borderColor: "#A3BE8C",
+                textColor: "#D8DEE9",
+                headerColor: "#3B4252"
             }
         },
         connections: {
-            idecontainsclass: {
-                lineColor: "#00FF00",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            class_contains_functions: {
-                lineColor: "#33FF33",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            class_contains_standalone: {
-                lineColor: "#66FF66",
-                arrowHead: "diamond",
-                lineStyle: "dotted"
-            },
-            inherits: {
-                lineColor: "#00CC00",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            composes: {
-                lineColor: "#00AA00",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            idecontainsstandalonecode: {
-                lineColor: "#009900",
-                arrowHead: "arrow",
-                lineStyle: "solid"
-            }
+            idecontainsclass: { lineColor: "#88C0D0", arrowHead: "triangle", lineStyle: "solid" },
+            class_contains_functions: { lineColor: "#81A1C1", arrowHead: "diamond", lineStyle: "dashed" },
+            class_contains_standalone: { lineColor: "#B48EAD", arrowHead: "diamond", lineStyle: "dotted" },
+            inherits: { lineColor: "#BF616A", arrowHead: "triangle", lineStyle: "solid" },
+            composes: { lineColor: "#81A1C1", arrowHead: "diamond", lineStyle: "dashed" },
+            idecontainsstandalonecode: { lineColor: "#EBCB8B", arrowHead: "arrow", lineStyle: "solid" }
         },
         canvas: {
-            backgroundColor: "#000000",
-            gridColor: "#003300",
+            backgroundColor: "#2E3440",
+            gridColor: "#3B4252",
             gridSpacing: 20
         },
         ide: {
-            backgroundColor: "#000000",
-            textColor: "#00FF00",
-            lineNumbersColor: "#006600",
-            highlightColor: "#00AA00"
+            backgroundColor: "#2E3440",
+            textColor: "#D8DEE9",
+            lineNumbersColor: "#4C566A",
+            highlightColor: "#3B4252"
+        },
+        buttons: {
+            backgroundColor: "#88C0D0",
+            textColor: "#2E3440",
+            hoverBackgroundColor: "#81A1C1"
         }
     },
-    {
-        name: "Cyberpunk Night City",
-        blocks: {
-            class: {
-                backgroundColor: "#0D0221",
-                borderColor: "#FF00FF",
-                textColor: "#00FFFF",
-                headerColor: "#190535"
-            },
-            class_function: {
-                backgroundColor: "#190535",
-                borderColor: "#FF00FF",
-                textColor: "#00FFFF",
-                headerColor: "#2B0A50"
-            },
-            code: {
-                backgroundColor: "#2B0A50",
-                borderColor: "#FF00FF",
-                textColor: "#00FFFF",
-                headerColor: "#190535"
-            },
-            class_standalone: {
-                backgroundColor: "#0D0221",
-                borderColor: "#FF00FF",
-                textColor: "#00FFFF",
-                headerColor: "#190535"
-            },
-            standalone_function: {
-                backgroundColor: "#190535",
-                borderColor: "#FF00FF",
-                textColor: "#00FFFF",
-                headerColor: "#2B0A50"
-            }
-        },
-        connections: {
-            idecontainsclass: {
-                lineColor: "#FF00FF",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            class_contains_functions: {
-                lineColor: "#00FFFF",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            class_contains_standalone: {
-                lineColor: "#FF00AA",
-                arrowHead: "diamond",
-                lineStyle: "dotted"
-            },
-            inherits: {
-                lineColor: "#FF1493",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            composes: {
-                lineColor: "#FF69B4",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            idecontainsstandalonecode: {
-                lineColor: "#1E90FF",
-                arrowHead: "arrow",
-                lineStyle: "solid"
-            }
-        },
-        canvas: {
-            backgroundColor: "#0D0221",
-            gridColor: "#190535",
-            gridSpacing: 20
-        },
-        ide: {
-            backgroundColor: "#0D0221",
-            textColor: "#00FFFF",
-            lineNumbersColor: "#FF00FF",
-            highlightColor: "#FF1493"
-        }
-    },
-    {
-        name: "Anime Mecha",
-        blocks: {
-            class: {
-                backgroundColor: "#1A1A1D",
-                borderColor: "#C3073F",
-                textColor: "#950740",
-                headerColor: "#4E4E50"
-            },
-            class_function: {
-                backgroundColor: "#4E4E50",
-                borderColor: "#C3073F",
-                textColor: "#950740",
-                headerColor: "#6F2232"
-            },
-            code: {
-                backgroundColor: "#6F2232",
-                borderColor: "#C3073F",
-                textColor: "#950740",
-                headerColor: "#4E4E50"
-            },
-            class_standalone: {
-                backgroundColor: "#1A1A1D",
-                borderColor: "#C3073F",
-                textColor: "#950740",
-                headerColor: "#4E4E50"
-            },
-            standalone_function: {
-                backgroundColor: "#4E4E50",
-                borderColor: "#C3073F",
-                textColor: "#950740",
-                headerColor: "#6F2232"
-            }
-        },
-        connections: {
-            idecontainsclass: {
-                lineColor: "#C3073F",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            class_contains_functions: {
-                lineColor: "#950740",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            class_contains_standalone: {
-                lineColor: "#6F2232",
-                arrowHead: "diamond",
-                lineStyle: "dotted"
-            },
-            inherits: {
-                lineColor: "#FF0000",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            composes: {
-                lineColor: "#FF4136",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            idecontainsstandalonecode: {
-                lineColor: "#FF851B",
-                arrowHead: "arrow",
-                lineStyle: "solid"
-            }
-        },
-        canvas: {
-            backgroundColor: "#1A1A1D",
-            gridColor: "#4E4E50",
-            gridSpacing: 20
-        },
-        ide: {
-            backgroundColor: "#1A1A1D",
-            textColor: "#950740",
-            lineNumbersColor: "#6F2232",
-            highlightColor: "#C3073F"
-        }
-    },
-    {
-        name: "Steampunk Coder",
-        blocks: {
-            class: {
-                backgroundColor: "#2C3531",
-                borderColor: "#D9B08C",
-                textColor: "#FFCB9A",
-                headerColor: "#116466"
-            },
-            class_function: {
-                backgroundColor: "#116466",
-                borderColor: "#D9B08C",
-                textColor: "#FFCB9A",
-                headerColor: "#0B3C3F"
-            },
-            code: {
-                backgroundColor: "#0B3C3F",
-                borderColor: "#D9B08C",
-                textColor: "#FFCB9A",
-                headerColor: "#116466"
-            },
-            class_standalone: {
-                backgroundColor: "#2C3531",
-                borderColor: "#D9B08C",
-                textColor: "#FFCB9A",
-                headerColor: "#116466"
-            },
-            standalone_function: {
-                backgroundColor: "#116466",
-                borderColor: "#D9B08C",
-                textColor: "#FFCB9A",
-                headerColor: "#0B3C3F"
-            }
-        },
-        connections: {
-            idecontainsclass: {
-                lineColor: "#D9B08C",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            class_contains_functions: {
-                lineColor: "#FFCB9A",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            class_contains_standalone: {
-                lineColor: "#D1E8E2",
-                arrowHead: "diamond",
-                lineStyle: "dotted"
-            },
-            inherits: {
-                lineColor: "#A3A380",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            composes: {
-                lineColor: "#D4A76A",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            idecontainsstandalonecode: {
-                lineColor: "#8E733F",
-                arrowHead: "arrow",
-                lineStyle: "solid"
-            }
-        },
-        canvas: {
-            backgroundColor: "#2C3531",
-            gridColor: "#116466",
-            gridSpacing: 20
-        },
-        ide: {
-            backgroundColor: "#2C3531",
-            textColor: "#FFCB9A",
-            lineNumbersColor: "#D9B08C",
-            highlightColor: "#116466"
-        }
-    },
-    {
-        name: "Studio Ghibli Inspired",
-        blocks: {
-            class: {
-                backgroundColor: "#D5F4E6",
-                borderColor: "#80B192",
-                textColor: "#2C5F2D",
-                headerColor: "#97C1A9"
-            },
-            class_function: {
-                backgroundColor: "#97C1A9",
-                borderColor: "#80B192",
-                textColor: "#2C5F2D",
-                headerColor: "#B2D8B9"
-            },
-            code: {
-                backgroundColor: "#B2D8B9",
-                borderColor: "#80B192",
-                textColor: "#2C5F2D",
-                headerColor: "#97C1A9"
-            },
-            class_standalone: {
-                backgroundColor: "#D5F4E6",
-                borderColor: "#80B192",
-                textColor: "#2C5F2D",
-                headerColor: "#97C1A9"
-            },
-            standalone_function: {
-                backgroundColor: "#97C1A9",
-                borderColor: "#80B192",
-                textColor: "#2C5F2D",
-                headerColor: "#B2D8B9"
-            }
-        },
-        connections: {
-            idecontainsclass: {
-                lineColor: "#2C5F2D",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            class_contains_functions: {
-                lineColor: "#80B192",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            class_contains_standalone: {
-                lineColor: "#4B8F6B",
-                arrowHead: "diamond",
-                lineStyle: "dotted"
-            },
-            inherits: {
-                lineColor: "#1E4D2B",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            composes: {
-                lineColor: "#6B9080",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            idecontainsstandalonecode: {
-                lineColor: "#A4C3B2",
-                arrowHead: "arrow",
-                lineStyle: "solid"
-            }
-        },
-        canvas: {
-            backgroundColor: "#EAF4F4",
-            gridColor: "#CCE3DE",
-            gridSpacing: 20
-        },
-        ide: {
-            backgroundColor: "#EAF4F4",
-            textColor: "#2C5F2D",
-            lineNumbersColor: "#6B9080",
-            highlightColor: "#80B192"
-        }
-    },
-    {
-        name: "Blade Runner 2049",
-        blocks: {
-            class: {
-                backgroundColor: "#0F1215",
-                borderColor: "#F6A02D",
-                textColor: "#7AD1DD",
-                headerColor: "#1B2023"
-            },
-            class_function: {
-                backgroundColor: "#1B2023",
-                borderColor: "#F6A02D",
-                textColor: "#7AD1DD",
-                headerColor: "#2C3440"
-            },
-            code: {
-                backgroundColor: "#2C3440",
-                borderColor: "#F6A02D",
-                textColor: "#7AD1DD",
-                headerColor: "#1B2023"
-            },
-            class_standalone: {
-                backgroundColor: "#0F1215",
-                borderColor: "#F6A02D",
-                textColor: "#7AD1DD",
-                headerColor: "#1B2023"
-            },
-            standalone_function: {
-                backgroundColor: "#1B2023",
-                borderColor: "#F6A02D",
-                textColor: "#7AD1DD",
-                headerColor: "#2C3440"
-            }
-        },
-        connections: {
-            idecontainsclass: {
-                lineColor: "#F6A02D",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            class_contains_functions: {
-                lineColor: "#7AD1DD",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            class_contains_standalone: {
-                lineColor: "#EB4D4B",
-                arrowHead: "diamond",
-                lineStyle: "dotted"
-            },
-            inherits: {
-                lineColor: "#FF6B6B",
-                arrowHead: "triangle",
-                lineStyle: "solid"
-            },
-            composes: {
-                lineColor: "#4ECDC4",
-                arrowHead: "diamond",
-                lineStyle: "dashed"
-            },
-            idecontainsstandalonecode: {
-                lineColor: "#45B7D1",
-                arrowHead: "arrow",
-                lineStyle: "solid"
-            }
-        },
-        canvas: {
-            backgroundColor: "#0F1215",
-            gridColor: "#1B2023",
-            gridSpacing: 20
-        },
-        ide: {
-            backgroundColor: "#0F1215",
-            textColor: "#7AD1DD",
-            lineNumbersColor: "#F6A02D",
-            highlightColor: "#EB4D4B"
-        }
-    }
-];
+    
+                    {
+                        name: "One Dark Pro",
+                        blocks: {
+                            class: {
+                                backgroundColor: "#282C34",
+                                borderColor: "#98C379",
+                                textColor: "#ABB2BF",
+                                headerColor: "#21252B"
+                            },
+                            class_function: {
+                                backgroundColor: "#21252B",
+                                borderColor: "#61AFEF",
+                                textColor: "#ABB2BF",
+                                headerColor: "#282C34"
+                            },
+                            code: {
+                                backgroundColor: "#282C34",
+                                borderColor: "#E5C07B",
+                                textColor: "#ABB2BF",
+                                headerColor: "#21252B"
+                            },
+                            class_standalone: {
+                                backgroundColor: "#21252B",
+                                borderColor: "#C678DD",
+                                textColor: "#ABB2BF",
+                                headerColor: "#282C34"
+                            },
+                            standalone_function: {
+                                backgroundColor: "#282C34",
+                                borderColor: "#56B6C2",
+                                textColor: "#ABB2BF",
+                                headerColor: "#21252B"
+                            }
+                        },
+                        connections: {
+                            idecontainsclass: { lineColor: "#98C379", arrowHead: "triangle", lineStyle: "solid" },
+                            class_contains_functions: { lineColor: "#61AFEF", arrowHead: "diamond", lineStyle: "dashed" },
+                            class_contains_standalone: { lineColor: "#C678DD", arrowHead: "diamond", lineStyle: "dotted" },
+                            inherits: { lineColor: "#E06C75", arrowHead: "triangle", lineStyle: "solid" },
+                            composes: { lineColor: "#61AFEF", arrowHead: "diamond", lineStyle: "dashed" },
+                            idecontainsstandalonecode: { lineColor: "#E5C07B", arrowHead: "arrow", lineStyle: "solid" }
+                        },
+                        canvas: {
+                            backgroundColor: "#282C34",
+                            gridColor: "#3E4451",
+                            gridSpacing: 20
+                        },
+                        ide: {
+                            backgroundColor: "#282C34",
+                            textColor: "#ABB2BF",
+                            lineNumbersColor: "#4B5363",
+                            highlightColor: "#2C313A"
+                        },
+                        buttons: {
+                            backgroundColor: "#98C379",
+                            textColor: "#282C34",
+                            hoverBackgroundColor: "#61AFEF"
+                        }
+                    },
+                    {
+                        name: "Material Ocean",
+                        blocks: {
+                            class: {
+                                backgroundColor: "#0F111A",
+                                borderColor: "#89DDFF",
+                                textColor: "#A6ACCD",
+                                headerColor: "#1A1C25"
+                            },
+                            class_function: {
+                                backgroundColor: "#1A1C25",
+                                borderColor: "#82AAFF",
+                                textColor: "#A6ACCD",
+                                headerColor: "#0F111A"
+                            },
+                            code: {
+                                backgroundColor: "#0F111A",
+                                borderColor: "#F78C6C",
+                                textColor: "#A6ACCD",
+                                headerColor: "#1A1C25"
+                            },
+                            class_standalone: {
+                                backgroundColor: "#1A1C25",
+                                borderColor: "#C792EA",
+                                textColor: "#A6ACCD",
+                                headerColor: "#0F111A"
+                            },
+                            standalone_function: {
+                                backgroundColor: "#0F111A",
+                                borderColor: "#FFCB6B",
+                                textColor: "#A6ACCD",
+                                headerColor: "#1A1C25"
+                            }
+                        },
+                        connections: {
+                            idecontainsclass: { lineColor: "#89DDFF", arrowHead: "triangle", lineStyle: "solid" },
+                            class_contains_functions: { lineColor: "#82AAFF", arrowHead: "diamond", lineStyle: "dashed" },
+                            class_contains_standalone: { lineColor: "#C792EA", arrowHead: "diamond", lineStyle: "dotted" },
+                            inherits: { lineColor: "#FF5370", arrowHead: "triangle", lineStyle: "solid" },
+                            composes: { lineColor: "#82AAFF", arrowHead: "diamond", lineStyle: "dashed" },
+                            idecontainsstandalonecode: { lineColor: "#F78C6C", arrowHead: "arrow", lineStyle: "solid" }
+                        },
+                        canvas: {
+                            backgroundColor: "#0F111A",
+                            gridColor: "#1A1C25",
+                            gridSpacing: 20
+                        },
+                        ide: {
+                            backgroundColor: "#0F111A",
+                            textColor: "#A6ACCD",
+                            lineNumbersColor: "#4B526D",
+                            highlightColor: "#1A1C25"
+                        },
+                        buttons: {
+                            backgroundColor: "#89DDFF",
+                            textColor: "#0F111A",
+                            hoverBackgroundColor: "#82AAFF"
+                        }
+                    },
+                    {
+                        name: "Ayu Light",
+                        blocks: {
+                            class: {
+                                backgroundColor: "#FAFAFA",
+                                borderColor: "#FF9940",
+                                textColor: "#5C6773",
+                                headerColor: "#F3F3F3"
+                            },
+                            class_function: {
+                                backgroundColor: "#F3F3F3",
+                                borderColor: "#F2AE49",
+                                textColor: "#5C6773",
+                                headerColor: "#FAFAFA"
+                            },
+                            code: {
+                                backgroundColor: "#FAFAFA",
+                                borderColor: "#86B300",
+                                textColor: "#5C6773",
+                                headerColor: "#F3F3F3"
+                            },
+                            class_standalone: {
+                                backgroundColor: "#F3F3F3",
+                                borderColor: "#FA8D3E",
+                                textColor: "#5C6773",
+                                headerColor: "#FAFAFA"
+                            },
+                            standalone_function: {
+                                backgroundColor: "#FAFAFA",
+                                borderColor: "#55B4D4",
+                                textColor: "#5C6773",
+                                headerColor: "#F3F3F3"
+                            }
+                        },
+                        connections: {
+                            idecontainsclass: { lineColor: "#FF9940", arrowHead: "triangle", lineStyle: "solid" },
+                            class_contains_functions: { lineColor: "#F2AE49", arrowHead: "diamond", lineStyle: "dashed" },
+                            class_contains_standalone: { lineColor: "#FA8D3E", arrowHead: "diamond", lineStyle: "dotted" },
+                            inherits: { lineColor: "#F07178", arrowHead: "triangle", lineStyle: "solid" },
+                            composes: { lineColor: "#F2AE49", arrowHead: "diamond", lineStyle: "dashed" },
+                            idecontainsstandalonecode: { lineColor: "#86B300", arrowHead: "arrow", lineStyle: "solid" }
+                        },
+                        canvas: {
+                            backgroundColor: "#FAFAFA",
+                            gridColor: "#F3F3F3",
+                            gridSpacing: 20
+                        },
+                        ide: {
+                            backgroundColor: "#FAFAFA",
+                            textColor: "#5C6773",
+                            lineNumbersColor: "#828C99",
+                            highlightColor: "#F0F0F0"
+                        },
+                        buttons: {
+                            backgroundColor: "#FF9940",
+                            textColor: "#FAFAFA",
+                            hoverBackgroundColor: "#F2AE49"
+                        }
+                    },
+                    {
+                        name: "Night Owl",
+                        blocks: {
+                            class: {
+                                backgroundColor: "#011627",
+                                borderColor: "#82AAFF",
+                                textColor: "#D6DEEB",
+                                headerColor: "#01121F"
+                            },
+                            class_function: {
+                                backgroundColor: "#01121F",
+                                borderColor: "#C792EA",
+                                textColor: "#D6DEEB",
+                                headerColor: "#011627"
+                            },
+                            code: {
+                                backgroundColor: "#011627",
+                                borderColor: "#ADDB67",
+                                textColor: "#D6DEEB",
+                                headerColor: "#01121F"
+                            },
+                            class_standalone: {
+                                backgroundColor: "#01121F",
+                                borderColor: "#7FDBCA",
+                                textColor: "#D6DEEB",
+                                headerColor: "#011627"
+                            },
+                            standalone_function: {
+                                backgroundColor: "#011627",
+                                borderColor: "#F78C6C",
+                                textColor: "#D6DEEB",
+                                headerColor: "#01121F"
+                            }
+                        },
+                        connections: {
+                            idecontainsclass: { lineColor: "#82AAFF", arrowHead: "triangle", lineStyle: "solid" },
+                            class_contains_functions: { lineColor: "#C792EA", arrowHead: "diamond", lineStyle: "dashed" },
+                            class_contains_standalone: { lineColor: "#7FDBCA", arrowHead: "diamond", lineStyle: "dotted" },
+                            inherits: { lineColor: "#EF5350", arrowHead: "triangle", lineStyle: "solid" },
+                            composes: { lineColor: "#C792EA", arrowHead: "diamond", lineStyle: "dashed" },
+                            idecontainsstandalonecode: { lineColor: "#ADDB67", arrowHead: "arrow", lineStyle: "solid" }
+                        },
+                        canvas: {
+                            backgroundColor: "#011627",
+                            gridColor: "#01121F",
+                            gridSpacing: 20
+                        },
+                        ide: {
+                            backgroundColor: "#011627",
+                            textColor: "#D6DEEB",
+                            lineNumbersColor: "#4B6479",
+                            highlightColor: "#01121F"
+                        },
+                        buttons: {
+                            backgroundColor: "#82AAFF",
+                            textColor: "#011627",
+                            hoverBackgroundColor: "#C792EA"
+                        }
+                    },
+                    {
+                        name: "Cobalt2",
+                        blocks: {
+                            class: {
+                                backgroundColor: "#193549",
+                                borderColor: "#FFC600",
+                                textColor: "#FFFFFF",
+                                headerColor: "#122738"
+                            },
+                            class_function: {
+                                backgroundColor: "#122738",
+                                borderColor: "#FF9D00",
+                                textColor: "#FFFFFF",
+                                headerColor: "#193549"
+                            },
+                            code: {
+                                backgroundColor: "#193549",
+                                borderColor: "#3AD900",
+                                textColor: "#FFFFFF",
+                                headerColor: "#122738"
+                            },
+                            class_standalone: {
+                                backgroundColor: "#122738",
+                                borderColor: "#FF628C",
+                                textColor: "#FFFFFF",
+                                headerColor: "#193549"
+                            },
+                            standalone_function: {
+                                backgroundColor: "#193549",
+                                borderColor: "#80FCFF",
+                                textColor: "#FFFFFF",
+                                headerColor: "#122738"
+                            }
+                        },
+                        connections: {
+                            idecontainsclass: { lineColor: "#FFC600", arrowHead: "triangle", lineStyle: "solid" },
+                            class_contains_functions: { lineColor: "#FF9D00", arrowHead: "diamond", lineStyle: "dashed" },
+                            class_contains_standalone: { lineColor: "#FF628C", arrowHead: "diamond", lineStyle: "dotted" },
+                            inherits: { lineColor: "#FF628C", arrowHead: "triangle", lineStyle: "solid" },
+                            composes: { lineColor: "#FF9D00", arrowHead: "diamond", lineStyle: "dashed" },
+                            idecontainsstandalonecode: { lineColor: "#3AD900", arrowHead: "arrow", lineStyle: "solid" }
+                        },
+                        canvas: {
+                            backgroundColor: "#193549",
+                            gridColor: "#122738",
+                            gridSpacing: 20
+                        },
+                        ide: {
+                            backgroundColor: "#193549",
+                            textColor: "#FFFFFF",
+                            lineNumbersColor: "#0D3A58",
+                            highlightColor: "#0D3A58"
+                        },
+                        buttons: {
+                            backgroundColor: "#FFC600",
+                            textColor: "#193549",
+                            hoverBackgroundColor: "#FF9D00"
+                        }
+                    },
+                    {
+                        name: "Synthwave '84",
+                        blocks: {
+                            class: {
+                                backgroundColor: "#262335",
+                                borderColor: "#FF7EDB",
+                                textColor: "#F92AFF",
+                                headerColor: "#241B2F"
+                            },
+                            class_function: {
+                                backgroundColor: "#241B2F",
+                                borderColor: "#36F9F6",
+                                textColor: "#F92AFF",
+                                headerColor: "#262335"
+                            },
+                            code: {
+                                backgroundColor: "#262335",
+                                borderColor: "#FEDE5D",
+                                textColor: "#F92AFF",
+                                headerColor: "#241B2F"
+                            },
+                            class_standalone: {
+                                backgroundColor: "#241B2F",
+                                borderColor: "#FF8B39",
+                                textColor: "#F92AFF",
+                                headerColor: "#262335"
+                            },
+                            standalone_function: {
+                                backgroundColor: "#262335",
+                                borderColor: "#72F1B8",
+                                textColor: "#F92AFF",
+                                headerColor: "#241B2F"
+                            }
+                        },
+                        connections: {
+                            idecontainsclass: { lineColor: "#FF7EDB", arrowHead: "triangle", lineStyle: "solid" },
+                            class_contains_functions: { lineColor: "#36F9F6", arrowHead: "diamond", lineStyle: "dashed" },
+                            class_contains_standalone: { lineColor: "#FF8B39", arrowHead: "diamond", lineStyle: "dotted" },
+                            inherits: { lineColor: "#FE4450", arrowHead: "triangle", lineStyle: "solid" },
+                            composes: { lineColor: "#36F9F6", arrowHead: "diamond", lineStyle: "dashed" },
+                            idecontainsstandalonecode: { lineColor: "#FEDE5D", arrowHead: "arrow", lineStyle: "solid" }
+                        },
+                        canvas: {
+                            backgroundColor: "#262335",
+                            gridColor: "#241B2F",
+                            gridSpacing: 20
+                        },
+                        ide: {
+                            backgroundColor: "#262335",
+                            textColor: "#F92AFF",
+                            lineNumbersColor: "#495495",
+                            highlightColor: "#241B2F"
+                        },
+                        buttons: {
+                            backgroundColor: "#FF7EDB",
+                            textColor: "#262335",
+                            hoverBackgroundColor: "#36F9F6"
+                        }
+                    }
+                ];
 
-export default customTemplates;
+                export default customTemplates;
