@@ -105,8 +105,14 @@ Version 2.7 - Setting Connectors exact line of the ide  and also make this block
 Version 2.8 - Import (first phase of mul tiple pages) and inhertience  block (in heritinece in single file )
             - -save last opened folder and last save settings folderview / file type
             -gesture zoom in and zoom out on canvas 
-            - connection and blocks should update when ide updates  
+            - connection and blocks should update when ide updates   
+            - on focus on code blocks @done 
+
+            Bug
+                - Connection head disapears when i clicked invisine  
+            Note 
             
+
 
 
 Upcoming Versions : 

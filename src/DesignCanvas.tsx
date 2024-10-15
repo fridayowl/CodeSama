@@ -109,15 +109,22 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         adjustZoom();
     }, [blocks, adjustZoom]);
 
-    const handleConnectionVisibilityChange = useCallback((connectionId: string, isVisible: boolean) => {
+    const handleConnectionVisibilityChange = useCallback((connectionId: string, isVisible: boolean,connectionType: string) => {
         console.log("Connection visibility change for", connectionId, "to", isVisible);
 
         let connectionIdsFormatted: string[] = [];
+        console.log("Clicked connection ID:", connectionType);
 
+        if (connectionType ==="idecontainsclass"){
         setConnections(prevConnections =>
             prevConnections.map(conn => {
                 const formateConnectionId = `${connectionId}-${connectionId}.`
+                console.log("Clicked connection ID Fromated:", connectionId);
+                console.log("Clicked connection ID Condition:", conn.id);
+                
+               
                 if (conn.id.includes(formateConnectionId)) {
+                    console.log("Clicked connection ID ADDEDFromated", conn.id)
                     connectionIdsFormatted.push(conn.id);
                     return { ...conn, isVisible };
                 }
@@ -125,9 +132,11 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                     connectionIdsFormatted.push(conn.id);
                     return { ...conn, isVisible };
                 }
+             
                 return conn;
             })
         );
+    }
 
         const connection = connections.find(conn => conn.id === connectionId);
         if (connection) {

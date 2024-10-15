@@ -13,7 +13,7 @@ interface ConnectionsProps {
     getBlockPosition: (id: string) => { x: number; y: number; width: number; height: number };
     getBlockType: (id: string) => string;
     customization: any;
-    onConnectionVisibilityChange: (connectionId: string, isVisible: boolean) => void;
+    onConnectionVisibilityChange: (connectionId: string, isVisible: boolean, connectionType:string) => void;
 }
 
 const defaultConnectionColor = "#000000";
@@ -79,7 +79,7 @@ const Connections: React.FC<ConnectionsProps> = ({
         return {};
     };
 
-    const handleConnectionClick = (e: React.MouseEvent, connectionId: string) => {
+    const handleConnectionClick = (e: React.MouseEvent, connectionId: string, connectionType: string) => {
         e.stopPropagation();
         setInvisibleConnections(prev => {
             const newSet = new Set(prev);
@@ -88,7 +88,7 @@ const Connections: React.FC<ConnectionsProps> = ({
             } else {
                 newSet.add(connectionId);
             }
-            onConnectionVisibilityChange(connectionId, !newSet.has(connectionId));
+            onConnectionVisibilityChange(connectionId, !newSet.has(connectionId), connectionType);
             return newSet;
         });
     };
@@ -190,7 +190,7 @@ const Connections: React.FC<ConnectionsProps> = ({
                             cy={scaledStart.y}
                             r={4}
                             fill={color}
-                            onClick={(e) => handleConnectionClick(e, connection.id)}
+                            onClick={(e) => handleConnectionClick(e, connection.id, connection.type)}
                             style={{ cursor: 'pointer', pointerEvents: 'all' }}
                         />
                         {isVisible && (
@@ -199,7 +199,7 @@ const Connections: React.FC<ConnectionsProps> = ({
                                 cy={scaledEnd.y}
                                 r={4}
                                 fill={color}
-                                onClick={(e) => handleConnectionClick(e, connection.id)}
+                                onClick={(e) => handleConnectionClick(e, connection.id, connection.type)}
                                 style={{ cursor: 'pointer', pointerEvents: 'all' }}
                             />
                         )}

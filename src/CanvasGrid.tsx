@@ -20,7 +20,7 @@ interface CanvasGridProps {
     zoomLevel: number;
     idePosition: { x: number; y: number };
     customization: any;
-    onConnectionVisibilityChange: (connectionId: string, isVisible: boolean) => void;
+    onConnectionVisibilityChange: (connectionId: string, isVisible: boolean, connectionType: string) => void;
     onBlockWidthChange: (id: string, newWidth: number) => void;
     onBlockSelect: (id: string) => void;
     selectedBlockId: string | null;
