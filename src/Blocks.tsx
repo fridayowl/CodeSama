@@ -138,7 +138,7 @@ const Block: React.FC<BlockProps> = ({
                 borderWidth: '2px',
                 borderStyle: 'solid',
                 paddingLeft: '20px',
-                width: `${calculatedWidth}px`,
+                width:  `850px`,
                 cursor: 'pointer',
             }}
             onClick={() => onSelect()}

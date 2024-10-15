@@ -16,6 +16,31 @@ export interface ExtendedBlockData extends BlockData {
     isVisible?: boolean;
     width: number;
 }
+interface Template {
+    name: string;
+    canvas?: {
+        backgroundColor?: string;
+    };
+    blocks?: {
+        class?: {
+            backgroundColor?: string;
+        };
+        class_function?: {
+            backgroundColor?: string;
+        };
+    };
+    connections?: {
+        inherits?: {
+            lineColor?: string;
+        };
+    };
+}
+
+interface TemplateCardProps {
+    template: Template;
+    onSelect: (template: Template) => void;
+}
+
 
 export interface Connection {
     id: string;
@@ -515,23 +540,26 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         return { x: scrollX, y: scrollY };
     };
 
-    const TemplateCard: React.FC<{ template: any }> = ({ template }) => (
+    const TemplateCard: React.FC<TemplateCardProps> = ({ template, onSelect }) => (
         <div
             className="w-48 h-64 bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform hover:scale-105"
-            onClick={() => handleTemplateChange(template)}>
-            <div className="h-1/2 p-2 flex flex-col justify-between" style={{ backgroundColor: template.canvas?.backgroundColor || '#ffffff' }}>
+            onClick={() => onSelect(template)}
+        >
+            <div className="h-2/3 p-4 flex flex-col justify-between" style={{ backgroundColor: template.canvas?.backgroundColor || '#ffffff' }}>
                 <div className="flex justify-between">
                     <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks?.class?.backgroundColor || '#cccccc' }} />
-                    <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks?.class_function?.backgroundColor || '#cccccc' }} />
+                    <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks?.class_function?.backgroundColor || '#aaaaaa' }} />
                 </div>
-                <div className="w-full h-1 rounded" style={{ backgroundColor: template.connections?.uses?.lineColor || '#000000' }} />
+                <div className="w-full h-2 rounded-full" style={{ backgroundColor: template.connections?.inherits?.lineColor || '#000000' }} />
             </div>
-            <div className="h-1/2 p-4 flex flex-col justify-between">
-                <h3 className="font-bold text-lg">{template.name || 'Unnamed Template'}</h3>
-                <p className="text-sm text-gray-600">Click to apply</p>
+            <div className="h-1/3 p-4 flex flex-col justify-between bg-white">
+                <h3 className="font-bold text-sm">{template.name}</h3>
+                <p className="text-xs text-gray-600">Click to apply</p>
             </div>
         </div>
     );
+
+
 
     return (
         <div className="w-full h-screen p-4">
@@ -634,16 +662,16 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
 
             {isTemplatesPanelOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg max-w-3xl max-h-[80vh] overflow-y-auto">
+                    <div className="bg-white p-8 rounded-lg w-11/12 max-w-6xl max-h-[90vh] overflow-y-auto">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-2xl font-bold">Choose a Template</h2>
                             <button onClick={() => setIsTemplatesPanelOpen(false)} className="p-1 rounded-full hover:bg-gray-200">
                                 <X size={24} />
                             </button>
                         </div>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                             {customTemplates.map((template, index) => (
-                                <TemplateCard key={index} template={template} />
+                                <TemplateCard key={index} template={template} onSelect={handleTemplateChange} />
                             ))}
                         </div>
                     </div>

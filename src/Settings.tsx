@@ -118,23 +118,31 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
         </>
     );
 
-    const renderTemplates = () => (
-        <>
-            {customTemplates.map((template, index) => (
-                <div
-                    key={index}
-                    className="border rounded-lg p-4 mb-4 cursor-pointer hover:shadow-md transition-shadow duration-200"
-                    onClick={() => onCustomizationChange(template)}
-                >
-                    <h4 className="font-medium text-gray-800 mb-2">{template.name}</h4>
-                    <div className="flex space-x-2">
-                        <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks.class.backgroundColor }} />
-                        <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks.class_function.backgroundColor }} />
-                        <div className="w-8 h-8 rounded" style={{ backgroundColor: template.blocks.code.backgroundColor }} />
-                    </div>
+    const TemplateCard: React.FC<{ template: any }> = ({ template }) => (
+        <div
+            className="w-32 h-48 bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-transform hover:scale-105"
+            onClick={() => onCustomizationChange(template)}
+        >
+            <div className="h-1/2 p-2 flex flex-col justify-between" style={{ backgroundColor: template.canvas?.backgroundColor || '#ffffff' }}>
+                <div className="flex justify-between">
+                    <div className="w-6 h-6 rounded" style={{ backgroundColor: template.blocks?.class?.backgroundColor || '#cccccc' }} />
+                    <div className="w-6 h-6 rounded" style={{ backgroundColor: template.blocks?.class_function?.backgroundColor || '#cccccc' }} />
                 </div>
+                <div className="w-full h-1 rounded" style={{ backgroundColor: template.connections?.inherits?.lineColor || '#000000' }} />
+            </div>
+            <div className="h-1/2 p-2 flex flex-col justify-between">
+                <h3 className="font-bold text-sm leading-tight">{template.name || 'Unnamed Template'}</h3>
+                <p className="text-xs text-gray-600">Click to apply</p>
+            </div>
+        </div>
+    );
+
+    const renderTemplates = () => (
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+            {customTemplates.map((template, index) => (
+                <TemplateCard key={index} template={template} />
             ))}
-        </>
+        </div>
     );
 
     const tabs = [
@@ -146,10 +154,10 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ isOpen, onClose, customiz
     ];
 
     return (
-        <div className="fixed right-0 top-0 h-full w-96 bg-white shadow-lg z-50 overflow-y-auto">
-            <div className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">Settings</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg w-11/12 max-w-6xl max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-2xl font-bold">Settings</h2>
                     <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-200 transition duration-200">
                         <X size={24} />
                     </button>
