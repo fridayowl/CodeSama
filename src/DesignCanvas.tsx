@@ -84,6 +84,8 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const [hiddenSubBlocks, setHiddenSubBlocks] = useState<string[]>([]);
     const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
     const [isBlocksListOpen, setIsBlocksListOpen] = useState(false);
+    const [ideContent, setIdeContent] = useState<string | null>(null);
+
     const handleAddBlock = (blockType: string) => {
         // Implement the logic to add a new block of the specified type
         console.log(`Adding new block of type: ${blockType}`);
@@ -289,6 +291,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             const allBlocks = [...modifiedBlocks, ...classFunctionBlocks, ...classStandaloneBlocks];
 
             setBlocks(allBlocks);
+            setIdeContent(content);
             console.log('Set blocks:', allBlocks);
             setRefreshKey(prevKey => prevKey + 1);
         } catch (error) {
@@ -436,7 +439,9 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         updateConnections();
     }, [updateConnections]);
 
+   
     const handleCodeChange = (newCode: string) => {
+        setIdeContent(newCode);
         if (selectedFileName) {
             processFile(newCode, selectedFileName);
         }

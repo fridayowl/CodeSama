@@ -11,7 +11,7 @@ interface CanvasGridProps {
     isFlowVisible: boolean;
     onPositionChange: (id: string, x: number, y: number) => void;
     onVisibilityChange: (id: string, isVisible: boolean) => void;
-    onCodeChange: (id: string, newCode: string) => void;
+    onCodeChange: (newCode: string) => void;
     getVisibleBlocks: () => ExtendedBlockData[];
     getVisibleConnections: () => Connection[];
     fileContent: string | null;
@@ -73,7 +73,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
         const block = blocks.find(b => b.id === id);
         return block ? block.type : 'unknown';
     };
-     
+
     const renderBlock = (item: ExtendedBlockData) => {
         const commonProps = {
             id: item.id,
@@ -84,7 +84,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
             code: item.code,
             lineNumber: item.lineNumber,
             onVisibilityChange: onVisibilityChange,
-            onCodeChange: (newCode: string) => onCodeChange(item.id, newCode),
+            onCodeChange: (newCode: string) => onCodeChange(newCode),
             customization: customization,
             isVisible: item.isVisible !== false,
             parentClass: item.parentClass,
@@ -134,7 +134,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
             >
                 <PythonIDE
                     fileContent={fileContent}
-                    onCodeChange={(newCode) => onCodeChange('python-ide', newCode)}
+                    onCodeChange={onCodeChange}
                     fileName={fileName}
                     onFlowVisibilityChange={onFlowVisibilityChange}
                     customization={customization.ide}
