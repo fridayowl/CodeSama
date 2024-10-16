@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Eye, EyeOff, RefreshCw } from 'lucide-react';
 
 interface PythonIDECustomization {
@@ -6,12 +6,6 @@ interface PythonIDECustomization {
     textColor: string;
     lineNumbersColor: string;
     highlightColor: string;
-    ide?: {
-        backgroundColor: string;
-        lineNumbersColor: string;
-        highlightColor: string;
-        textColor: string;
-    };
 }
 
 interface PythonIDEProps {
@@ -36,66 +30,66 @@ const PythonIDE: React.FC<PythonIDEProps> = ({
     onFlowVisibilityChange,
     customization: propCustomization
 }) => {
-    const [lines, setLines] = useState<string[]>([]);
+    const [content, setContent] = useState(fileContent || '');
     const [isFlowVisible, setIsFlowVisible] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [localCustomization, setLocalCustomization] = useState({ ...defaultCustomization, ...propCustomization });
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
     const [contentHeight, setContentHeight] = useState(0);
+    const editorRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
-    const lineHeight = 20; // Compact line height
-    const headerHeight = 40; // Height of the header
-    const extraLines = 2; // Number of extra lines to add at the end
-    const bottomPadding = 20; // Additional padding at the bottom
+    const lineHeight = 20;
+    const headerHeight = 40;
+    const extraLines = 2;
+    const bottomPadding = 20;
 
     useEffect(() => {
-        if (propCustomization.ide) {
-            setLocalCustomization({
-                ...defaultCustomization,
-                ...propCustomization.ide
-            });
-        } else {
-            setLocalCustomization({
-                ...defaultCustomization,
-                ...propCustomization
-            });
-        }
+        setLocalCustomization({
+            ...defaultCustomization,
+            ...propCustomization
+        });
     }, [propCustomization]);
 
     useEffect(() => {
-        if (fileContent) {
-            const newLines = fileContent.split('\n');
-            setLines(newLines);
-            setContentHeight((newLines.length + extraLines) * lineHeight + headerHeight + bottomPadding);
-        } else {
-            setLines([]);
-            setContentHeight(lineHeight + headerHeight + bottomPadding);
+        if (fileContent !== null) {
+            setContent(fileContent);
+            updateContentHeight(fileContent);
+            if (editorRef.current) {
+                editorRef.current.innerText = fileContent;
+            }
         }
     }, [fileContent]);
 
-    const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const newContent = e.target.value;
-        const newLines = newContent.split('\n');
-        setLines(newLines);
-        setContentHeight((newLines.length + extraLines) * lineHeight + headerHeight + bottomPadding);
-        onCodeChange(newContent);
-    };
+    const updateContentHeight = useCallback((text: string) => {
+        const lines = text.split('\n').length;
+        setContentHeight((lines + extraLines) * lineHeight + headerHeight + bottomPadding);
+    }, []);
 
-    const toggleFlowVisibility = () => {
-        const newVisibility = !isFlowVisible;
-        setIsFlowVisible(newVisibility);
-        onFlowVisibilityChange(newVisibility);
-    };
+    const handleContentChange = useCallback(() => {
+        if (editorRef.current) {
+            const newContent = editorRef.current.innerText;
+            setContent(newContent);
+            updateContentHeight(newContent);
+            onCodeChange(newContent);
+        }
+    }, [onCodeChange, updateContentHeight]);
 
-    const handleRefresh = () => {
+    const toggleFlowVisibility = useCallback(() => {
+        setIsFlowVisible(prev => {
+            const newVisibility = !prev;
+            onFlowVisibilityChange(newVisibility);
+            return newVisibility;
+        });
+    }, [onFlowVisibilityChange]);
+
+    const handleRefresh = useCallback(() => {
         setIsRefreshing(true);
         onFlowVisibilityChange(false);
         setTimeout(() => {
             onFlowVisibilityChange(true);
             setIsRefreshing(false);
         }, 500);
-    };
+    }, [onFlowVisibilityChange]);
 
     return (
         <div
@@ -132,7 +126,7 @@ const PythonIDE: React.FC<PythonIDEProps> = ({
                     </button>
                 </div>
             </div>
-            <div className="flex flex-grow">
+            <div className="flex flex-grow overflow-auto">
                 <div
                     className="p-1 text-right select-none"
                     style={{
@@ -141,24 +135,23 @@ const PythonIDE: React.FC<PythonIDEProps> = ({
                         color: localCustomization.textColor
                     }}
                 >
-                    {[...Array(lines.length + extraLines)].map((_, index) => (
+                    {content.split('\n').map((_, index) => (
                         <div key={index} style={{ height: `${lineHeight}px`, fontSize: '10px', lineHeight: `${lineHeight}px` }}>
                             {index + 1}
                         </div>
                     ))}
                 </div>
-                <textarea
-                    ref={textareaRef}
-                    className="flex-grow p-1 font-mono text-sm border-none resize-none outline-none"
-                    value={lines.join('\n')}
-                    onChange={handleTextareaChange}
-                    placeholder="Enter your Python code here..."
-                    spellCheck="false"
+                <div
+                    ref={editorRef}
+                    contentEditable
+                    className="flex-grow p-1 font-mono text-sm outline-none whitespace-pre"
+                    onInput={handleContentChange}
                     style={{
                         backgroundColor: localCustomization.backgroundColor,
                         color: localCustomization.textColor,
                         lineHeight: `${lineHeight}px`,
                         fontSize: '12px',
+                        overflowY: 'auto',
                         height: `${contentHeight - headerHeight}px`,
                         paddingBottom: `${bottomPadding}px`
                     }}

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, Settings as SettingsIcon, X, Info ,Layers} from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Settings as SettingsIcon, X, Info, Layers } from 'lucide-react';
 import CanvasGrid from './CanvasGrid';
 import { generateJsonFromPythonFile, BlockData, ConnectionData as FileProcessorConnectionData } from './fileProcessor';
 import SettingsPanel from './Settings';
@@ -7,8 +7,9 @@ import defaultCustomization from './customization.json';
 import customTemplates from './customTemplates';
 import CanvasInfoPanel from './CanvasInfoPanel';
 import BlocksListPanel from './BlocksListPanel';
+
 export interface ConnectionData extends FileProcessorConnectionData {
-    id: string;  // Added id field
+    id: string;
 }
 
 export interface ExtendedBlockData extends BlockData {
@@ -16,6 +17,7 @@ export interface ExtendedBlockData extends BlockData {
     isVisible?: boolean;
     width: number;
 }
+
 interface Template {
     name: string;
     canvas?: {
@@ -41,7 +43,6 @@ interface TemplateCardProps {
     onSelect: (template: Template) => void;
 }
 
-
 export interface Connection {
     id: string;
     start: string;
@@ -59,8 +60,8 @@ export interface Connection {
 interface DesignCanvasProps {
     selectedFile: string | null;
     selectedFileName: string | null;
+    onCodeChange: (newContent: string) => void;  // Add this line
 }
-
 const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileName }) => {
     const [blocks, setBlocks] = useState<ExtendedBlockData[]>([]);
     const [connections, setConnections] = useState<Connection[]>([]);
@@ -86,11 +87,6 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const [isBlocksListOpen, setIsBlocksListOpen] = useState(false);
     const [ideContent, setIdeContent] = useState<string | null>(null);
 
-    const handleAddBlock = (blockType: string) => {
-        // Implement the logic to add a new block of the specified type
-        console.log(`Adding new block of type: ${blockType}`);
-        // You'll need to implement the actual logic here
-    };
     const toggleAutoZoom = () => {
         if (!isAutoZoomLocked) {
             setAutoZoom(!autoZoom);
@@ -141,34 +137,33 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         adjustZoom();
     }, [blocks, adjustZoom]);
 
-    const handleConnectionVisibilityChange = useCallback((connectionId: string, isVisible: boolean,connectionType: string) => {
+    const handleConnectionVisibilityChange = useCallback((connectionId: string, isVisible: boolean, connectionType: string) => {
         console.log("Connection visibility change for", connectionId, "to", isVisible);
 
         let connectionIdsFormatted: string[] = [];
         console.log("Clicked connection ID:", connectionType);
 
-        if (connectionType ==="idecontainsclass"){
-        setConnections(prevConnections =>
-            prevConnections.map(conn => {
-                const formateConnectionId = `${connectionId}-${connectionId}.`
-                console.log("Clicked connection ID Fromated:", connectionId);
-                console.log("Clicked connection ID Condition:", conn.id);
-                
-               
-                if (conn.id.includes(formateConnectionId)) {
-                    console.log("Clicked connection ID ADDEDFromated", conn.id)
-                    connectionIdsFormatted.push(conn.id);
-                    return { ...conn, isVisible };
-                }
-                if (conn.start === connectionId.split('-')[0]) {
-                    connectionIdsFormatted.push(conn.id);
-                    return { ...conn, isVisible };
-                }
-             
-                return conn;
-            })
-        );
-    }
+        if (connectionType === "idecontainsclass") {
+            setConnections(prevConnections =>
+                prevConnections.map(conn => {
+                    const formateConnectionId = `${connectionId}-${connectionId}.`
+                    console.log("Clicked connection ID Fromated:", connectionId);
+                    console.log("Clicked connection ID Condition:", conn.id);
+
+                    if (conn.id.includes(formateConnectionId)) {
+                        console.log("Clicked connection ID ADDEDFromated", conn.id)
+                        connectionIdsFormatted.push(conn.id);
+                        return { ...conn, isVisible };
+                    }
+                    if (conn.start === connectionId.split('-')[0]) {
+                        connectionIdsFormatted.push(conn.id);
+                        return { ...conn, isVisible };
+                    }
+
+                    return conn;
+                })
+            );
+        }
 
         const connection = connections.find(conn => conn.id === connectionId);
         if (connection) {
@@ -300,8 +295,21 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     }, []);
 
     useEffect(() => {
-        if (selectedFile && selectedFileName) {
-            processFile(selectedFile, selectedFileName);
+        if (selectedFileName) {
+            // Check if there's content in local storage for this file
+            const storedContent = localStorage.getItem(`file_${selectedFileName}`);
+
+            if (storedContent) {
+                // If found in local storage, use this content
+                setIdeContent(storedContent);
+                processFile(storedContent, selectedFileName);
+            } else if (selectedFile) {
+                // If not in local storage, use the selectedFile content
+                setIdeContent(selectedFile);
+                processFile(selectedFile, selectedFileName);
+                // Also, store this content in local storage for future use
+                localStorage.setItem(`file_${selectedFileName}`, selectedFile);
+            }
         }
     }, [selectedFile, selectedFileName, processFile]);
 
@@ -439,10 +447,14 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         updateConnections();
     }, [updateConnections]);
 
-   
     const handleCodeChange = (newCode: string) => {
         setIdeContent(newCode);
         if (selectedFileName) {
+            // Update local storage with the new content
+            localStorage.setItem(`file_${selectedFileName}`, newCode);
+            console.log("new code", newCode);
+
+            // Process the file with the new content
             processFile(newCode, selectedFileName);
         }
     };
@@ -531,7 +543,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         const widthRatio = viewportWidth / (blockWidth * 2);
         const heightRatio = viewportHeight / (blockHeight * 2);
 
-        return Math.min(widthRatio, heightRatio, 0.8); // Cap at 200% zoom
+        return Math.min(widthRatio, heightRatio, 0.8); // Cap at 80% zoom
     };
 
     const calculateScrollPositionForBlock = (block: ExtendedBlockData, newZoom: number) => {
@@ -563,8 +575,6 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             </div>
         </div>
     );
-
-
 
     return (
         <div className="w-full h-screen p-4">
@@ -649,7 +659,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                             onVisibilityChange={handleClassVisibilityChange}
                             getVisibleBlocks={getVisibleBlocks}
                             getVisibleConnections={getVisibleConnections}
-                            fileContent={selectedFile}
+                            fileContent={ideContent}
                             fileName={selectedFileName || ''}
                             onCodeChange={handleCodeChange}
                             onFlowVisibilityChange={handleFlowVisibilityChange}

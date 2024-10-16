@@ -1,11 +1,16 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { Folder, File, ChevronRight, ChevronDown, ChevronLeft, ChevronRight as ChevronRightExpand, Settings } from 'lucide-react';
+import React, { useState, useCallback, useMemo, forwardRef, useImperativeHandle, useEffect } from 'react';
+import { Folder, File, ChevronRight, ChevronDown, ChevronLeft, ChevronRight as ChevronRightExpand, Settings, Edit } from 'lucide-react';
 
 export interface FileSystemItem {
     name: string;
     type: 'file' | 'folder';
     children?: FileSystemItem[];
     content?: string;
+}
+
+interface OpenEditorFile {
+    name: string;
+    content: string;
 }
 
 interface DirectoryProps {
@@ -22,29 +27,76 @@ const commonFileTypes = [
     '.sql', '.json', '.xml', '.yaml', '.md'
 ];
 
-const Directory: React.FC<DirectoryProps> = ({ items, onFolderSelect, onFileSelect }) => {
+export interface DirectoryHandle {
+    updateOpenEditorContent: (fileName: string, newContent: string) => void;
+}
+
+const Directory = forwardRef<DirectoryHandle, DirectoryProps>(({ items, onFolderSelect, onFileSelect }, ref) => {
     const [isMinimized, setIsMinimized] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [visibleTypes, setVisibleTypes] = useState<string[]>(commonFileTypes);
+    const [openEditors, setOpenEditors] = useState<OpenEditorFile[]>([]);
+    const [currentFile, setCurrentFile] = useState<string | null>(null);
+
+    useEffect(() => {
+        const storedEditors = localStorage.getItem('openEditors');
+        if (storedEditors) {
+            setOpenEditors(JSON.parse(storedEditors));
+        }
+    }, []);
+
+    useImperativeHandle(ref, () => ({
+        updateOpenEditorContent: (fileName: string, newContent: string) => {
+            setOpenEditors(prev => {
+                const updated = prev.map(file =>
+                    file.name === fileName ? { ...file, content: newContent } : file
+                );
+                localStorage.setItem('openEditors', JSON.stringify(updated));
+                return updated;
+            });
+        }
+    }));
 
     const handleFileSelect = useCallback(async (file: FileSystemItem) => {
         if (file.type === 'file' && file.content) {
             try {
-                // Check if the content is a Blob URL
+                let fileContent: string;
                 if (file.content.startsWith('blob:')) {
                     const response = await fetch(file.content);
-                    const text = await response.text();
-                    onFileSelect(text, file.name);
+                    fileContent = await response.text();
                 } else {
-                    // If it's not a Blob URL, assume it's the content itself
-                    onFileSelect(file.content, file.name);
+                    fileContent = file.content;
                 }
+
+                const existingFileIndex = openEditors.findIndex(f => f.name === file.name);
+                if (existingFileIndex !== -1) {
+                    const confirmOverwrite = window.confirm(`File "${file.name}" is already open. Do you want to overwrite it?`);
+                    if (confirmOverwrite) {
+                        const updatedOpenEditors = [...openEditors];
+                        updatedOpenEditors[existingFileIndex] = { name: file.name, content: fileContent };
+                        setOpenEditors(updatedOpenEditors);
+                        localStorage.setItem('openEditors', JSON.stringify(updatedOpenEditors));
+                    } else {
+                        fileContent = openEditors[existingFileIndex].content;
+                    }
+                } else {
+                    const updatedOpenEditors = [...openEditors, { name: file.name, content: fileContent }];
+                    setOpenEditors(updatedOpenEditors);
+                    localStorage.setItem('openEditors', JSON.stringify(updatedOpenEditors));
+                }
+
+                setCurrentFile(file.name);
+                onFileSelect(fileContent, file.name);
             } catch (error) {
                 console.error('Error reading file content:', error);
-                // Optionally, you can show an error message to the user here
             }
         }
-    }, [onFileSelect]);
+    }, [onFileSelect, openEditors]);
+
+    const handleOpenEditorSelect = (file: OpenEditorFile) => {
+        setCurrentFile(file.name);
+        onFileSelect(file.content, file.name);
+    };
 
     const DirectoryItem: React.FC<{
         item: FileSystemItem;
@@ -233,6 +285,18 @@ const Directory: React.FC<DirectoryProps> = ({ items, onFolderSelect, onFileSele
                         </div>
                     )}
                     <div className="mt-4 max-h-[calc(100vh-300px)] overflow-y-auto">
+                        <h3 className="font-semibold mb-2">Open Editors</h3>
+                        {openEditors.map((file, index) => (
+                            <div
+                                key={index}
+                                className={`flex items-center cursor-pointer hover:bg-gray-100 py-1 ${currentFile === file.name ? 'bg-blue-100' : ''}`}
+                                onClick={() => handleOpenEditorSelect(file)}
+                            >
+                                <Edit size={16} className="mr-2 text-gray-500" />
+                                <span className="text-sm">{file.name}</span>
+                            </div>
+                        ))}
+                        <h3 className="font-semibold mt-4 mb-2">Source</h3>
                         {filteredItems.map((item, index) => (
                             <DirectoryItem
                                 key={index}
@@ -246,6 +310,6 @@ const Directory: React.FC<DirectoryProps> = ({ items, onFolderSelect, onFileSele
             )}
         </div>
     );
-};
+});
 
 export default Directory;
