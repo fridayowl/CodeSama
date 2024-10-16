@@ -371,8 +371,8 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                 startPoint,
                 endPoint,
                 type: connectionType,
-                fromConnector: 'output',
-                toConnector: 'input',
+                fromConnector: 'mainfile',
+                toConnector: `${cleanBlockId}`,
                 startBlockType: 'code',
                 endBlockType: block.type
             });

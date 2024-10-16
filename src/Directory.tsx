@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, forwardRef, useImperativeHandle, useEffect } from 'react';
-import { Folder, File, ChevronRight, ChevronDown, ChevronLeft, ChevronRight as ChevronRightExpand, Settings, Edit } from 'lucide-react';
+import { Folder, File, ChevronRight, ChevronDown, ChevronLeft, ChevronRight as ChevronRightExpand, Settings, Edit, Trash2, Save, Info } from 'lucide-react';
 
 export interface FileSystemItem {
     name: string;
@@ -19,6 +19,10 @@ interface DirectoryProps {
     onFileSelect: (fileContent: string, fileName: string) => void;
 }
 
+export interface DirectoryHandle {
+    updateOpenEditorContent: (fileName: string, newContent: string) => void;
+}
+
 const commonFileTypes = [
     '.py', '.js', '.ts', '.tsx', '.jsx',
     '.html', '.css', '.scss', '.less',
@@ -26,10 +30,6 @@ const commonFileTypes = [
     '.rb', '.php', '.swift', '.kt', '.rs',
     '.sql', '.json', '.xml', '.yaml', '.md'
 ];
-
-export interface DirectoryHandle {
-    updateOpenEditorContent: (fileName: string, newContent: string) => void;
-}
 
 const Directory = forwardRef<DirectoryHandle, DirectoryProps>(({ items, onFolderSelect, onFileSelect }, ref) => {
     const [isMinimized, setIsMinimized] = useState(false);
@@ -96,6 +96,45 @@ const Directory = forwardRef<DirectoryHandle, DirectoryProps>(({ items, onFolder
     const handleOpenEditorSelect = (file: OpenEditorFile) => {
         setCurrentFile(file.name);
         onFileSelect(file.content, file.name);
+    };
+
+    const handleDeleteFile = (fileName: string) => {
+        const confirmDelete = window.confirm(`Are you sure you want to delete ${fileName}?`);
+        if (confirmDelete) {
+            localStorage.removeItem(`file_${fileName}`);
+            setOpenEditors(prev => {
+                const updated = prev.filter(file => file.name !== fileName);
+                localStorage.setItem('openEditors', JSON.stringify(updated));
+                return updated;
+            });
+            if (currentFile === fileName) {
+                setCurrentFile(null);
+            }
+        }
+    };
+
+    const handleSaveFile = (fileName: string) => {
+        const fileContent = openEditors.find(file => file.name === fileName)?.content;
+        if (fileContent) {
+            const blob = new Blob([fileContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+    };
+
+    const handleFileInfo = (fileName: string) => {
+        const file = openEditors.find(file => file.name === fileName);
+        if (file) {
+            const fileSize = new Blob([file.content]).size;
+            const lineCount = file.content.split('\n').length;
+            alert(`File: ${fileName}\nSize: ${fileSize} bytes\nLines: ${lineCount}`);
+        }
     };
 
     const DirectoryItem: React.FC<{
@@ -289,11 +328,35 @@ const Directory = forwardRef<DirectoryHandle, DirectoryProps>(({ items, onFolder
                         {openEditors.map((file, index) => (
                             <div
                                 key={index}
-                                className={`flex items-center cursor-pointer hover:bg-gray-100 py-1 ${currentFile === file.name ? 'bg-blue-100' : ''}`}
-                                onClick={() => handleOpenEditorSelect(file)}
+                                className={`flex items-center justify-between cursor-pointer hover:bg-gray-100 py-1 ${currentFile === file.name ? 'bg-blue-100' : ''}`}
                             >
-                                <Edit size={16} className="mr-2 text-gray-500" />
-                                <span className="text-sm">{file.name}</span>
+                                <div className="flex items-center flex-grow overflow-hidden" onClick={() => handleOpenEditorSelect(file)}>
+                                    <Edit size={16} className="mr-2 text-gray-500 flex-shrink-0" />
+                                    <span className="text-sm truncate">{file.name}</span>
+                                </div>
+                                <div className="flex items-center flex-shrink-0">
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleFileInfo(file.name); }}
+                                        className="p-1 text-gray-500 hover:text-blue-500"
+                                        title="File Info"
+                                    >
+                                        <Info size={14} />
+                                    </button>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleSaveFile(file.name); }}
+                                        className="p-1 text-gray-500 hover:text-green-500"
+                                        title="Save File"
+                                    >
+                                        <Save size={14} />
+                                    </button>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleDeleteFile(file.name); }}
+                                        className="p-1 text-gray-500 hover:text-red-500"
+                                        title="Delete File"
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                </div>
                             </div>
                         ))}
                         <h3 className="font-semibold mt-4 mb-2">Source</h3>
