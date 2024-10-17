@@ -107,17 +107,21 @@ Version 2.8 -Import (first phase of mul tiple pages) and inhertience  block (in 
             - connection and blocks should update when ide updates    @done
             -gesture zoom in and zoom out on canvas  @low
             - on focus on code blocks @done 
-            - adding file download and info button 
+            - adding file download and info button @done
             Bug
-                - Connection head disapears when i clicked invisible 
+                - Connection head disapears when i clicked invisible @odne
                 - overwrite not working
             Note 
             -- Improving the  file editing part 
 
+Version 2.9 
+        - first verison of code analyiss 
+            -security scalability ,maintaiblity , potential improvments
 
 
 Upcoming Versions : 
 Version 3 : Focus on Functions that helps Testing much easier and bug fixing  and Documentation (lock in features)
+        :save documetation per blokc and users can import it directly
 
 Version 5 : Focus on code generation and code analysis 
 

@@ -371,8 +371,8 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                 startPoint,
                 endPoint,
                 type: connectionType,
-                fromConnector: 'mainfile',
-                toConnector: `${cleanBlockId}`,
+                fromConnector: "python - ide" ,
+                toConnector: cleanBlockId.split('.').pop() || '',
                 startBlockType: 'code',
                 endBlockType: block.type
             });
@@ -386,6 +386,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                     b.type === 'class_function' && b.parentClass === block.id
                 );
                 classFunctions.forEach(functionBlock => {
+                   
                     const { startPoint, endPoint } = getConnectionPoints(block, functionBlock);
                     newConnections.push({
                         id: `${block.id}-${functionBlock.id}`,
@@ -394,8 +395,8 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                         startPoint,
                         endPoint,
                         type: 'class_contains_functions',
-                        fromConnector: 'method',
-                        toConnector: 'input',
+                        fromConnector: block.id.split('.').pop() ||'',
+                        toConnector: functionBlock.id.split('.').pop() ||'',
                         startBlockType: 'class',
                         endBlockType: 'class_function'
                     });
@@ -413,8 +414,8 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                         startPoint,
                         endPoint,
                         type: 'class_contains_standalone',
-                        fromConnector: 'output',
-                        toConnector: 'input',
+                        fromConnector: block.id.split('.').pop() || '',
+                        toConnector: standaloneBlock.id.split('.').pop() || '',
                         startBlockType: 'class',
                         endBlockType: 'class_standalone'
                     });

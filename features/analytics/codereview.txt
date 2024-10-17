@@ -1,0 +1,22 @@
+Security (25% weight)
+
+Hardcoded token is a significant security risk. Sensitive information should always be securely managed.
+Score: 10/25
+Flexibility & Environment Management (25% weight)
+
+The use of environment variables is a good practice. However, relying on defaults for critical fields (like token) reduces flexibility.
+Score: 18/25
+Code Quality & Readability (20% weight)
+
+The code is simple and readable but lacks error handling and logging. Adding these would improve maintainability and traceability.
+Score: 15/20
+Scalability & Maintainability (15% weight)
+
+The code is easily adjustable for different environments. Still, hardcoding values can lead to issues in multi-environment setups.
+Score: 12/15
+Best Practices (15% weight)
+
+Good use of environment variables but could be improved by removing all hardcoded sensitive data and adding validations.
+Score: 10/15
+Total Score:
+65/100

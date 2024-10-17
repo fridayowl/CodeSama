@@ -175,11 +175,11 @@ const Connections: React.FC<ConnectionsProps> = ({
                                     </div>
                                 </foreignObject>
                                 <text
-                                    x={midPoint.x + 16}
-                                    y={midPoint.y}
-                                    fontSize={10}
+                                    x={midPoint.x -40}
+                                    y={midPoint.y-20}
+                                    fontSize={8}
                                     fill={color}
-                                    filter="url(#glow)"
+                                    // filter="url(#glow)"
                                 >
                                     {`${connection.fromConnector} → ${connection.toConnector}`}
                                 </text>
