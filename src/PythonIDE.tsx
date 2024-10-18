@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { Eye, EyeOff, RefreshCw } from 'lucide-react';
 
 interface PythonIDECustomization {
@@ -10,10 +10,15 @@ interface PythonIDECustomization {
 
 interface PythonIDEProps {
     fileContent: string | null;
-    onCodeChange: (newCode: string) => void;
+    onCodeChange: (newCode: string, lineNumber: number) => void;
+    onBlockCodeChange: (id: string, newCode: string[], lineNumber: number) => void;
     fileName: string;
     onFlowVisibilityChange: (isVisible: boolean) => void;
     customization: PythonIDECustomization;
+}
+
+export interface PythonIDEHandle {
+    handleBlockCodeChange: (id: string, newCode: string[], lineNumber: number) => void;
 }
 
 const defaultCustomization: PythonIDECustomization = {
@@ -23,13 +28,14 @@ const defaultCustomization: PythonIDECustomization = {
     highlightColor: '#2563EB'
 };
 
-const PythonIDE: React.FC<PythonIDEProps> = ({
+const PythonIDE = forwardRef<PythonIDEHandle, PythonIDEProps>(({
     fileContent,
     onCodeChange,
+    onBlockCodeChange,
     fileName,
     onFlowVisibilityChange,
     customization: propCustomization
-}) => {
+}, ref) => {
     const [content, setContent] = useState(fileContent || '');
     const [isFlowVisible, setIsFlowVisible] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -70,7 +76,19 @@ const PythonIDE: React.FC<PythonIDEProps> = ({
             const newContent = editorRef.current.innerText;
             setContent(newContent);
             updateContentHeight(newContent);
-            onCodeChange(newContent);
+
+            // Calculate the line number based on the cursor position
+            const selection = window.getSelection();
+            const range = selection?.getRangeAt(0);
+            const startNode = range?.startContainer;
+            let lineNumber = 1;
+
+            if (startNode && startNode.nodeType === Node.TEXT_NODE) {
+                const textBefore = startNode.textContent?.substring(0, range?.startOffset || 0) || '';
+                lineNumber += textBefore.split('\n').length - 1;
+            }
+
+            onCodeChange(newContent, lineNumber);
         }
     }, [onCodeChange, updateContentHeight]);
 
@@ -90,6 +108,41 @@ const PythonIDE: React.FC<PythonIDEProps> = ({
             setIsRefreshing(false);
         }, 500);
     }, [onFlowVisibilityChange]);
+
+    const handleBlockCodeChange = useCallback((id: string, newCode: string[], lineNumber: number) => {
+        console.log("bchange", newCode, id, lineNumber);
+        if (editorRef.current) {
+            const oldContent = editorRef.current.innerText;
+            console.log("bcheck", "oldcontent", oldContent);
+
+            // Split the old content into lines
+            const contentLines = oldContent.split('\n');
+
+            // Convert newCode to an array if it's not already
+            const newCodeLines = Array.isArray(newCode) ? newCode : [newCode];
+
+            // Insert the new code lines at the specified line number
+            contentLines.splice(lineNumber - 1, 0, ...newCodeLines);
+
+            // Join the lines back together
+            const updatedContent = contentLines.join('\n');
+
+            // Update the content state
+            setContent(updatedContent);
+
+            // Update the content height
+            updateContentHeight(updatedContent);
+
+            // Update the editor content
+            editorRef.current.innerText = updatedContent;
+
+        }
+    }, [setContent, updateContentHeight, onBlockCodeChange]);
+
+    useImperativeHandle(ref, () => ({
+        handleBlockCodeChange
+    }), [handleBlockCodeChange]);
+
 
     return (
         <div
@@ -159,6 +212,6 @@ const PythonIDE: React.FC<PythonIDEProps> = ({
             </div>
         </div>
     );
-};
+});
 
 export default PythonIDE;

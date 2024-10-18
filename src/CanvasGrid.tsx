@@ -1,17 +1,18 @@
 import React from 'react';
 import DraggableWrapper from './DraggableWrapper';
 import Connections from './Connections';
-import { ClassBlock, FunctionBlock, ClassStandaloneBlock, CodeBlock, StandaloneFunctionBlock } from './Blocks';
-import PythonIDE from './PythonIDE';
+import { ClassBlock, FunctionBlock, ClassStandaloneBlock, CodeBlock, StandaloneFunctionBlock } from './Blocks'; 
 import { ExtendedBlockData, Connection } from './DesignCanvas';
-
+import PythonIDE, { PythonIDEHandle } from './PythonIDE';
 interface CanvasGridProps {
+    pythonIDERef: React.RefObject<PythonIDEHandle>;
     blocks: ExtendedBlockData[];
     connections: Connection[];
     isFlowVisible: boolean;
     onPositionChange: (id: string, x: number, y: number) => void;
     onVisibilityChange: (id: string, isVisible: boolean) => void;
     onCodeChange: (newCode: string) => void;
+    onBlockCodeChange: (id: string, newCode: string[], lineNumber: number) => void;
     getVisibleBlocks: () => ExtendedBlockData[];
     getVisibleConnections: () => Connection[];
     fileContent: string | null;
@@ -33,6 +34,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
     onPositionChange,
     onVisibilityChange,
     onCodeChange,
+    onBlockCodeChange,
     getVisibleBlocks,
     getVisibleConnections,
     fileContent,
@@ -45,6 +47,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
     onBlockWidthChange,
     onBlockSelect,
     selectedBlockId,
+    pythonIDERef,
 }) => {
     const HEADER_HEIGHT = 40;
     const CONNECTOR_OFFSET_X = 5;
@@ -85,6 +88,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
             lineNumber: item.lineNumber,
             onVisibilityChange: onVisibilityChange,
             onCodeChange: (newCode: string) => onCodeChange(newCode),
+            onBlockCodeChange: onBlockCodeChange,
             customization: customization,
             isVisible: item.isVisible !== false,
             parentClass: item.parentClass,
@@ -133,8 +137,10 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                 zoomLevel={zoomLevel}
             >
                 <PythonIDE
+                    ref={pythonIDERef}
                     fileContent={fileContent}
                     onCodeChange={onCodeChange}
+                    onBlockCodeChange={onBlockCodeChange}
                     fileName={fileName}
                     onFlowVisibilityChange={onFlowVisibilityChange}
                     customization={customization.ide}

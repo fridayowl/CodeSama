@@ -11,7 +11,7 @@ interface BlockProps {
     code: string;
     lineNumber?: number;
     onVisibilityChange: (id: string, isVisible: boolean) => void;
-    onCodeChange?: (id: string, newCode: string) => void;
+    onBlockCodeChange: (id: string, newCode: string[], lineNumber: number) => void;
     customization: any;
     isConnectorVisible?: boolean;
     parentClass?: string;
@@ -31,7 +31,7 @@ const Block: React.FC<BlockProps> = ({
     code,
     lineNumber,
     onVisibilityChange,
-    onCodeChange,
+    onBlockCodeChange,
     customization,
     isConnectorVisible = true,
     parentClass,
@@ -57,9 +57,8 @@ const Block: React.FC<BlockProps> = ({
 
     const handleSave = () => {
         setIsEditing(false);
-        if (onCodeChange) {
-            onCodeChange(id, currentCode);
-        }
+        const codeLines = currentCode.split('\n');
+        onBlockCodeChange(id, codeLines, lineNumber || 1);
     };
 
     const toggleVisibility = () => {
@@ -138,7 +137,7 @@ const Block: React.FC<BlockProps> = ({
                 borderWidth: '2px',
                 borderStyle: 'solid',
                 paddingLeft: '20px',
-                width:  `850px`,
+                width: `850px`,
                 cursor: 'pointer',
             }}
             onClick={() => onSelect()}

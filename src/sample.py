@@ -34,7 +34,7 @@ class DataProcessor1:
     print("jk")
     def process1(self):
         """Apply all data processing steps."""
-        self.processed_data = (
+        self.processed_data1 = (
             self.clean_data()
             .sort_data()
             .data

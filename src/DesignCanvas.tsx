@@ -7,7 +7,7 @@ import defaultCustomization from './customization.json';
 import customTemplates from './customTemplates';
 import CanvasInfoPanel from './CanvasInfoPanel';
 import BlocksListPanel from './BlocksListPanel';
-
+import PythonIDE, { PythonIDEHandle } from './PythonIDE';
 export interface ConnectionData extends FileProcessorConnectionData {
     id: string;
 }
@@ -86,7 +86,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
     const [isBlocksListOpen, setIsBlocksListOpen] = useState(false);
     const [ideContent, setIdeContent] = useState<string | null>(null);
-
+    const pythonIDERef = useRef<PythonIDEHandle>(null);
     const toggleAutoZoom = () => {
         if (!isAutoZoomLocked) {
             setAutoZoom(!autoZoom);
@@ -136,6 +136,11 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     useEffect(() => {
         adjustZoom();
     }, [blocks, adjustZoom]);
+
+
+    
+
+   
 
     const handleConnectionVisibilityChange = useCallback((connectionId: string, isVisible: boolean, connectionType: string) => {
         console.log("Connection visibility change for", connectionId, "to", isVisible);
@@ -313,6 +318,20 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         }
     }, [selectedFile, selectedFileName, processFile]);
 
+    const handleBlockCodeChange = useCallback((id: string, newCode: string[], lineNumber: number) => {
+        setBlocks(prevBlocks =>
+            prevBlocks.map(block =>
+                block.id === id ? { ...block, code: newCode.join('\n') } : block
+            )
+        );
+
+        if (pythonIDERef.current) {
+            pythonIDERef.current.handleBlockCodeChange(id, newCode, lineNumber);
+        } else {
+            console.log("pythonIDERef is not initialized", id, newCode, lineNumber);
+        }
+    }, []);
+    
     const getConnectionPoints = useCallback((startBlock: ExtendedBlockData, endBlock: ExtendedBlockData) => {
         const CONNECTOR_OFFSET = 20;
 
@@ -652,6 +671,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                         height: `${canvasSize.height}px`,
                     }}>
                         <CanvasGrid
+                            pythonIDERef={pythonIDERef}
                             key={refreshKey}
                             blocks={blocks}
                             connections={getVisibleConnections()}
@@ -663,6 +683,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                             fileContent={ideContent}
                             fileName={selectedFileName || ''}
                             onCodeChange={handleCodeChange}
+                            onBlockCodeChange={handleBlockCodeChange}
                             onFlowVisibilityChange={handleFlowVisibilityChange}
                             zoomLevel={zoomLevel}
                             idePosition={idePosition}
