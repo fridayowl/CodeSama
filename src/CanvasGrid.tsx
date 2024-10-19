@@ -77,6 +77,10 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
         return block ? block.type : 'unknown';
     };
 
+    const handleClassNameClick = (className: string, lineNumber: number) => {
+        console.log(`Class ${className} clicked at line ${lineNumber}`);
+        // Handle the class name click, e.g., navigate to class definition
+    };
     const renderBlock = (item: ExtendedBlockData) => {
         const commonProps = {
             id: item.id,
@@ -140,6 +144,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
                     ref={pythonIDERef}
                     fileContent={fileContent}
                     onCodeChange={onCodeChange}
+                    onClassNameClick={handleClassNameClick}
                     onBlockCodeChange={onBlockCodeChange}
                     fileName={fileName}
                     onFlowVisibilityChange={onFlowVisibilityChange}

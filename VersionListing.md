@@ -115,6 +115,9 @@ Version 2.8 -Import (first phase of mul tiple pages) and inhertience  block (in 
             -- Improving the  file editing part 
 
 Version 2.9 
+        - first version of git import 
+        - first version of code highlighter 
+        - first version of code error highlighter 
         - first verison of code analyiss 
             -security scalability ,maintaiblity , potential improvments
 

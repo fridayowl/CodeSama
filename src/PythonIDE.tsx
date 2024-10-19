@@ -15,6 +15,7 @@ interface PythonIDEProps {
     fileName: string;
     onFlowVisibilityChange: (isVisible: boolean) => void;
     customization: PythonIDECustomization;
+    onClassNameClick: (className: string, lineNumber: number) => void;
 }
 
 export interface PythonIDEHandle {
@@ -34,13 +35,15 @@ const PythonIDE = forwardRef<PythonIDEHandle, PythonIDEProps>(({
     onBlockCodeChange,
     fileName,
     onFlowVisibilityChange,
-    customization: propCustomization
+    customization: propCustomization,
+    onClassNameClick
 }, ref) => {
     const [content, setContent] = useState(fileContent || '');
     const [isFlowVisible, setIsFlowVisible] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [localCustomization, setLocalCustomization] = useState({ ...defaultCustomization, ...propCustomization });
     const [contentHeight, setContentHeight] = useState(0);
+    const [highlightedContent, setHighlightedContent] = useState<string>('');
     const editorRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -48,6 +51,16 @@ const PythonIDE = forwardRef<PythonIDEHandle, PythonIDEProps>(({
     const headerHeight = 40;
     const extraLines = 2;
     const bottomPadding = 20;
+
+    const builtInFunctions = new Set([
+        'abs', 'all', 'any', 'ascii', 'bin', 'bool', 'bytearray', 'bytes', 'callable', 'chr',
+        'classmethod', 'compile', 'complex', 'delattr', 'dict', 'dir', 'divmod', 'enumerate',
+        'eval', 'exec', 'filter', 'float', 'format', 'frozenset', 'getattr', 'globals', 'hasattr',
+        'hash', 'help', 'hex', 'id', 'input', 'int', 'isinstance', 'issubclass', 'iter', 'len',
+        'list', 'locals', 'map', 'max', 'memoryview', 'min', 'next', 'object', 'oct', 'open',
+        'ord', 'pow', 'print', 'property', 'range', 'repr', 'reversed', 'round', 'set', 'setattr',
+        'slice', 'sorted', 'staticmethod', 'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip'
+    ]);
 
     useEffect(() => {
         setLocalCustomization({
@@ -60,9 +73,7 @@ const PythonIDE = forwardRef<PythonIDEHandle, PythonIDEProps>(({
         if (fileContent !== null) {
             setContent(fileContent);
             updateContentHeight(fileContent);
-            if (editorRef.current) {
-                editorRef.current.innerText = fileContent;
-            }
+            highlightCode(fileContent);
         }
     }, [fileContent]);
 
@@ -71,11 +82,58 @@ const PythonIDE = forwardRef<PythonIDEHandle, PythonIDEProps>(({
         setContentHeight((lines + extraLines) * lineHeight + headerHeight + bottomPadding);
     }, []);
 
+    const highlightCode = useCallback((code: string) => {
+        const lines = code.split('\n');
+        const highlightedLines = lines.map((line, lineIndex) => {
+            // Highlight class definitions
+            line = line.replace(
+                /\b(class)\s+([a-zA-Z_]\w*)/g,
+                (match, classKeyword, className) => {
+                    return `<span style="color: #FF00FF; font-weight: bold;">${classKeyword}</span> <span class="clickable-class" style="color: #00FFFF; font-weight: bold; cursor: pointer;" data-class-name="${className}" data-line-number="${lineIndex + 1}">${className}</span>`;
+                }
+            );
+
+            // Highlight function calls (excluding built-in functions)
+            return line.replace(/\b([a-zA-Z_]\w*)\s*\(/g, (match, funcName) => {
+                if (builtInFunctions.has(funcName)) {
+                    return match; // Return the original match without highlighting for built-in functions
+                }
+                return `<span style="color: #FFD700; font-weight: bold;">${funcName}</span>(`;
+            });
+        });
+
+        setHighlightedContent(highlightedLines.join('\n'));
+    }, []);
+
+    const handleClassNameClick = useCallback((e: MouseEvent) => {
+        const target = e.target as HTMLElement;
+        if (target.classList.contains('clickable-class')) {
+            const className = target.getAttribute('data-class-name');
+            const lineNumber = parseInt(target.getAttribute('data-line-number') || '0', 10);
+            if (className && lineNumber) {
+                onClassNameClick(className, lineNumber);
+            }
+        }
+    }, [onClassNameClick]);
+
+    useEffect(() => {
+        const editorElement = editorRef.current;
+        if (editorElement) {
+            editorElement.addEventListener('click', handleClassNameClick);
+        }
+        return () => {
+            if (editorElement) {
+                editorElement.removeEventListener('click', handleClassNameClick);
+            }
+        };
+    }, [handleClassNameClick]);
+
     const handleContentChange = useCallback(() => {
         if (editorRef.current) {
             const newContent = editorRef.current.innerText;
             setContent(newContent);
             updateContentHeight(newContent);
+            highlightCode(newContent);
 
             // Calculate the line number based on the cursor position
             const selection = window.getSelection();
@@ -90,7 +148,7 @@ const PythonIDE = forwardRef<PythonIDEHandle, PythonIDEProps>(({
 
             onCodeChange(newContent, lineNumber);
         }
-    }, [onCodeChange, updateContentHeight]);
+    }, [onCodeChange, updateContentHeight, highlightCode]);
 
     const toggleFlowVisibility = useCallback(() => {
         setIsFlowVisible(prev => {
@@ -110,39 +168,22 @@ const PythonIDE = forwardRef<PythonIDEHandle, PythonIDEProps>(({
     }, [onFlowVisibilityChange]);
 
     const handleBlockCodeChange = useCallback((id: string, newCode: string[], lineNumber: number) => {
-        console.log("bchange", newCode, id, lineNumber);
         if (editorRef.current) {
             const oldContent = editorRef.current.innerText;
-            console.log("bcheck", "oldcontent", oldContent);
-
-            // Split the old content into lines
             const contentLines = oldContent.split('\n');
-
-            // Convert newCode to an array if it's not already
             const newCodeLines = Array.isArray(newCode) ? newCode : [newCode];
-
-            // Insert the new code lines at the specified line number
             contentLines.splice(lineNumber - 1, 0, ...newCodeLines);
-
-            // Join the lines back together
             const updatedContent = contentLines.join('\n');
-
-            // Update the content state
             setContent(updatedContent);
-
-            // Update the content height
             updateContentHeight(updatedContent);
-
-            // Update the editor content
-            editorRef.current.innerText = updatedContent;
-
+            highlightCode(updatedContent);
+            editorRef.current.innerHTML = highlightedContent;
         }
-    }, [setContent, updateContentHeight, onBlockCodeChange]);
+    }, [updateContentHeight, highlightCode]);
 
     useImperativeHandle(ref, () => ({
         handleBlockCodeChange
     }), [handleBlockCodeChange]);
-
 
     return (
         <div
@@ -199,6 +240,7 @@ const PythonIDE = forwardRef<PythonIDEHandle, PythonIDEProps>(({
                     contentEditable
                     className="flex-grow p-1 font-mono text-sm outline-none whitespace-pre"
                     onInput={handleContentChange}
+                    dangerouslySetInnerHTML={{ __html: highlightedContent }}
                     style={{
                         backgroundColor: localCustomization.backgroundColor,
                         color: localCustomization.textColor,
