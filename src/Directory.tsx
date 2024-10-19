@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { Folder, File, ChevronRight, ChevronDown, ChevronLeft, ChevronRight as ChevronRightExpand, Settings, Edit, Trash2, Save, Info } from 'lucide-react';
-
+import GitCloneButton from './GitCloneButton';
 export interface FileSystemItem {
     name: string;
     type: 'file' | 'folder';
@@ -56,7 +56,7 @@ const Directory = forwardRef<DirectoryHandle, DirectoryProps>(({ items, onFolder
             });
         }
     }));
-
+    
     const handleFileSelect = useCallback(async (file: FileSystemItem) => {
         if (file.type === 'file' && file.content) {
             try {
@@ -291,6 +291,7 @@ const Directory = forwardRef<DirectoryHandle, DirectoryProps>(({ items, onFolder
                     >
                         Select Folder
                     </button>
+                    <GitCloneButton  />
                     {isSettingsOpen && (
                         <div className="mt-4 border-t pt-4">
                             <h3 className="font-semibold mb-2">File Types</h3>
