@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, Settings as SettingsIcon, X, Info, Layers } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Settings as SettingsIcon, X, Info, Layers,Keyboard } from 'lucide-react';
 import CanvasGrid from './CanvasGrid';
 import { generateJsonFromPythonFile, BlockData, ConnectionData as FileProcessorConnectionData } from './fileProcessor';
 import SettingsPanel from './Settings';
@@ -8,6 +8,8 @@ import customTemplates from './customTemplates';
 import CanvasInfoPanel from './CanvasInfoPanel';
 import BlocksListPanel from './BlocksListPanel';
 import PythonIDE, { PythonIDEHandle } from './PythonIDE';
+import KeyboardShortcutsPanel from './KeyboardShortcutsPanel'; // We'll create this component next
+
 export interface ConnectionData extends FileProcessorConnectionData {
     id: string;
 }
@@ -87,6 +89,8 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const [isBlocksListOpen, setIsBlocksListOpen] = useState(false);
     const [ideContent, setIdeContent] = useState<string | null>(null);
     const pythonIDERef = useRef<PythonIDEHandle>(null);
+    const [isKeyboardShortcutsPanelOpen, setIsKeyboardShortcutsPanelOpen] = useState(false);
+
     const toggleAutoZoom = () => {
         if (!isAutoZoomLocked) {
             setAutoZoom(!autoZoom);
@@ -331,7 +335,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             console.log("pythonIDERef is not initialized", id, newCode, lineNumber);
         }
     }, []);
-    
+
     const getConnectionPoints = useCallback((startBlock: ExtendedBlockData, endBlock: ExtendedBlockData) => {
         const CONNECTOR_OFFSET = 20;
 
@@ -628,6 +632,13 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                         Blocks
                     </button>
                     <button
+                        onClick={() => setIsKeyboardShortcutsPanelOpen(true)}
+                        className="p-2 bg-gray-200 rounded hover:bg-gray-300"
+                        title="Keyboard Shortcuts"
+                    >
+                        <Keyboard size={20} />
+                    </button>
+                    <button
                         onClick={() => setIsTemplatesPanelOpen(true)}
                         className="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300 text-sm"
                         title="Choose Template"
@@ -732,6 +743,10 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                 onClose={() => setIsInfoPanelOpen(false)}
                 blocks={blocks}
                 onBlockSelect={handleBlockSelect}
+            />
+            <KeyboardShortcutsPanel
+                isOpen={isKeyboardShortcutsPanelOpen}
+                onClose={() => setIsKeyboardShortcutsPanelOpen(false)}
             />
         </div>
     );

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Eye, EyeOff, Edit, Save, Info, FileText, TestTube, AlertTriangle } from 'lucide-react';
+import { Eye, EyeOff, Edit, Save, Info, FileText, TestTube, AlertTriangle, Copy, Wand2 } from 'lucide-react';
 import { checkPythonSyntax, SyntaxError } from './pythonsyntaxChecker';
+import ComingSoon from './ComingSoon';
 
 interface BlockProps {
     id: string;
@@ -50,6 +51,7 @@ const Block: React.FC<BlockProps> = ({
     const [calculatedWidth, setCalculatedWidth] = useState(initialWidth);
     const [syntaxErrors, setSyntaxErrors] = useState<SyntaxError[]>([]);
     const [hasSyntaxError, setHasSyntaxError] = useState(false);
+    const [showComingSoon, setShowComingSoon] = useState(false);
     const codeRef = useRef<HTMLPreElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const blockStyle = customization?.blocks?.[type] || {};
@@ -68,6 +70,7 @@ const Block: React.FC<BlockProps> = ({
         setSyntaxErrors(validErrors);
         setHasSyntaxError(validErrors.length > 0);
     }, [currentCode, lineNumber]);
+
     const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newCode = e.target.value;
         setCurrentCode(newCode);
@@ -77,6 +80,7 @@ const Block: React.FC<BlockProps> = ({
         setSyntaxErrors(validErrors);
         setHasSyntaxError(validErrors.length > 0);
     };
+
     const handleSave = () => {
         setIsEditing(false);
         const codeLines = currentCode.split('\n');
@@ -112,6 +116,18 @@ const Block: React.FC<BlockProps> = ({
     const handleButtonClick = (e: React.MouseEvent, action: () => void) => {
         e.stopPropagation();
         action();
+    };
+
+    const handleCopyErrorAndCode = () => {
+        const errorText = syntaxErrors.map(error => `Line ${error.line}: ${error.message}`).join('\n');
+        const textToCopy = `Errors:\n${errorText}\n\nCode:\n${currentCode}`;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            alert('Errors and code copied to clipboard!');
+        });
+    };
+
+    const handleFixUsingAI = () => {
+        setShowComingSoon(true);
     };
 
     useEffect(() => {
@@ -166,7 +182,7 @@ const Block: React.FC<BlockProps> = ({
                 borderWidth: '2px',
                 borderStyle: 'solid',
                 paddingLeft: '20px',
-                width: `${calculatedWidth}px`,
+                width: `850px`,
                 cursor: 'pointer',
             }}
             onClick={() => onSelect()}
@@ -250,13 +266,35 @@ const Block: React.FC<BlockProps> = ({
                                     paddingLeft: '20px'
                                 }}
                             />
-                            <button
-                                onClick={(e) => handleButtonClick(e, handleSave)}
-                                className="mt-2 px-4 py-2 text-white rounded hover:bg-opacity-80"
-                                style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
-                            >
-                                Save
-                            </button>
+                            <div className="mt-2 flex space-x-2">
+                                <button
+                                    onClick={(e) => handleButtonClick(e, handleSave)}
+                                    className="px-4 py-2 text-white rounded hover:bg-opacity-80"
+                                    style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
+                                >
+                                    Save
+                                </button>
+                                {syntaxErrors.length > 0 && (
+                                    <>
+                                        <button
+                                            onClick={(e) => handleButtonClick(e, handleCopyErrorAndCode)}
+                                            className="px-4 py-2 text-white rounded hover:bg-opacity-80 flex items-center"
+                                            style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
+                                        >
+                                            <Copy size={16} className="mr-2" />
+                                            Copy Error and Code
+                                        </button>
+                                        <button
+                                            onClick={(e) => handleButtonClick(e, handleFixUsingAI)}
+                                            className="px-4 py-2 text-white rounded hover:bg-opacity-80 flex items-center"
+                                            style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
+                                        >
+                                            <Wand2 size={16} className="mr-2" />
+                                            Fix using AI
+                                        </button>
+                                    </>
+                                )}
+                            </div>
                         </>
                     ) : (
                         <pre
@@ -307,6 +345,12 @@ const Block: React.FC<BlockProps> = ({
                     </button>
                     <p className="mt-2 text-sm">Click the button above to run tests for this {type}.</p>
                 </div>
+            )}
+            {showComingSoon && (
+                <ComingSoon
+                    feature="AI-powered code fixing"
+                    onClose={() => setShowComingSoon(false)}
+                />
             )}
         </div>
     );
