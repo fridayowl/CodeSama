@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Eye, EyeOff, Edit, Save, Info, FileText, TestTube } from 'lucide-react';
+import { Eye, EyeOff, Edit, Save, Info, FileText, TestTube, AlertTriangle } from 'lucide-react';
+import { checkPythonSyntax, SyntaxError } from './pythonsyntaxChecker';
 
 interface BlockProps {
     id: string;
@@ -47,12 +48,34 @@ const Block: React.FC<BlockProps> = ({
     const [isTestingVisible, setIsTestingVisible] = useState(false);
     const [currentCode, setCurrentCode] = useState(code);
     const [calculatedWidth, setCalculatedWidth] = useState(initialWidth);
+    const [syntaxErrors, setSyntaxErrors] = useState<SyntaxError[]>([]);
+    const [hasSyntaxError, setHasSyntaxError] = useState(false);
     const codeRef = useRef<HTMLPreElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const blockStyle = customization?.blocks?.[type] || {};
 
+    const adjustErrorLineNumbers = (errors: SyntaxError[]): SyntaxError[] => {
+        const startLine = lineNumber || 1;
+        return errors.map(error => ({
+            ...error,
+            line: error.line - startLine + 1
+        }));
+    };
+
+    useEffect(() => {
+        const errors = checkPythonSyntax(currentCode);
+        const adjustedErrors = adjustErrorLineNumbers(errors);
+        setSyntaxErrors(adjustedErrors);
+        setHasSyntaxError(adjustedErrors.length > 0);
+    }, [currentCode, lineNumber]);
+
     const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setCurrentCode(e.target.value);
+        const newCode = e.target.value;
+        setCurrentCode(newCode);
+        const errors = checkPythonSyntax(newCode);
+        const adjustedErrors = adjustErrorLineNumbers(errors);
+        setSyntaxErrors(adjustedErrors);
+        setHasSyntaxError(adjustedErrors.length > 0);
     };
 
     const handleSave = () => {
@@ -126,24 +149,37 @@ const Block: React.FC<BlockProps> = ({
         ? 'ring-4 ring-green-500 shadow-xl shadow-blue-500/50 '
         : '';
 
+    const errorBorderStyle = hasSyntaxError ? {
+        borderColor: 'red',
+        borderWidth: '2px',
+        boxShadow: '0 0 10px rgba(255, 0, 0, 0.5)'
+    } : {};
+
     return (
         <div
             ref={containerRef}
             className={`w-full max-w-3xl rounded-lg shadow-md overflow-hidden ${glowEffectClass}`}
             style={{
+                ...errorBorderStyle,
                 backgroundColor: blockStyle.backgroundColor || '#ffffff',
-                borderColor: blockStyle.borderColor || '#000000',
+                borderColor: hasSyntaxError ? 'red' : (blockStyle.borderColor || '#000000'),
                 color: blockStyle.textColor || '#000000',
                 borderWidth: '2px',
                 borderStyle: 'solid',
                 paddingLeft: '20px',
-                width: `850px`,
+                width: `${calculatedWidth}px`,
                 cursor: 'pointer',
             }}
             onClick={() => onSelect()}
         >
-            <div className="p-2 flex justify-between items-center" style={{ backgroundColor: blockStyle.headerColor || '#f0f0f0', paddingLeft: '20px' }}>
-                <h3 className="font-bold text-lg">
+            <div className="p-2 flex justify-between items-center"
+                style={{
+                    backgroundColor: blockStyle.headerColor || '#f0f0f0',
+                    paddingLeft: '20px',
+                    borderBottom: hasSyntaxError ? '2px solid red' : 'none'
+                }}>
+                <h3 className="font-bold text-lg flex items-center">
+                    {hasSyntaxError && <AlertTriangle size={20} className="mr-2 text-red-500" />}
                     {name}
                     {lineNumber && <span className="ml-2 text-sm font-normal">(Line {lineNumber})</span>}
                 </h3>
@@ -235,6 +271,22 @@ const Block: React.FC<BlockProps> = ({
                         >
                             {renderCodeWithLineNumbers()}
                         </pre>
+                    )}
+
+                    {syntaxErrors.length > 0 && (
+                        <div className="mt-4 p-2 bg-red-100 border border-red-400 rounded">
+                            <h4 className="font-semibold flex items-center">
+                                <AlertTriangle size={16} className="mr-2 text-red-500" />
+                                Syntax Errors:
+                            </h4>
+                            <ul className="list-disc list-inside">
+                                {syntaxErrors.map((error, index) => (
+                                    <li key={index} className="text-sm text-red-700">
+                                        Line {error.line}: {error.message}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     )}
                 </div>
             )}
