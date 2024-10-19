@@ -54,30 +54,29 @@ const Block: React.FC<BlockProps> = ({
     const containerRef = useRef<HTMLDivElement>(null);
     const blockStyle = customization?.blocks?.[type] || {};
 
-    const adjustErrorLineNumbers = (errors: SyntaxError[]): SyntaxError[] => {
-        const startLine = lineNumber || 1;
+    const adjustErrorLineNumbers = (errors: SyntaxError[], blockLineNumber: number): SyntaxError[] => {
         return errors.map(error => ({
             ...error,
-            line: error.line - startLine + 1
+            line: error.line + blockLineNumber - 1
         }));
     };
 
     useEffect(() => {
         const errors = checkPythonSyntax(currentCode);
-        const adjustedErrors = adjustErrorLineNumbers(errors);
-        setSyntaxErrors(adjustedErrors);
-        setHasSyntaxError(adjustedErrors.length > 0);
+        const adjustedErrors = adjustErrorLineNumbers(errors, lineNumber || 1);
+        const validErrors = adjustedErrors.filter(error => error.line > 0);
+        setSyntaxErrors(validErrors);
+        setHasSyntaxError(validErrors.length > 0);
     }, [currentCode, lineNumber]);
-
     const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newCode = e.target.value;
         setCurrentCode(newCode);
         const errors = checkPythonSyntax(newCode);
-        const adjustedErrors = adjustErrorLineNumbers(errors);
-        setSyntaxErrors(adjustedErrors);
-        setHasSyntaxError(adjustedErrors.length > 0);
+        const adjustedErrors = adjustErrorLineNumbers(errors, lineNumber || 1);
+        const validErrors = adjustedErrors.filter(error => error.line > 0);
+        setSyntaxErrors(validErrors);
+        setHasSyntaxError(validErrors.length > 0);
     };
-
     const handleSave = () => {
         setIsEditing(false);
         const codeLines = currentCode.split('\n');
