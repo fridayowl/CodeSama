@@ -489,6 +489,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     };
 
     const handleClassVisibilityChange = (classId: string, isVisible: boolean) => {
+        console.log("v2.9","clicked");
         setClassVisibility(prev => ({ ...prev, [classId]: isVisible }));
     };
 
@@ -639,6 +640,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             </div>
         </div>
     );
+     
 
     return (
         <div className="w-full h-screen p-4">
