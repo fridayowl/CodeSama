@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, Settings as SettingsIcon, X, Info, Layers,Keyboard } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Settings as SettingsIcon, X, Info, Layers,Keyboard,LogsIcon} from 'lucide-react';
 import CanvasGrid from './CanvasGrid';
 import { generateJsonFromPythonFile, BlockData, ConnectionData as FileProcessorConnectionData } from './fileProcessor';
 import SettingsPanel from './Settings';
@@ -8,7 +8,7 @@ import customTemplates from './customTemplates';
 import CanvasInfoPanel from './CanvasInfoPanel';
 import BlocksListPanel from './BlocksListPanel';
 import PythonIDE, { PythonIDEHandle } from './PythonIDE';
-import KeyboardShortcutsPanel from './KeyboardShortcutsPanel'; // We'll create this component next
+import KeyboardShortcutsPanel from './KeyboardShortcutsPannel'; // We'll create this component next
 
 export interface ConnectionData extends FileProcessorConnectionData {
     id: string;
@@ -623,6 +623,14 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                     <span className="ml-4">Zoom: {Math.round(zoomLevel * 100)}%</span>
                 </div>
                 <div className="flex items-center space-x-2">
+                    <button
+                        // onClick={() => setIsBlocksListOpen(true)}
+                        className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm flex items-center"
+                        title="Logs"
+                    >
+                        <LogsIcon size={16} className="mr-2" />
+                        Logs
+                    </button>
                     <button
                         onClick={() => setIsBlocksListOpen(true)}
                         className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm flex items-center"

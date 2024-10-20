@@ -110,9 +110,9 @@ Version 2.8 -Import (first phase of mul tiple pages) and inhertience  block (in 
             - adding file download and info button @done
             Bug
                 - Connection head disapears when i clicked invisible @odne
-                - overwrite not working
+                - overwrite not working @done
             Note 
-            -- Improving the  file editing part 
+            -- Improving the  file editing part  @done
 
 Version 2.9 
         - first version of git import 

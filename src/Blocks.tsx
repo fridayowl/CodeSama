@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Eye, EyeOff, Edit, Save, Info, FileText, TestTube, AlertTriangle, Copy, Wand2 } from 'lucide-react';
+import { Eye, EyeOff, Edit, Save, Info, FileText, TestTube, AlertTriangle, Copy, Wand2, ScrollText } from 'lucide-react';
 import { checkPythonSyntax, SyntaxError } from './pythonsyntaxChecker';
 import ComingSoon from './ComingSoon';
 
@@ -55,7 +55,7 @@ const Block: React.FC<BlockProps> = ({
     const codeRef = useRef<HTMLPreElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const blockStyle = customization?.blocks?.[type] || {};
-
+    const [isLogsVisible, setIsLogsVisible] = useState(false);
     const adjustErrorLineNumbers = (errors: SyntaxError[], blockLineNumber: number): SyntaxError[] => {
         return errors.map(error => ({
             ...error,
@@ -79,6 +79,10 @@ const Block: React.FC<BlockProps> = ({
         const validErrors = adjustedErrors.filter(error => error.line > 0);
         setSyntaxErrors(validErrors);
         setHasSyntaxError(validErrors.length > 0);
+    };
+    const handleViewLogs = () => {
+        setIsLogsVisible(!isLogsVisible);
+        // Add any additional logic for fetching or displaying logs
     };
 
     const handleSave = () => {
@@ -291,6 +295,14 @@ const Block: React.FC<BlockProps> = ({
                                         >
                                             <Wand2 size={16} className="mr-2" />
                                             Fix using AI
+                                        </button>
+                                        <button
+                                            onClick={(e) => handleButtonClick(e, handleViewLogs)}
+                                            className="px-4 py-2 text-white rounded hover:bg-opacity-80 flex items-center ml-2"
+                                            style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
+                                        >
+                                            <ScrollText size={16} className="mr-2" />
+                                            Logs
                                         </button>
                                     </>
                                 )}
