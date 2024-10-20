@@ -4,7 +4,7 @@ const KeyboardShortcuts = {
   // Navigation shortcuts
   TRAVEL_ALL_BLOCKS: 'Cmd+B',
   TRAVEL_CLASSES: 'Cmd+C',
-  TRAVEL_FUNCTIONS: 'Cmd+F',
+  TRAVEL_FUNCTIONS: 'Cmd+J',
   TRAVEL_CODE_BLOCKS: 'Cmd+K',
 
   // Direction keys (used in combination with navigation shortcuts)

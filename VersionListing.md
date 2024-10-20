@@ -120,6 +120,8 @@ Version 2.9
         - first version of code error highlighter 
         - first verison of code analyiss 
             -security scalability ,maintaiblity , potential improvments
+        -first version of share the workflow @done
+        -fix the block size visibile 
 
 
 Upcoming Versions : 

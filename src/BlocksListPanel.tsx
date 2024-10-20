@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { X, Layers, Search, Filter } from 'lucide-react';
+import { X, Layers, Search, Filter, FileText } from 'lucide-react';
 import { ExtendedBlockData } from './DesignCanvas';
 
 interface BlocksListPanelProps {
@@ -13,15 +13,25 @@ interface BlocksListPanelProps {
 const BlocksListPanel: React.FC<BlocksListPanelProps> = ({ isOpen, onClose, blocks, onBlockSelect, customization }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedType, setSelectedType] = useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = useState<string>('all');
 
     const blockTypes = ['class', 'class_function', 'class_standalone', 'code', 'standalone_function'];
+
+    const fileNames = useMemo(() => {
+        const uniqueFiles = new Set(blocks.map(block => {
+            const parts = block.id.split('.');
+            return parts[0];
+        }));
+        return Array.from(uniqueFiles);
+    }, [blocks]);
 
     const filteredBlocks = useMemo(() => {
         return blocks.filter(block =>
             (selectedType ? block.type === selectedType : true) &&
+            (selectedFile !== 'all' ? block.id.startsWith(selectedFile) : true) &&
             (searchTerm ? block.id.toLowerCase().includes(searchTerm.toLowerCase()) : true)
         );
-    }, [blocks, selectedType, searchTerm]);
+    }, [blocks, selectedType, selectedFile, searchTerm]);
 
     const blockCounts = useMemo(() => {
         return blockTypes.reduce((acc, type) => {
@@ -70,7 +80,7 @@ const BlocksListPanel: React.FC<BlocksListPanelProps> = ({ isOpen, onClose, bloc
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-center mb-2">
                         <Filter size={20} className="text-gray-400 mr-2" />
                         <select
                             className="w-full p-2 border rounded"
@@ -83,27 +93,49 @@ const BlocksListPanel: React.FC<BlocksListPanelProps> = ({ isOpen, onClose, bloc
                             ))}
                         </select>
                     </div>
+                    <div className="flex items-center">
+                        <FileText size={20} className="text-gray-400 mr-2" />
+                        <select
+                            className="w-full p-2 border rounded"
+                            value={selectedFile}
+                            onChange={(e) => setSelectedFile(e.target.value)}
+                        >
+                            <option value="all">All Files</option>
+                            {fileNames.map(file => (
+                                <option key={file} value={file}>{file}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
                 <div className="mb-6 p-4 border rounded-lg bg-gray-50">
                     <h3 className="text-lg font-semibold mb-2">Blocks</h3>
                     <ul className="space-y-2">
-                        {filteredBlocks.map(block => (
-                            <li
-                                key={block.id}
-                                className="border p-2 rounded cursor-pointer hover:bg-gray-100 flex items-center"
-                                onClick={() => onBlockSelect(block.id)}
-                                style={{
-                                    borderLeftColor: getBlockColor(block.type),
-                                    borderLeftWidth: '4px',
-                                    backgroundColor: getBlockColor(block.type),
-                                    color: customization.blocks[block.type]?.textColor || '#000000'
-                                }}
-                            >
-                                <span className="font-medium truncate flex-grow">{block.id}</span>
-                                <span className="text-xs ml-2">{block.type}</span>
-                            </li>
-                        ))}
+                        {filteredBlocks.map(block => {
+                            const blockName = block.id.split('.').pop() || block.id;
+                            const fileName = block.id.split('.')[0];
+                            return (
+                                <li
+                                    key={block.id}
+                                    className="border p-2 rounded cursor-pointer hover:bg-gray-100 flex flex-col"
+                                    onClick={() => onBlockSelect(block.id)}
+                                    style={{
+                                        borderLeftColor: getBlockColor(block.type),
+                                        borderLeftWidth: '4px',
+                                        backgroundColor: getBlockColor(block.type),
+                                        color: customization.blocks[block.type]?.textColor || '#000000'
+                                    }}
+                                >
+                                    <span className="font-medium truncate">{blockName}</span>
+                                    <div className="flex justify-between items-center mt-1">
+                                        <span className="text-xs">{block.type}</span>
+                                        {selectedFile === 'all' && (
+                                            <span className="text-xs">{fileName}</span>
+                                        )}
+                                    </div>
+                                </li>
+                            );
+                        })}
                     </ul>
                 </div>
             </div>

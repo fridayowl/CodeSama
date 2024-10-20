@@ -9,7 +9,9 @@ import CanvasInfoPanel from './CanvasInfoPanel';
 import BlocksListPanel from './BlocksListPanel';
 import PythonIDE, { PythonIDEHandle } from './PythonIDE';
 import KeyboardShortcutsPanel from './KeyboardShortcutsPannel'; // We'll create this component next
-
+import { useKeyboardNavigation } from './KeyboardNavigation';
+import ShareFlow from './ShareFlow'; // Add this import
+import ComingSoon from './ComingSoon';
 export interface ConnectionData extends FileProcessorConnectionData {
     id: string;
 }
@@ -65,6 +67,7 @@ interface DesignCanvasProps {
     onCodeChange: (newContent: string) => void;  // Add this line
 }
 const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileName }) => {
+    
     const [blocks, setBlocks] = useState<ExtendedBlockData[]>([]);
     const [connections, setConnections] = useState<Connection[]>([]);
     const [isFlowVisible, setIsFlowVisible] = useState(true);
@@ -90,7 +93,7 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
     const [ideContent, setIdeContent] = useState<string | null>(null);
     const pythonIDERef = useRef<PythonIDEHandle>(null);
     const [isKeyboardShortcutsPanelOpen, setIsKeyboardShortcutsPanelOpen] = useState(false);
-
+    const [isLogsListOpen, setIsLogsListOpen] = useState(false);
     const toggleAutoZoom = () => {
         if (!isAutoZoomLocked) {
             setAutoZoom(!autoZoom);
@@ -141,8 +144,6 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
         adjustZoom();
     }, [blocks, adjustZoom]);
 
-
-    
 
    
 
@@ -556,6 +557,45 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
             });
         }
     }, [blocks]);
+    const handleBlockVisibilityToggle = useCallback((id: string) => {
+        setBlocks(prevBlocks =>
+            prevBlocks.map(block =>
+                block.id === id ? { ...block, isVisible: !block.isVisible } : block
+            )
+        );
+    }, []);
+
+    const handlePan = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
+        if (canvasRef.current) {
+            const scrollAmount = 100;
+            switch (direction) {
+                case 'up':
+                    canvasRef.current.scrollTop -= scrollAmount;
+                    break;
+                case 'down':
+                    canvasRef.current.scrollTop += scrollAmount;
+                    break;
+                case 'left':
+                    canvasRef.current.scrollLeft -= scrollAmount;
+                    break;
+                case 'right':
+                    canvasRef.current.scrollLeft += scrollAmount;
+                    break;
+            }
+        }
+    }, []);
+
+    const { currentIndex, currentType } = useKeyboardNavigation({
+        blocks,
+        onBlockSelect: handleBlockSelect,
+        onBlockVisibilityToggle: handleBlockVisibilityToggle,
+        onZoomIn: handleZoomIn,
+        onZoomOut: handleZoomOut,
+        onResetZoom: handleZoomReset,
+        onPan: handlePan,
+        onToggleSettingsPanel: () => setIsSettingsPanelOpen(prev => !prev)
+    });
+
 
     const calculateZoomForBlock = (block: ExtendedBlockData) => {
         if (!canvasRef.current) return zoomLevel;
@@ -623,8 +663,9 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                     <span className="ml-4">Zoom: {Math.round(zoomLevel * 100)}%</span>
                 </div>
                 <div className="flex items-center space-x-2">
+                    <ShareFlow canvasRef={canvasRef} /> 
                     <button
-                        // onClick={() => setIsBlocksListOpen(true)}
+                        onClick={() => setIsLogsListOpen(true)}
                         className="px-3 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm flex items-center"
                         title="Logs"
                     >
@@ -711,6 +752,8 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                             onBlockWidthChange={handleBlockWidthChange}
                             onBlockSelect={handleBlockSelect}
                             selectedBlockId={selectedBlockId}
+                            currentIndex={currentIndex}
+                            currentType={currentType}
                         />
                     </div>
                 </div>
@@ -732,6 +775,13 @@ const DesignCanvas: React.FC<DesignCanvasProps> = ({ selectedFile, selectedFileN
                         </div>
                     </div>
                 </div>
+            )}
+
+            {isLogsListOpen && (
+                <ComingSoon
+                    feature="Logs"
+                    onClose={() => setIsLogsListOpen(false)}
+                />
             )}
             <BlocksListPanel
                 isOpen={isBlocksListOpen}

@@ -23,18 +23,19 @@ const KeyboardShortcutsPanel: React.FC<KeyboardShortcutsPanelProps> = ({ isOpen,
             { name: 'Select Block', shortcut: KeyboardShortcuts.SELECT_BLOCK },
             { name: 'Toggle Block Visibility', shortcut: KeyboardShortcuts.TOGGLE_BLOCK_VISIBILITY },
         ],
-        Canvas: [
+        Zoom: [
             { name: 'Zoom In', shortcut: KeyboardShortcuts.ZOOM_IN },
             { name: 'Zoom Out', shortcut: KeyboardShortcuts.ZOOM_OUT },
             { name: 'Reset Zoom', shortcut: KeyboardShortcuts.RESET_ZOOM },
+        ],
+        'Canvas Navigation': [
             { name: 'Pan Up', shortcut: KeyboardShortcuts.PAN_UP },
             { name: 'Pan Down', shortcut: KeyboardShortcuts.PAN_DOWN },
             { name: 'Pan Left', shortcut: KeyboardShortcuts.PAN_LEFT },
             { name: 'Pan Right', shortcut: KeyboardShortcuts.PAN_RIGHT },
         ],
-        Interface: [
+        Miscellaneous: [
             { name: 'Toggle Settings Panel', shortcut: KeyboardShortcuts.TOGGLE_SETTINGS_PANEL },
-            { name: 'Toggle Blocks List', shortcut: KeyboardShortcuts.TOGGLE_BLOCKS_LIST },
         ],
     };
 

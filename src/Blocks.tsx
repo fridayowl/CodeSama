@@ -23,6 +23,13 @@ interface BlockProps {
     isSelected: boolean;
 }
 
+const defaultBlockStyle = {
+    backgroundColor: '#ffffff',
+    borderColor: '#000000',
+    textColor: '#000000',
+    headerColor: '#f0f0f0'
+};
+
 const Block: React.FC<BlockProps> = ({
     id,
     type,
@@ -54,8 +61,9 @@ const Block: React.FC<BlockProps> = ({
     const [showComingSoon, setShowComingSoon] = useState(false);
     const codeRef = useRef<HTMLPreElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const blockStyle = customization?.blocks?.[type] || {};
+    const blockStyle = customization?.blocks?.[type] || defaultBlockStyle;
     const [isLogsVisible, setIsLogsVisible] = useState(false);
+
     const adjustErrorLineNumbers = (errors: SyntaxError[], blockLineNumber: number): SyntaxError[] => {
         return errors.map(error => ({
             ...error,
@@ -80,6 +88,7 @@ const Block: React.FC<BlockProps> = ({
         setSyntaxErrors(validErrors);
         setHasSyntaxError(validErrors.length > 0);
     };
+
     const handleViewLogs = () => {
         setIsLogsVisible(!isLogsVisible);
         // Add any additional logic for fetching or displaying logs
@@ -180,9 +189,9 @@ const Block: React.FC<BlockProps> = ({
             className={`w-full max-w-3xl rounded-lg shadow-md overflow-hidden ${glowEffectClass}`}
             style={{
                 ...errorBorderStyle,
-                backgroundColor: blockStyle.backgroundColor || '#ffffff',
-                borderColor: hasSyntaxError ? 'red' : (blockStyle.borderColor || '#000000'),
-                color: blockStyle.textColor || '#000000',
+                backgroundColor: blockStyle?.backgroundColor || defaultBlockStyle.backgroundColor,
+                borderColor: hasSyntaxError ? 'red' : (blockStyle?.borderColor || defaultBlockStyle.borderColor),
+                color: blockStyle?.textColor || defaultBlockStyle.textColor,
                 borderWidth: '2px',
                 borderStyle: 'solid',
                 paddingLeft: '20px',
@@ -193,7 +202,7 @@ const Block: React.FC<BlockProps> = ({
         >
             <div className="p-2 flex justify-between items-center"
                 style={{
-                    backgroundColor: blockStyle.headerColor || '#f0f0f0',
+                    backgroundColor: blockStyle?.headerColor || defaultBlockStyle.headerColor,
                     paddingLeft: '20px',
                     borderBottom: hasSyntaxError ? '2px solid red' : 'none'
                 }}>
@@ -207,7 +216,7 @@ const Block: React.FC<BlockProps> = ({
                         onClick={(e) => handleButtonClick(e, toggleDetails)}
                         className="p-1 rounded hover:bg-opacity-80"
                         title="Details"
-                        style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
+                        style={{ backgroundColor: customization.buttons?.backgroundColor, color: customization.buttons?.textColor }}
                     >
                         <Info size={16} />
                     </button>
@@ -215,7 +224,7 @@ const Block: React.FC<BlockProps> = ({
                         onClick={(e) => handleButtonClick(e, toggleEditing)}
                         className="p-1 rounded hover:bg-opacity-80"
                         title={isEditing ? "Save" : "Edit"}
-                        style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
+                        style={{ backgroundColor: customization.buttons?.backgroundColor, color: customization.buttons?.textColor }}
                     >
                         {isEditing ? <Save size={16} /> : <Edit size={16} />}
                     </button>
@@ -223,7 +232,7 @@ const Block: React.FC<BlockProps> = ({
                         onClick={(e) => handleButtonClick(e, toggleVisibility)}
                         className="p-1 rounded hover:bg-opacity-80"
                         title={isVisible ? "Hide code" : "Show code"}
-                        style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
+                        style={{ backgroundColor: customization.buttons?.backgroundColor, color: customization.buttons?.textColor }}
                     >
                         {isVisible ? <Eye size={16} /> : <EyeOff size={16} />}
                     </button>
@@ -231,7 +240,7 @@ const Block: React.FC<BlockProps> = ({
                         onClick={(e) => handleButtonClick(e, toggleDocumentation)}
                         className="p-1 rounded hover:bg-opacity-80"
                         title="Documentation"
-                        style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
+                        style={{ backgroundColor: customization.buttons?.backgroundColor, color: customization.buttons?.textColor }}
                     >
                         <FileText size={16} />
                     </button>
@@ -239,7 +248,7 @@ const Block: React.FC<BlockProps> = ({
                         onClick={(e) => handleButtonClick(e, toggleTesting)}
                         className="p-1 rounded hover:bg-opacity-80"
                         title="Testing"
-                        style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
+                        style={{ backgroundColor: customization.buttons?.backgroundColor, color: customization.buttons?.textColor }}
                     >
                         <TestTube size={16} />
                     </button>
@@ -274,7 +283,7 @@ const Block: React.FC<BlockProps> = ({
                                 <button
                                     onClick={(e) => handleButtonClick(e, handleSave)}
                                     className="px-4 py-2 text-white rounded hover:bg-opacity-80"
-                                    style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
+                                    style={{ backgroundColor: customization.buttons?.backgroundColor, color: customization.buttons?.textColor }}
                                 >
                                     Save
                                 </button>
@@ -283,7 +292,7 @@ const Block: React.FC<BlockProps> = ({
                                         <button
                                             onClick={(e) => handleButtonClick(e, handleCopyErrorAndCode)}
                                             className="px-4 py-2 text-white rounded hover:bg-opacity-80 flex items-center"
-                                            style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
+                                            style={{ backgroundColor: customization.buttons?.backgroundColor, color: customization.buttons?.textColor }}
                                         >
                                             <Copy size={16} className="mr-2" />
                                             Copy Error and Code
@@ -291,7 +300,7 @@ const Block: React.FC<BlockProps> = ({
                                         <button
                                             onClick={(e) => handleButtonClick(e, handleFixUsingAI)}
                                             className="px-4 py-2 text-white rounded hover:bg-opacity-80 flex items-center"
-                                            style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
+                                            style={{ backgroundColor: customization.buttons?.backgroundColor, color: customization.buttons?.textColor }}
                                         >
                                             <Wand2 size={16} className="mr-2" />
                                             Fix using AI
@@ -299,7 +308,7 @@ const Block: React.FC<BlockProps> = ({
                                         <button
                                             onClick={(e) => handleButtonClick(e, handleViewLogs)}
                                             className="px-4 py-2 text-white rounded hover:bg-opacity-80 flex items-center ml-2"
-                                            style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
+                                            style={{ backgroundColor: customization.buttons?.backgroundColor, color: customization.buttons?.textColor }}
                                         >
                                             <ScrollText size={16} className="mr-2" />
                                             Logs
@@ -351,7 +360,7 @@ const Block: React.FC<BlockProps> = ({
                     <button
                         onClick={(e) => handleButtonClick(e, () => console.log('Run tests'))}
                         className="px-4 py-2 text-white rounded hover:bg-opacity-80"
-                        style={{ backgroundColor: customization.buttons.backgroundColor, color: customization.buttons.textColor }}
+                        style={{ backgroundColor: customization.buttons?.backgroundColor, color: customization.buttons?.textColor }}
                     >
                         Run Tests
                     </button>

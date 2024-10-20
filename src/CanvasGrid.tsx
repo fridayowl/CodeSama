@@ -25,6 +25,8 @@ interface CanvasGridProps {
     onBlockWidthChange: (id: string, newWidth: number) => void;
     onBlockSelect: (id: string) => void;
     selectedBlockId: string | null;
+    currentIndex: number;
+    currentType: string | null;
 }
 
 const CanvasGrid: React.FC<CanvasGridProps> = ({
@@ -48,6 +50,8 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
     onBlockSelect,
     selectedBlockId,
     pythonIDERef,
+     currentIndex,
+    currentType,
 }) => {
     const HEADER_HEIGHT = 40;
     const CONNECTOR_OFFSET_X = 5;
@@ -82,6 +86,9 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
         // Handle the class name click, e.g., navigate to class definition
     };
     const renderBlock = (item: ExtendedBlockData) => {
+        const isCurrentBlock = (currentType === null || item.type === currentType) &&
+            getVisibleBlocks().filter(block => currentType === null || block.type === currentType).indexOf(item) === currentIndex;
+
         const commonProps = {
             id: item.id,
             name: item.name,
@@ -99,7 +106,7 @@ const CanvasGrid: React.FC<CanvasGridProps> = ({
             onWidthChange: (newWidth: number) => onBlockWidthChange(item.id, newWidth),
             initialWidth: item.width,
             onSelect: () => onBlockSelect(item.id),
-            isSelected: item.id === selectedBlockId,
+            isSelected: item.id === selectedBlockId || isCurrentBlock,
         };
 
         switch (item.type) {
