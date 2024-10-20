@@ -52,7 +52,7 @@ Company X implemented CodeSama and saw:
 - 70% reduction in onboarding time
 - 40% increase in code quality
 
-## The ROI of Innovation
+## The ROI of Innovationd
 
 For a team of 10 developers:
 - Average salary: $120,000/year
